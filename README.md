@@ -1,4 +1,6 @@
-# 大模型交互平台
+# ICT
+
+## 原链接https://github.com/EthanChan050430/bigmodel-flask-app
 
 ## 简介
 
