@@ -28,7 +28,7 @@ app.config['PASSWORD_FILE'] = 'password/pswd.csv'
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 # API配置
-API_KEY = os.environ.get("API_KEY", "sk-ALtvDororXBSW26qm8fEgGnJdC7WvTICUeh2bLjDe6UHVJ3i")
+API_KEY = os.environ.get("API_KEY", "si")
 API_URL = os.environ.get("API_URL", "https://api.moonshot.cn")
 # 模型列表
 # 这里的模型名称和ID需要根据实际API进行调整
