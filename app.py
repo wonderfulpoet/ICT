@@ -2,7 +2,7 @@ import os
 import json
 import requests
 import csv
-from flask import Flask, render_template, request, jsonify, url_for, redirect, send_from_directory, session, flash
+from flask import Flask, render_template, request, jsonify, url_for, redirect, send_from_directory, session, flash, g
 from werkzeug.utils import secure_filename
 import base64
 from io import BytesIO
@@ -13,7 +13,8 @@ import traceback
 from functools import wraps
 from dotenv import load_dotenv
 import secrets
-
+from blueprints.detection import bp as dect_bp
+from blueprints.qa import bp as qa_bp
 # 加载环境变量
 load_dotenv()
 
@@ -23,6 +24,9 @@ app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 限制上传文件大小为16MB
 app.config['PORT'] = 3000
 app.config['PASSWORD_FILE'] = 'password/pswd.csv'
+
+app.register_blueprint(dect_bp)
+app.register_blueprint(qa_bp)
 
 # 确保上传文件夹存在
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
@@ -55,6 +59,22 @@ def login_required(f):
             return redirect(url_for('login'))
         return f(*args, **kwargs)
     return decorated_function
+
+@app.before_request
+def my_before_request():
+    username=session.get('username', None)
+    logged_in = session.get('logged_in', False)
+    if username:
+        setattr(g,'username',username)
+        setattr(g,'logged_in',logged_in)
+    else:
+        setattr(g,'username',None)
+        setattr(g,'logged_in',False)
+
+
+@app.context_processor
+def my_context_porcessor():
+    return {'username':g.username,'logged_in':g.logged_in}
 
 def get_users():
     """从CSV文件中获取所有用户信息"""
@@ -173,9 +193,7 @@ def index():
             if available_models[model_key] in PREMIUM_MODELS:
                 available_models.pop(model_key)
     
-    return render_template('index.html', models=available_models, 
-                           is_logged_in=is_logged_in, 
-                           username=session.get('username', None))
+    return render_template('index.html', models=available_models)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():

@@ -1,0 +1,79 @@
+
+<body>
+
+<div class="wrapper">
+    <h2>图像伪造检测</h2>
+    <div class="content-area">
+        <div class="panel">
+            <h3>原始图片</h3>
+            <div class="image-box" id="upload-box">
+                <span id="upload-placeholder">点击选择 或 拖拽图片到此</span>
+                
+                <input type="file" id="image-input" accept="image/*" style="display:none;">
+                <img id="input-preview" class="preview-image" style="display:none;">
+            </div>
+            <div style="margin-top: 18px; display: flex; justify-content: center; gap: 18px;">
+                <button class="btn" id="upload-btn" type="button">上传图片</button>
+                <button class="btn" id="clear-btn" type="button" style="background: #b5b5b5; color: #fff;">清除图片</button>
+            </div>
+        </div>
+        <div class="panel">
+            <h3>检测结果</h3>
+            <div class="image-box" id="result-box">
+                <span id="result-placeholder">检测结果将在此显示</span>
+                <img id="result-image-preview" class="preview-image" style="display:none;">
+            </div>
+            <div style="margin-top: 18px; display: flex; justify-content: center;">
+                <button class="btn" id="download-btn" type="button" style="background: #4a7aff; color: #fff;">下载结果图片</button>
+            </div>
+        </div>
+    </div>
+    <button class="btn" id="detect-btn">开始检测</button>
+    <div class="result-info" id="result-info-details">
+        <p>伪造判断: <span id="result-is-fake"></span></p>
+        <p>主要伪造类型: <span id="result-fake-type"></span></p>
+        <p>置信度评分: <span id="result-confidence-score"></span></p>
+    </div>
+</div>
+
+
+</body>
+    
+<style>
+
+    .wrapper {
+        background: 181A20; border-radius: 18px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.10);
+        width: 100%; max-width: 1280px; text-align: center;
+    }
+    h2 { color: #FFF; margin-bottom: 36px; font-weight: 700; font-size: 2.4rem; }
+    .content-area { display: flex; gap: 80px; margin-bottom: 36px; }
+    .panel { flex: 1; display: flex; flex-direction: column; }
+    .panel h3 { color: lightblue; font-size: 20px; margin-bottom: 18px; font-weight: 600; }
+    .image-box {
+        border: 2.5px dashed #d0dbe5; border-radius: 12px; min-height: 480px; flex-grow: 1;
+        display: flex; justify-content: center; align-items: center; position: relative;
+        overflow: hidden; background-color: #fcfdff; transition: all 0.3s ease;
+        color: #8a99a8; font-size: 20px;
+    }
+    #upload-box { cursor: pointer; }
+    #upload-box:hover { border-color: #6a5acd; background-color: #f5f3ff; }
+    .preview-image {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        object-fit: contain; padding: 18px; box-sizing: border-box; background-color: white;
+    }
+    .btn {
+        padding: 18px 48px; background: linear-gradient(45deg, #6a5acd, #836FFF); color: white;
+        border: none; border-radius: 12px; cursor: pointer; font-size: 22px; font-weight: 600;
+        transition: all 0.3s ease; box-shadow: 0 6px 18px rgba(106, 90, 205, 0.3);
+    }
+    .btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(106, 90, 205, 0.4); }
+    .btn:disabled { background: #b5b5b5; cursor: not-allowed; box-shadow: none; }
+    .result-info {
+        margin-top: 32px; padding: 24px; border: 1.5px solid #e0e6ed; border-radius: 12px;
+        text-align: left; background-color: #f8f9fa; display: none;
+    }
+    .result-info p { font-size: 18px; margin: 12px 0; color: #333; white-space: pre-wrap; }
+    .result-info p span { font-weight: 700; color: #6a5acd; }
+</style>
+
+
