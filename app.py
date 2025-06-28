@@ -38,8 +38,8 @@ app.register_blueprint(settings_bp)
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 # API配置
-API_KEY = os.environ.get("API_KEY", "sk-0d8f31e1cf5d4774bcf82f2f7624c02d")
-API_URL = os.environ.get("API_URL", "https://api.deepseek.com")
+API_KEY = os.environ.get("API_KEY", "replace with your API key")
+API_URL = os.environ.get("API_URL", "replace with your API URL")
 # 模型列表
 # 这里的模型名称和ID需要根据实际API进行调整
 MODELS = {
