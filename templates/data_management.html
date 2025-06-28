@@ -1,0 +1,340 @@
+<div id="data-management-container">
+    <div class="dm-header">
+        <h2>数据管理</h2>
+    </div>
+    <div class="dm-main">
+        <!-- 左侧筛选区 -->
+        <div class="dm-sidebar">
+            <h4>筛选</h4>
+            <div class="dm-filter-group">
+                <label>日期范围</label>
+                <div class="dm-date-options">
+                    <button class="dm-date-btn active" data-range="all">全部</button>
+                    <button class="dm-date-btn" data-range="today">今日</button>
+                    <button class="dm-date-btn" data-range="week">本周</button>
+                    <button class="dm-date-btn" data-range="month">本月</button>
+                </div>
+            </div>
+            <div class="dm-filter-group">
+                <label>文件类型</label>
+                <div class="dm-checkbox-group">
+                    <label><input type="checkbox" name="file-type" value="text"> 文本</label>
+                    <label><input type="checkbox" name="file-type" value="image"> 图片</label>
+                    <label><input type="checkbox" name="file-type" value="spreadsheet"> 表格</label>
+                    <label><input type="checkbox" name="file-type" value="pdf"> PDF</label>
+                </div>
+            </div>
+            <div class="dm-filter-group">
+                <label>状态</label>
+                <div class="dm-radio-group">
+                    <label><input type="radio" name="status" value="all" checked> 全部</label>
+                    <label><input type="radio" name="status" value="processed"> 已处理</label>
+                    <label><input type="radio" name="status" value="pending"> 待处理</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧数据展示区 -->
+        <div class="dm-content">
+            <div class="dm-toolbar">
+                <div class="dm-search-box">
+                    <input type="text" id="dm-search-input" placeholder="按文件名称搜索...">
+                    <i class="fas fa-search"></i>
+                </div>
+            </div>
+
+            <div id="dm-card-list" class="dm-card-list">
+                <!-- 数据卡片将通过JS动态插入 -->
+            </div>
+
+            <div class="dm-pagination" id="dm-pagination">
+                <!-- 分页控件将通过JS动态生成 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部操作栏 -->
+    <div class="dm-footer">
+        <div class="dm-bulk-actions">
+            <label><input type="checkbox" id="dm-select-all"> 全选</label>
+            <button id="dm-bulk-delete-btn" disabled><i class="fas fa-trash-alt"></i> 批量删除</button>
+        </div>
+        <div class="dm-stats" id="dm-stats">
+            共 0 条记录
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 确保此脚本只在 data_management.html 加载时执行
+    if (document.getElementById('data-management-container')) {
+        const state = {
+            currentPage: 1,
+            search: '',
+            date: 'all',
+            types: [],
+            status: 'all'
+        };
+
+        const searchInput = document.getElementById('dm-search-input');
+        const cardList = document.getElementById('dm-card-list');
+        const paginationContainer = document.getElementById('dm-pagination');
+        const statsContainer = document.getElementById('dm-stats');
+        const selectAllCheckbox = document.getElementById('dm-select-all');
+        const bulkDeleteBtn = document.getElementById('dm-bulk-delete-btn');
+
+        function fetchFiles() {
+            const params = new URLSearchParams({
+                page: state.currentPage,
+                search: state.search,
+                date: state.date,
+                status: state.status
+            });
+            state.types.forEach(type => params.append('type', type));
+
+            fetch(`/data/files?${params.toString()}`)
+                .then(response => {
+                    if(response.status === 401) {
+                        cardList.innerHTML = `<p class="error">请先登录后查看数据。</p>`;
+                        return Promise.reject('Unauthorized');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+                    renderCards(data.records);
+                    renderPagination(data);
+                    updateStats(data.total);
+                    updateBulkDeleteButtonState();
+                })
+                .catch(error => {
+                    console.error('获取文件失败:', error);
+                    if (error !== 'Unauthorized') {
+                        cardList.innerHTML = '<p class="error">无法加载数据，请稍后重试。</p>';
+                    }
+                });
+        }
+
+        function getFileIcon(fileType) {
+            switch(fileType) {
+                case 'pdf': return 'fa-file-pdf';
+                case 'image': return 'fa-file-image';
+                case 'spreadsheet': return 'fa-file-excel';
+                case 'text': return 'fa-file-alt';
+                default: return 'fa-file';
+            }
+        }
+
+        function renderCards(records) {
+            cardList.innerHTML = '';
+            if (records.length === 0) {
+                cardList.innerHTML = '<p class="dm-no-data">没有找到匹配的文件。</p>';
+                return;
+            }
+            records.forEach(record => {
+                const card = document.createElement('div');
+                card.className = 'dm-card';
+                card.dataset.id = record.id;
+                
+                const statusClass = record.status === 'processed' ? 'processed' : 'pending';
+                const statusText = record.status === 'processed' ? '已处理' : '待处理';
+
+                card.innerHTML = `
+                    <div class="dm-card-select">
+                        <input type="checkbox" class="dm-card-checkbox" value="${record.id}">
+                    </div>
+                    <div class="dm-card-icon">
+                        <i class="fas ${getFileIcon(record.file_type)}"></i>
+                    </div>
+                    <div class="dm-card-main">
+                        <div class="dm-card-name">${escapeHTML(record.filename)}</div>
+                        <div class="dm-card-meta">
+                            <span><i class="fas fa-clock"></i> ${new Date(record.upload_time).toLocaleString()}</span>
+                            <span><i class="fas fa-hdd"></i> ${(record.size_bytes / 1024).toFixed(2)} KB</span>
+                        </div>
+                    </div>
+                    <div class="dm-card-status">
+                        <span class="dm-status-tag ${statusClass}">${statusText}</span>
+                    </div>
+                    <div class="dm-card-actions">
+                        <button class="dm-action-btn" title="查看详情" disabled><i class="fas fa-eye"></i></button>
+                        <a href="/uploads/${escapeHTML(record.filename)}" download class="dm-action-btn" title="下载"><i class="fas fa-download"></i></a>
+                        <button class="dm-action-btn dm-delete-btn" title="删除"><i class="fas fa-trash"></i></button>
+                    </div>
+                `;
+                cardList.appendChild(card);
+            });
+        }
+
+        function renderPagination(data) {
+            paginationContainer.innerHTML = '';
+            if (data.pages <= 1) return;
+
+            // Previous button
+            const prev = document.createElement('button');
+            prev.textContent = '«';
+            prev.disabled = data.page === 1;
+            prev.addEventListener('click', () => {
+                state.currentPage--;
+                fetchFiles();
+            });
+            paginationContainer.appendChild(prev);
+
+            // Page numbers
+            for (let i = 1; i <= data.pages; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.textContent = i;
+                if (i === data.page) pageBtn.classList.add('active');
+                pageBtn.addEventListener('click', () => {
+                    state.currentPage = i;
+                    fetchFiles();
+                });
+                paginationContainer.appendChild(pageBtn);
+            }
+
+            // Next button
+            const next = document.createElement('button');
+            next.textContent = '»';
+            next.disabled = data.page === data.pages;
+            next.addEventListener('click', () => {
+                state.currentPage++;
+                fetchFiles();
+            });
+            paginationContainer.appendChild(next);
+        }
+        
+        function updateStats(total) {
+            statsContainer.textContent = `共 ${total} 条记录`;
+        }
+        
+        function updateBulkDeleteButtonState() {
+            const selected = cardList.querySelectorAll('.dm-card-checkbox:checked');
+            bulkDeleteBtn.disabled = selected.length === 0;
+            selectAllCheckbox.checked = selected.length > 0 && selected.length === cardList.querySelectorAll('.dm-card-checkbox').length;
+        }
+        
+        function escapeHTML(str) {
+            return str.replace(/[&<>"']/g, function(match) {
+                return {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#39;'
+                }[match];
+            });
+        }
+
+        // Event Listeners
+        // Filter: Date range
+        document.querySelector('.dm-date-options').addEventListener('click', e => {
+            if (e.target.tagName === 'BUTTON') {
+                document.querySelectorAll('.dm-date-btn').forEach(btn => btn.classList.remove('active'));
+                e.target.classList.add('active');
+                state.date = e.target.dataset.range;
+                state.currentPage = 1;
+                fetchFiles();
+            }
+        });
+
+        // Filter: File types
+        document.querySelector('.dm-checkbox-group').addEventListener('change', () => {
+            state.types = Array.from(document.querySelectorAll('input[name="file-type"]:checked')).map(el => el.value);
+            state.currentPage = 1;
+            fetchFiles();
+        });
+
+        // Filter: Status
+        document.querySelector('.dm-radio-group').addEventListener('change', e => {
+            if (e.target.name === 'status') {
+                state.status = e.target.value;
+                state.currentPage = 1;
+                fetchFiles();
+            }
+        });
+        
+        // Search
+        let searchTimeout;
+        searchInput.addEventListener('input', () => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                state.search = searchInput.value;
+                state.currentPage = 1;
+                fetchFiles();
+            }, 300);
+        });
+
+        // Card actions (delegated)
+        cardList.addEventListener('click', e => {
+            const target = e.target;
+            const card = target.closest('.dm-card');
+            if (!card) return;
+
+            const fileId = card.dataset.id;
+
+            // Single delete
+            if (target.closest('.dm-delete-btn')) {
+                if (confirm('确定要删除这个文件吗？此操作无法撤销。')) {
+                    fetch('/data/delete', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ ids: [fileId] })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            fetchFiles(); // Refresh list
+                        } else {
+                            alert(`删除失败: ${data.error || '未知错误'}`);
+                        }
+                    })
+                    .catch(err => alert(`删除时发生错误: ${err}`));
+                }
+            }
+
+            // Checkbox click
+            if(target.classList.contains('dm-card-checkbox')) {
+                updateBulkDeleteButtonState();
+            }
+        });
+        
+        // Bulk actions
+        selectAllCheckbox.addEventListener('change', () => {
+            const isChecked = selectAllCheckbox.checked;
+            cardList.querySelectorAll('.dm-card-checkbox').forEach(cb => {
+                cb.checked = isChecked;
+            });
+            updateBulkDeleteButtonState();
+        });
+
+        bulkDeleteBtn.addEventListener('click', () => {
+            const selectedIds = Array.from(cardList.querySelectorAll('.dm-card-checkbox:checked')).map(cb => cb.value);
+            if(selectedIds.length === 0) return;
+
+            if (confirm(`确定要删除选中的 ${selectedIds.length} 个文件吗？此操作无法撤销。`)) {
+                fetch('/data/delete', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ ids: selectedIds })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        fetchFiles(); // Refresh list
+                        selectAllCheckbox.checked = false;
+                    } else {
+                       alert(`删除失败: ${data.error || '未知错误'}`);
+                    }
+                })
+                .catch(err => alert(`删除时发生错误: ${err}`));
+            }
+        });
+
+        // Initial fetch
+        fetchFiles();
+    }
+});
+</script> 

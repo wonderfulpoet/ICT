@@ -1,0 +1,229 @@
+<link rel="stylesheet" href="{{ url_for('static', filename='css/model_center.css') }}">
+<!-- 引入Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div id="model-center-container">
+    <div class="mc-header">
+        <h1>模型中心</h1>
+        <p>探索、评估并与我们最先进的AI模型进行交互。</p>
+    </div>
+
+    <div class="mc-toolbar">
+        <div class="mc-filter-group">
+            <select id="mc-type-filter">
+                <option value="all">所有类型</option>
+                <option value="Text">文本</option>
+                <option value="Vision">视觉</option>
+                <option value="Code">代码</option>
+                <option value="Audio">音频</option>
+            </select>
+        </div>
+        <div class="mc-search-box">
+            <input type="text" id="mc-search-input" placeholder="搜索模型名称...">
+            <i class="fas fa-search"></i>
+        </div>
+    </div>
+
+    <div id="mc-grid" class="mc-grid">
+        <!-- 模型卡片将通过JS动态插入 -->
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    if (document.getElementById('model-center-container')) {
+        const grid = document.getElementById('mc-grid');
+        const searchInput = document.getElementById('mc-search-input');
+        const typeFilter = document.getElementById('mc-type-filter');
+        let modelsData = [];
+        let activeCharts = {};
+
+        function renderModels(filter = {}) {
+            grid.innerHTML = '';
+            let filteredModels = modelsData;
+
+            // 搜索过滤
+            if (filter.search) {
+                filteredModels = filteredModels.filter(m => m.name.toLowerCase().includes(filter.search.toLowerCase()));
+            }
+
+            // 类型过滤
+            if (filter.type && filter.type !== 'all') {
+                filteredModels = filteredModels.filter(m => m.formats.includes(filter.type));
+            }
+            
+            if (filteredModels.length === 0) {
+                grid.innerHTML = '<p class="mc-no-data">未找到匹配的模型。</p>';
+                return;
+            }
+
+            filteredModels.forEach(model => {
+                const card = document.createElement('div');
+                card.className = 'mc-card';
+                card.dataset.modelId = model.id;
+
+                const statusClass = model.status === 'online' ? 'online' : 'offline';
+                const statusText = model.status === 'online' ? '在线' : '离线';
+
+                card.innerHTML = `
+                    <div class="mc-card-header">
+                        <div class="mc-card-logo"><i class="${model.logo}"></i></div>
+                        <div class="mc-card-name">${model.name}</div>
+                        <div class="mc-card-status">
+                            <span class="mc-status-indicator ${statusClass}"></span>
+                            ${statusText}
+                        </div>
+                    </div>
+                    <div class="mc-card-body">
+                        <div class="mc-card-meta">
+                            <span><strong>版本:</strong> ${model.version}</span>
+                            <span><strong>格式:</strong> ${model.formats.join(', ')}</span>
+                            <span><strong>更新:</strong> ${model.updated_time}</span>
+                        </div>
+                        <div class="mc-perf-metrics">
+                            <div class="mc-perf-item">
+                                <label>准确率</label>
+                                <div class="mc-progress-bar">
+                                    <div style="width: ${model.performance.accuracy}%;">${model.performance.accuracy}%</div>
+                                </div>
+                            </div>
+                            <div class="mc-perf-item">
+                                <label>响应速度</label>
+                                <div class="mc-progress-bar">
+                                    <div style="width: ${model.performance.speed}%;">${model.performance.speed}%</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mc-card-footer">
+                        <button class="mc-btn mc-btn-primary">调用测试</button>
+                        <button class="mc-btn mc-btn-secondary mc-details-toggle">
+                            详情 <i class="fas fa-chevron-down"></i>
+                        </button>
+                    </div>
+                    <div class="mc-details-panel">
+                        <p>${model.details.description}</p>
+                        <h5>技术参数</h5>
+                        <table class="mc-details-table">
+                            <tr><td>开发者</td><td>${model.details.developer}</td></tr>
+                            <tr><td>训练数据量</td><td>${model.details.data_size}</td></tr>
+                            <tr><td>支持语言</td><td>${model.details.languages.join(', ')}</td></tr>
+                        </table>
+                        <h5>API调用示例</h5>
+                        <pre><code>${escapeHTML(model.details.api_example)}</code></pre>
+                        <h5>最近7天调用量</h5>
+                        <div class="mc-chart-container">
+                             <canvas id="chart-${model.id}"></canvas>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+        
+        function toggleDetails(card) {
+            const panel = card.querySelector('.mc-details-panel');
+            const icon = card.querySelector('.mc-details-toggle i');
+            const modelId = card.dataset.modelId;
+
+            if (panel.style.maxHeight) {
+                panel.style.maxHeight = null;
+                icon.classList.remove('fa-chevron-up');
+                icon.classList.add('fa-chevron-down');
+                // 销毁图表
+                if (activeCharts[modelId]) {
+                    activeCharts[modelId].destroy();
+                    delete activeCharts[modelId];
+                }
+            } else {
+                panel.style.maxHeight = panel.scrollHeight + "px";
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-up');
+                // 创建图表
+                createChart(modelId);
+            }
+        }
+
+        function createChart(modelId) {
+            const model = modelsData.find(m => m.id === modelId);
+            if (!model) return;
+
+            const ctx = document.getElementById(`chart-${modelId}`).getContext('2d');
+            
+            // 销毁旧图表实例（如果存在）
+            if (activeCharts[modelId]) {
+                activeCharts[modelId].destroy();
+            }
+
+            const labels = Array.from({length: 7}, (_, i) => {
+                const d = new Date();
+                d.setDate(d.getDate() - (6 - i));
+                return `${d.getMonth() + 1}-${d.getDate()}`;
+            });
+
+            activeCharts[modelId] = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '调用次数',
+                        data: model.details.usage_stats,
+                        borderColor: '#3f51b5',
+                        backgroundColor: 'rgba(63, 81, 181, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+        
+        function escapeHTML(str) {
+            return str.replace(/[&<>"']/g, match => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[match]));
+        }
+
+        // Event Listeners
+        fetch('/models/api/list')
+            .then(response => response.json())
+            .then(data => {
+                modelsData = data;
+                renderModels();
+            })
+            .catch(error => {
+                console.error('获取模型数据失败:', error);
+                grid.innerHTML = '<p class="mc-no-data error">无法加载模型列表，请稍后重试。</p>';
+            });
+
+        let searchTimeout;
+        searchInput.addEventListener('input', () => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                const filters = { search: searchInput.value, type: typeFilter.value };
+                renderModels(filters);
+            }, 300);
+        });
+
+        typeFilter.addEventListener('change', () => {
+            const filters = { search: searchInput.value, type: typeFilter.value };
+            renderModels(filters);
+        });
+        
+        grid.addEventListener('click', e => {
+             const toggleBtn = e.target.closest('.mc-details-toggle');
+             if (toggleBtn) {
+                 const card = e.target.closest('.mc-card');
+                 toggleDetails(card);
+             }
+        });
+    }
+});
+</script> 

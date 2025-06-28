@@ -15,6 +15,9 @@ from dotenv import load_dotenv
 import secrets
 from blueprints.detection import bp as dect_bp
 from blueprints.qa import bp as qa_bp
+from blueprints.data_management import bp as data_bp
+from blueprints.model_center import bp as model_center_bp
+from blueprints.settings import bp as settings_bp
 # 加载环境变量
 load_dotenv()
 
@@ -27,18 +30,23 @@ app.config['PASSWORD_FILE'] = 'password/pswd.csv'
 
 app.register_blueprint(dect_bp)
 app.register_blueprint(qa_bp)
+app.register_blueprint(data_bp)
+app.register_blueprint(model_center_bp)
+app.register_blueprint(settings_bp)
 
 # 确保上传文件夹存在
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 # API配置
-API_KEY = os.environ.get("API_KEY", "si")
-API_URL = os.environ.get("API_URL", "https://api.moonshot.cn")
+API_KEY = os.environ.get("API_KEY", "replace with your API key")
+API_URL = os.environ.get("API_URL", "replace with your API URL")
 # 模型列表
 # 这里的模型名称和ID需要根据实际API进行调整
 MODELS = {
     "Moonshot-8K": "moonshot-v1-8k",
-    "Moonshot-32K": "moonshot-v1-32k"
+    "Moonshot-32K": "moonshot-v1-32k",
+    "deepseek": "deepseek-r1",
+    "DeepSeek-V3-250324-P001": "deepseek-v3-250"
 }
 
 # 允许的文件扩展名
@@ -263,6 +271,47 @@ def chat():
         filename = secure_filename(file.filename)
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(file_path)
+
+        # ---- 添加文件元数据记录 ----
+        try:
+            from blueprints.data_management import ensure_metadata_file, METADATA_FILE, METADATA_HEADER
+            from datetime import datetime
+            import uuid
+
+            ensure_metadata_file()
+            
+            file_ext = filename.rsplit('.', 1)[1].lower()
+            file_type = 'other'
+            if file_ext in ['txt', 'md', 'json', 'csv', 'docx', 'pptx']:
+                file_type = 'text'
+            elif file_ext in ['png', 'jpg', 'jpeg', 'gif']:
+                file_type = 'image'
+            elif file_ext in ['pdf']:
+                file_type = 'pdf'
+            elif file_ext in ['xlsx', 'csv']:
+                file_type = 'spreadsheet'
+
+            metadata = {
+                'id': str(uuid.uuid4()),
+                'filename': filename,
+                'filepath': file_path,
+                'upload_time': datetime.now().isoformat(),
+                'size_bytes': os.path.getsize(file_path),
+                'file_type': file_type,
+                'status': 'pending', # 初始状态为待处理
+                'username': session.get('username', 'guest') 
+            }
+            
+            with open(METADATA_FILE, 'a', newline='', encoding='utf-8') as f:
+                writer = csv.DictWriter(f, fieldnames=METADATA_HEADER)
+                # 如果文件是空的，先写header
+                if f.tell() == 0:
+                    writer.writeheader()
+                writer.writerow(metadata)
+
+        except Exception as e:
+            current_app.logger.error(f"无法记录文件元数据: {e}")
+        # ---- 元数据记录结束 ----
         
         # 处理不同类型的文件
         if filename.lower().endswith('.pdf'):
