@@ -1,325 +1,286 @@
 <!-- templates/chat.html -->
-<div class="chat-container">
-    <div class="chat-messages" id="chatMessages">
-        <div class="message system">
-            <div class="message-content">
-                <p>您好！我是智鉴惟真，一款基于多模态融合的学术不端综合检测系统，欢迎使用！</p>
-            </div>
-        </div>
+<div class="ds-chat-root">
+  <aside class="ds-sidebar">
+    <div class="ds-sidebar-header">
+      <!-- <span class="ds-logo">deepseek</span> -->
+      <button class="ds-new-chat" id="dsNewChatBtn">➕ 开启新对话</button>
     </div>
-
-    <div class="input-area">
-        <div class="model-selector">
-            <label for="modelSelect">选择模型:</label>
-            <select id="modelSelect" name="model">
-                {% for key, value in models.items() %}
-                    <option value="{{ value }}">{{ value }}</option>
-                {% endfor %}
-            </select>
-            {% if not logged_in %}
-            <span class="model-tip">登录后可使用更多高级模型</span>
-            {% endif %}
-            <div class="options-container">
-                <label class="option-label">
-                    <input type="checkbox" id="autoSearch" name="auto_search" checked>
-                    自动联网搜索
-                </label>
-            </div>
-        </div>
-        <div class="tools-box">
-            <div class="file-upload">
-                <label for="fileUpload" class="file-label">
-                    <i class="fas fa-file-upload"></i> 上传文件
-                </label>
-                <input type="file" id="fileUpload" name="file" class="hidden-file-input">
-                <span id="fileName" class="file-name"></span>
-            </div>
-        </div>
-
-        <div class="message-input-box">
-            <textarea id="promptInput" placeholder="输入您的问题..." rows="3"></textarea>
-            <button id="sendBtn" class="send-btn">
-                <i class="fas fa-paper-plane"></i> 发送
-            </button>
-        </div>
+    <div class="ds-history-list" id="dsHistoryList"></div>
+    <div class="ds-sidebar-footer">
+      <div class="ds-user-info">
+        <img src="https://api.dicebear.com/7.x/identicon/svg?seed={{ username or 'guest' }}" class="ds-avatar">
+        <span>{{ username or '未登录' }}</span>
+        {% if logged_in %}<a href="{{ url_for('logout') }}" class="ds-logout">退出</a>{% endif %}
+      </div>
     </div>
+  </aside>
+  <main class="ds-main">
+    <header class="ds-main-header">
+      <h1>智鉴惟真</h1>
+      <!-- <span class="ds-risk-tip">⚠️ 本回答由AI生成，仅供参考，请仔细甄别。</span> -->
+    </header>
+    <section class="ds-chat-section" id="dsChatSection">
+      <!-- 附件预览区 -->
+      <div class="ds-attachments" id="dsAttachments"></div>
+      <!-- 对话气泡区 -->
+      <div class="ds-messages" id="dsMessages"></div>
+      <!-- 文件上传、输入区 -->
+      <div class="ds-input-bar">
+        <label class="ds-upload-label">
+          <input type="file" id="dsFileInput" accept=".pdf,image/*,.txt,.doc,.docx" multiple style="display:none">
+          <i class="fas fa-paperclip"></i>
+        </label>
+        <textarea id="dsPromptInput" placeholder="请输入您的问题..." rows="1"></textarea>
+        <button id="dsSendBtn" class="ds-send-btn"><i class="fas fa-paper-plane"></i></button>
+      </div>
+    </section>
+  </main>
 </div>
 
+<style>
+.ds-chat-root {
+  display: flex; height: 80vh; background: #191c22; border-radius: 18px; font-family: 'Microsoft YaHei', '微软雅黑', Arial, sans-serif;
+}
+.ds-sidebar {
+  width: 260px; background: #181c23; color: #fff; display: flex; flex-direction: column; border-radius: 18px 0 0 18px;
+}
+.ds-sidebar-header { padding: 24px 18px 12px 18px; display: flex; flex-direction: column; gap: 12px; }
+.ds-logo { font-size: 1.5rem; font-weight: bold; letter-spacing: 2px; color: #4da3ff; }
+.ds-new-chat { background: #232a36; color: #4da3ff; border: none; border-radius: 8px; padding: 8px 0; font-size: 1rem; cursor: pointer; margin-top: 8px; }
+.ds-new-chat:hover { background: #26304a; }
+.ds-history-list { flex: 1; overflow-y: auto; padding: 0 8px; }
+.ds-history-group { margin-bottom: 18px; }
+.ds-history-group-title { font-size: 0.95rem; color: #7bb6f9; margin: 10px 0 6px 6px; }
+.ds-history-item { display: flex; align-items: center; padding: 8px 6px; border-radius: 7px; cursor: pointer; transition: background 0.2s; font-size: 1rem; }
+.ds-history-item.active, .ds-history-item:hover { background: #232a36; color: #4da3ff; font-weight: bold; }
+.ds-history-item .ds-history-title { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ds-history-item .ds-history-del { color: #888; margin-left: 8px; font-size: 0.95em; cursor: pointer; }
+.ds-history-item .ds-history-del:hover { color: #e74c3c; }
+.ds-sidebar-footer { padding: 18px 12px; border-top: 1px solid #232a36; }
+.ds-user-info { display: flex; align-items: center; gap: 10px; font-size: 1rem; }
+.ds-avatar { width: 32px; height: 32px; border-radius: 50%; background: #232a36; }
+.ds-logout { color: #e74c3c; margin-left: 8px; font-size: 0.95em; text-decoration: none; }
+.ds-logout:hover { text-decoration: underline; }
+.ds-main { flex: 1; display: flex; flex-direction: column; background: #20232a; border-radius: 0 18px 18px 0; }
+.ds-main-header { padding: 24px 0 8px 0; text-align: center; border-bottom: 1px solid #232a36; }
+.ds-main-header h1 { font-size: 2.1rem; font-weight: bold; color: #fff; margin-bottom: 6px; letter-spacing: 2px; }
+.ds-risk-tip { color: #ffb84d; font-size: 0.98rem; }
+.ds-chat-section { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; }
+.ds-messages { flex: 1; overflow-y: auto; padding: 24px 32px 12px 32px; display: flex; flex-direction: column; gap: 18px; }
+.ds-bubble { max-width: 70%; padding: 16px 20px; border-radius: 16px; font-size: 1.08rem; line-height: 1.7; box-shadow: 0 2px 8px rgba(0,0,0,0.08); position: relative; word-break: break-all; }
+.ds-bubble.user { align-self: flex-end; background: linear-gradient(90deg,#4da3ff 60%,#7bb6f9 100%); color: #fff; font-weight: 500; }
+.ds-bubble.ai { align-self: flex-start; background: #232a36; color: #e3e3e3; }
+.ds-bubble .ds-bubble-actions { margin-top: 8px; display: flex; gap: 10px; font-size: 1.1em; }
+.ds-bubble .ds-bubble-actions button { background: none; border: none; color: #888; cursor: pointer; }
+.ds-bubble .ds-bubble-actions button.active, .ds-bubble .ds-bubble-actions button:hover { color: #4da3ff; }
+.ds-input-bar { display: flex; align-items: center; gap: 10px; padding: 16px 32px 20px 32px; border-top: 1px solid #232a36; background: #20232a; }
+.ds-upload-label { cursor: pointer; color: #4da3ff; font-size: 1.3em; }
+.ds-send-btn { background: #4da3ff; color: #fff; border: none; border-radius: 8px; padding: 8px 18px; font-size: 1.1rem; cursor: pointer; transition: background 0.2s; }
+.ds-send-btn:hover { background: #7bb6f9; }
+.ds-attachments { display: flex; flex-wrap: wrap; gap: 10px; padding: 8px 32px 0 32px; }
+.ds-attachment-item { background: #232a36; color: #fff; border-radius: 6px; padding: 4px 10px; display: flex; align-items: center; gap: 6px; font-size: 0.98rem; }
+.ds-attachment-item img { max-width: 40px; max-height: 40px; border-radius: 4px; }
+.ds-attachment-remove { color: #e74c3c; cursor: pointer; font-size: 1.1em; margin-left: 2px; }
+.ds-attachment-remove:hover { color: #ff4d4f; }
+@media (max-width: 900px) {
+  .ds-chat-root { flex-direction: column; height: auto; }
+  .ds-sidebar { width: 100%; border-radius: 18px 18px 0 0; flex-direction: row; }
+  .ds-main { border-radius: 0 0 18px 18px; }
+}
+</style>
+
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-            const chatMessages = document.getElementById('chatMessages');
-            const promptInput = document.getElementById('promptInput');
-            const sendBtn = document.getElementById('sendBtn');
-            const fileUpload = document.getElementById('fileUpload');
-            const fileName = document.getElementById('fileName');
-            const modelSelect = document.getElementById('modelSelect');
+// 附件全局变量
+let dsAttachments = [];
+// 历史对话本地存储结构: [{id, title, date, messages: [{role, content, time}], ...}]
+function getTodayStr() {
+  const d = new Date();
+  return d.toISOString().slice(0,10);
+}
+function getYesterdayStr() {
+  const d = new Date(Date.now()-86400000);
+  return d.toISOString().slice(0,10);
+}
+function groupHistoryByDate(history) {
+  const today = getTodayStr(), yesterday = getYesterdayStr();
+  const groups = { today: [], yesterday: [], earlier: [] };
+  history.forEach(item => {
+    if(item.date === today) groups.today.push(item);
+    else if(item.date === yesterday) groups.yesterday.push(item);
+    else groups.earlier.push(item);
+  });
+  return groups;
+}
+function saveHistory(history) {
+  localStorage.setItem('dsChatHistory', JSON.stringify(history));
+}
+function loadHistory() {
+  return JSON.parse(localStorage.getItem('dsChatHistory')||'[]');
+}
+function renderHistoryList() {
+  const history = loadHistory();
+  const groups = groupHistoryByDate(history);
+  const list = document.getElementById('dsHistoryList');
+  list.innerHTML = '';
+  function renderGroup(title, arr) {
+    if(arr.length===0) return;
+    const groupDiv = document.createElement('div');
+    groupDiv.className = 'ds-history-group';
+    groupDiv.innerHTML = `<div class="ds-history-group-title">${title}</div>`;
+    arr.forEach(item => {
+      const li = document.createElement('div');
+      li.className = 'ds-history-item';
+      li.dataset.id = item.id;
+      li.innerHTML = `<span class="ds-history-title">${item.title}</span><span class="ds-history-del" title="删除">🗑️</span>`;
+      li.onclick = e => {
+        if(e.target.classList.contains('ds-history-del')) {
+          // 删除
+          const idx = history.findIndex(h=>h.id===item.id);
+          if(idx>-1) { history.splice(idx,1); saveHistory(history); renderHistoryList(); }
+          return;
+        }
+        // 切换对话
+        document.querySelectorAll('.ds-history-item').forEach(x=>x.classList.remove('active'));
+        li.classList.add('active');
+        renderMessages(item.messages);
+        localStorage.setItem('dsCurrentChatId', item.id);
+      };
+      groupDiv.appendChild(li);
+    });
+    list.appendChild(groupDiv);
+  }
+  renderGroup('今天', groups.today);
+  renderGroup('昨天', groups.yesterday);
+  renderGroup('更早', groups.earlier);
+  // 高亮当前
+  const curId = localStorage.getItem('dsCurrentChatId');
+  if(curId) {
+    const cur = list.querySelector(`.ds-history-item[data-id="${curId}"]`);
+    if(cur) cur.classList.add('active');
+  }
+}
+function renderMessages(messages) {
+  const box = document.getElementById('dsMessages');
+  box.innerHTML = '';
+  messages.forEach(msg => {
+    const div = document.createElement('div');
+    div.className = 'ds-bubble ' + (msg.role==='user'?'user':'ai');
+    div.innerHTML = `<div>${msg.content}</div><div class="ds-bubble-actions">
+      <button title="复制" onclick="navigator.clipboard.writeText(this.parentNode.parentNode.innerText)">📋</button>
+      <button title="点赞">👍</button><button title="点踩">👎</button>
+    </div>`;
+    box.appendChild(div);
+  });
+  box.scrollTop = box.scrollHeight;
+}
+function newChat() {
+  const history = loadHistory();
+  const id = 'chat'+Date.now();
+  const item = {id, title:'新对话', date:getTodayStr(), messages:[]};
+  history.unshift(item);
+  saveHistory(history);
+  localStorage.setItem('dsCurrentChatId', id);
+  renderHistoryList();
+  renderMessages([]);
+}
+function getCurrentChat() {
+  const history = loadHistory();
+  const curId = localStorage.getItem('dsCurrentChatId');
+  return history.find(x=>x.id===curId);
+}
+function renderAttachments() {
+  const box = document.getElementById('dsAttachments');
+  box.innerHTML = '';
+  dsAttachments.forEach((file, idx) => {
+    const div = document.createElement('div');
+    div.className = 'ds-attachment-item';
+    if(file.type.startsWith('image/')) {
+      const img = document.createElement('img');
+      img.src = file.preview;
+      div.appendChild(img);
+    } else {
+      div.innerHTML += `<i class='fas fa-file'></i>`;
+    }
+    div.innerHTML += `<span>${file.name}</span><span class='ds-attachment-remove' title='移除'>&times;</span>`;
+    div.querySelector('.ds-attachment-remove').onclick = () => {
+      dsAttachments.splice(idx,1); renderAttachments();
+    };
+    box.appendChild(div);
+  });
+}
+document.addEventListener('DOMContentLoaded',function(){
+  renderHistoryList();
+  // 默认显示当前对话
+  const cur = getCurrentChat();
+  if(cur) renderMessages(cur.messages); else newChat();
+  document.getElementById('dsNewChatBtn').onclick = newChat;
+  // 发送消息
+  document.getElementById('dsSendBtn').onclick = sendMsg;
+  document.getElementById('dsPromptInput').onkeydown = function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}};
+  // 文件上传
+  document.getElementById('dsFileInput').onchange = function(){
+    const files = Array.from(this.files);
+    files.forEach(file=>{
+      const reader = new FileReader();
+      reader.onload = function(e){
+        file.preview = file.type.startsWith('image/') ? e.target.result : '';
+        dsAttachments.push(file);
+        renderAttachments();
+      };
+      if(file.type.startsWith('image/')) reader.readAsDataURL(file);
+      else reader.readAsArrayBuffer(file); // 其他类型不预览
+    });
+    this.value = '';
+  };
+});
+function sendMsg(){
+  const input = document.getElementById('dsPromptInput');
+  const text = input.value.trim();
+  if(!text) return;
+  const cur = getCurrentChat();
+  if(!cur) return;
+  cur.messages.push({role:'user',content:text});
+  saveHistory(loadHistory());
+  renderMessages(cur.messages);
+  input.value = '';
+  // 显示AI思考中
+  cur.messages.push({role:'ai',content:'<i class="fas fa-spinner fa-spin"></i> 思考中...'});
+  renderMessages(cur.messages);
 
-            // 显示上传的文件名
-            fileUpload.addEventListener('change', function() {
-                if (this.files.length > 0) {
-                    fileName.textContent = this.files[0].name;
-                    // 显示文件预览
-                    previewFile(this.files[0]);
-                } else {
-                    fileName.textContent = '';
-                }
-            });
+  // ======= 这里是deepseek大模型API调用位置 =======
+  const apiKey = 'sk-0d8f31e1cf5d4774bcf82f2f7624c02d'; // 替换为你的API KEY
+  const apiUrl = 'https://api.deepseek.com/v1/chat/completions';
 
-            // 发送消息
-            sendBtn.addEventListener('click', sendMessage);
-            promptInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    sendMessage();
-                }
-            });
-              function sendMessage() {
-                const prompt = promptInput.value.trim();
-                const file = fileUpload.files[0];
-                const model = modelSelect.value;
-                const autoSearch = document.getElementById('autoSearch').checked;
-                
-                if (!prompt && !file) {
-                    alert('请输入问题或上传文件!');
-                    return;
-                }
-
-                // 添加用户消息
-                addMessage('user', prompt);
-                
-                // 显示文件信息（如果有）
-                if (file) {
-                    const fileInfo = `<p><strong>上传文件:</strong> ${file.name}</p>`;
-                    addCustomMessage('user', fileInfo);
-                }
-                
-                // 显示加载状态
-                const loadingMessage = addCustomMessage('system', '<p class="loading"><i class="fas fa-spinner fa-spin"></i> 思考中...</p>');
-                  // 发送请求
-                const formData = new FormData();
-                formData.append('prompt', prompt);
-                formData.append('model', model);
-                formData.append('auto_search', autoSearch);
-                if (file) formData.append('file', file);
-
-                // 使用普通请求
-                fetch('/chat', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    // 移除加载消息
-                    loadingMessage.remove();
-                      if (data.error) {
-                        addCustomMessage('system', `<p class="error">错误: ${data.error}</p>`);
-                        // 如果错误是关于高级模型权限，提供登录按钮
-                        if (data.error.includes('需要登录才能使用高级模型')) {
-                            addCustomMessage('system', `<div class="login-suggestion">
-                                <p>您可以 <a href="{{ url_for('login') }}">登录</a> 或 
-                                <a href="{{ url_for('register') }}">注册</a> 
-                                来使用所有高级模型，或者切换到免费模型继续使用</p>
-                            </div>`);
-                        }
-                    } else {                        // 将回答格式化处理
-                        const formattedAnswer = formatAnswer(data.answer);
-                        const messageDiv = addCustomMessage('system', formattedAnswer);
-                    }
-                })
-                .catch(error => {
-                    loadingMessage.remove();
-                    addCustomMessage('system', `<p class="error">请求出错: ${error.message}</p>`);
-                });
-                
-                // 清空输入
-                promptInput.value = '';
-                fileUpload.value = '';
-                fileName.textContent = '';
-            }
-
-            function addMessage(type, text) {
-                const messageDiv = document.createElement('div');
-                messageDiv.className = `message ${type}`;
-                
-                const content = document.createElement('div');
-                content.className = 'message-content';
-                
-                const p = document.createElement('p');
-                p.textContent = text;
-                
-                content.appendChild(p);
-                messageDiv.appendChild(content);
-                chatMessages.appendChild(messageDiv);
-                
-                // 滚动到底部
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-                return messageDiv;
-            }
-
-            function addCustomMessage(type, html) {
-                const messageDiv = document.createElement('div');
-                messageDiv.className = `message ${type}`;
-                
-                const content = document.createElement('div');
-                content.className = 'message-content';
-                content.innerHTML = html;
-                
-                messageDiv.appendChild(content);
-                chatMessages.appendChild(messageDiv);
-                
-                // 滚动到底部
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-                return messageDiv;
-            }            function formatAnswer(text) {
-                // 创建一个临时数组来存储代码块和非代码块部分
-                const segments = [];
-                let lastIndex = 0;
-                let codeBlockMatch;
-                
-                // 正则表达式匹配代码块
-                const codeBlockRegex = /```(\w*)([\s\S]*?)```/g;
-                
-                // 提取所有代码块，同时保留它们在原始文本中的位置信息
-                while ((codeBlockMatch = codeBlockRegex.exec(text)) !== null) {
-                    // 添加代码块之前的文本（如果有的话）
-                    if (codeBlockMatch.index > lastIndex) {
-                        segments.push({
-                            type: 'text',
-                            content: text.substring(lastIndex, codeBlockMatch.index)
-                        });
-                    }
-                    
-                    // 添加代码块
-                    segments.push({
-                        type: 'code',
-                        language: codeBlockMatch[1] || 'bash',
-                        content: codeBlockMatch[2]
-                    });
-                    
-                    lastIndex = codeBlockMatch.index + codeBlockMatch[0].length;
-                }
-                
-                // 添加最后一个代码块之后的文本（如果有的话）
-                if (lastIndex < text.length) {
-                    segments.push({
-                        type: 'text',
-                        content: text.substring(lastIndex)
-                    });
-                }
-                
-                // 如果没有匹配到任何代码块，将整个文本视为普通文本
-                if (segments.length === 0) {
-                    segments.push({
-                        type: 'text',
-                        content: text
-                    });
-                }
-                
-                // 处理每个片段
-                let result = '';
-                
-                for (const segment of segments) {
-                    if (segment.type === 'code') {
-                        // 代码块不应用Markdown格式
-                        const displayLang = segment.language || 'terminal';
-                        const codeContent = segment.content;
-                        
-                        // 为复制按钮准备转义后的代码内容
-                        const escapedForAttribute = codeContent.replace(/"/g, '&quot;');
-                        
-                        result += `
-                        <div class="code-block">
-                            <div class="code-header">
-                                <span>${displayLang}</span>
-                                <button class="copy-btn" onclick="copyCodeFromPre(this)">复制</button>
-                            </div>
-                            <pre><code class="${segment.language}">${codeContent}</code></pre>
-                        </div>`;
-                    } else {
-                        // 普通文本应用Markdown格式
-                        let formattedText = segment.content;
-                        
-                        // 处理内联代码片段
-                        const inlineCodeBlocks = [];
-                        formattedText = formattedText.replace(/`([^`]+)`/g, (match, code) => {
-                            const id = inlineCodeBlocks.length;
-                            inlineCodeBlocks.push(code);
-                            return `__INLINE_CODE_${id}__`;
-                        });
-                        
-                        // 先转义HTML
-                        formattedText = escapeHtml(formattedText);
-                        
-                        // 处理粗体
-                        formattedText = formattedText.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-                        
-                        // 处理斜体
-                        formattedText = formattedText.replace(/\*([^*]+)\*/g, '<em>$1</em>');
-                        
-                        // 处理标题
-                        formattedText = formattedText.replace(/^### (.*$)/gm, '<h3>$1</h3>');
-                        formattedText = formattedText.replace(/^## (.*$)/gm, '<h2>$1</h2>');
-                        formattedText = formattedText.replace(/^# (.*$)/gm, '<h1>$1</h1>');
-                        
-                        // 处理链接
-                        formattedText = formattedText.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
-                        
-                        // 处理列表
-                        formattedText = formattedText.replace(/^\s*-\s+(.+)$/gm, '<li>$1</li>');
-                        formattedText = formattedText.replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>');
-                        
-                        // 处理换行
-                        formattedText = formattedText.replace(/\n/g, '<br>');
-                          // 还原内联代码
-                        for (let i = 0; i < inlineCodeBlocks.length; i++) {
-                            const code = inlineCodeBlocks[i];
-                            formattedText = formattedText.replace(`__INLINE_CODE_${i}__`, 
-                                `<code style="display: inline; white-space: pre-wrap; background-color: #3A3A3A; padding: 2px 4px; border-radius: 3px; font-family: 'SF Mono', 'Menlo', 'Monaco', 'Courier New', Courier, monospace;">${code}</code>`);
-                        }
-                        
-                        result += formattedText;
-                    }
-                }
-                
-                return result;
-            }
-            
-            // 辅助函数：从pre元素中复制代码内容
-            function copyCodeFromPre(button) {
-                const pre = button.closest('.code-block').querySelector('pre');
-                if (pre) {
-                    const text = pre.textContent;
-                    copyToClipboard(text);
-                    button.textContent = '已复制!';
-                    setTimeout(() => button.textContent = '复制', 2000);
-                }
-            }              function escapeHtml(unsafe) {
-                return unsafe
-                    .replace(/&/g, "&amp;")
-                    .replace(/</g, "&lt;")
-                    .replace(/>/g, "&gt;")
-                    .replace(/"/g, "&quot;")
-                    .replace(/'/g, "&#039;");
-            }
-            // 全局函数，用于复制代码
-            window.copyToClipboard = function(text) {
-                const textarea = document.createElement('textarea');
-                textarea.value = text;
-                document.body.appendChild(textarea);
-                textarea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textarea);
-            };
-            
-            // 复制代码块内容的函数
-            window.copyCodeFromPre = function(button) {
-                const pre = button.closest('.code-block').querySelector('pre');
-                if (pre) {
-                    const text = pre.textContent;
-                    copyToClipboard(text);
-                    button.textContent = '已复制!';
-                    setTimeout(() => button.textContent = '复制', 2000);
-                }
-            };
-        });
+  fetch(apiUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + apiKey
+    },
+    body: JSON.stringify({
+      model: 'deepseek-chat',
+      messages: [
+        { role: 'user', content: text }
+      ]
+    })
+  })
+  .then(r => r.json())
+  .then(data => {
+    cur.messages.pop(); // 移除思考中
+    if (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) {
+      cur.messages.push({ role: 'ai', content: data.choices[0].message.content });
+    } else {
+      cur.messages.push({ role: 'ai', content: `<span style='color:#e74c3c'>${data.error || 'AI出错'}</span>` });
+    }
+    saveHistory(loadHistory());
+    renderMessages(cur.messages);
+  })
+  .catch(e => {
+    cur.messages.pop();
+    cur.messages.push({ role: 'ai', content: `<span style='color:#e74c3c'>${e.message || 'AI出错'}</span>` });
+    saveHistory(loadHistory());
+    renderMessages(cur.messages);
+  });
+  // ======= 结束 =======
+}
 </script>

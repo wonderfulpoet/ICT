@@ -38,14 +38,14 @@ app.register_blueprint(settings_bp)
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 # API配置
-API_KEY = os.environ.get("API_KEY", "replace with your API key")
-API_URL = os.environ.get("API_URL", "replace with your API URL")
+API_KEY = os.environ.get("API_KEY", "sk-0d8f31e1cf5d4774bcf82f2f7624c02d")
+API_URL = os.environ.get("API_URL", "https://api.deepseek.com/v1")
 # 模型列表
 # 这里的模型名称和ID需要根据实际API进行调整
 MODELS = {
     "Moonshot-8K": "moonshot-v1-8k",
     "Moonshot-32K": "moonshot-v1-32k",
-    "deepseek": "deepseek-r1",
+    "deepseek-chat": "deepseek-r1",
     "DeepSeek-V3-250324-P001": "deepseek-v3-250"
 }
 
@@ -412,6 +412,16 @@ def handle_exception(e):
 def uploaded_file(filename):
     """提供上传文件的访问"""
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
+@app.route('/chat', methods=['GET'])
+def chat_page():
+    available_models = MODELS.copy()
+    is_logged_in = 'logged_in' in session
+    if not is_logged_in:
+        for model_key in list(available_models.keys()):
+            if available_models[model_key] in PREMIUM_MODELS:
+                available_models.pop(model_key)
+    return render_template('chat.html', models=available_models, logged_in=is_logged_in)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=app.config['PORT'])

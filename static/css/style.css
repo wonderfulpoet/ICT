@@ -608,6 +608,13 @@ input, textarea, select {
 .side-menu li:hover {
     background: #232a36;
 }
+.side-menu li.active {
+    background: #232a36 !important;
+    color: #4da3ff !important;
+    font-weight: bold;
+    border-left: 5px solid #4da3ff;
+    box-shadow: 0 2px 8px rgba(77,163,255,0.08);
+}
 @media (max-width: 900px) {
     .sidebar { width: 60px; }
     .side-menu li { padding: 18px 10px; font-size: 1rem; }
