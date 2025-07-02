@@ -1,0 +1,373 @@
+{% extends 'base.html' %}
+
+{% block style %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/model_center.css') }}">
+<!-- 引入Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block body %}
+
+<div id="model-center-outer" style="display: flex; height: 100%;">
+    <!-- 删除左侧空白栏 -->
+    <div class="mc-v-divider"></div>
+    <div id="model-center-container" style="flex:1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; min-height: 100vh;">
+        <div class="mc-header" style="text-align: center; margin-top: 40px;">
+            <h1 style="font-size: 2.6rem; letter-spacing: 2px;">模型中心</h1>
+            <p style="font-size: 1.1rem; color: #aaa;">探索、评估并与我们最先进的AI模型进行交互。</p>
+        </div>
+        <div class="mc-category-tabs" style="display: flex; gap: 32px; margin: 40px 0 32px 0; justify-content: center;">
+            <button class="mc-tab-btn active" onclick="showCategory('text')">文本类</button>
+            <button class="mc-tab-btn" onclick="showCategory('vision')">视觉类</button>
+            <button class="mc-tab-btn" onclick="showCategory('code')">代码类</button>
+        </div>
+        <div id="mc-category-text" class="mc-category-list" style="display: block; width: 100%;">
+            <ul class="mc-model-list">
+                <li>GPT-4o</li>
+                <hr class="mc-divider">
+                <li>Claude-3.7</li>
+                <hr class="mc-divider">
+                <li>Qwen</li>
+                <hr class="mc-divider">
+                <li>Bard</li>
+                <hr class="mc-divider">
+                <li>Llama 3</li>
+                <hr class="mc-divider">
+                <li>Starling-7B</li>
+                <hr class="mc-divider">
+                <li>Athene-V2-72B-Chat</li>
+                <hr class="mc-divider">
+                <li>DeepSeek V3</li>
+                <hr class="mc-divider">
+                <li>Mistral 7B</li>
+                <hr class="mc-divider">
+                <li>Falcon 40B</li>
+            </ul>
+        </div>
+        <div id="mc-category-vision" class="mc-category-list" style="display: none; width: 100%;">
+            <ul class="mc-model-list">
+                <li>DALL・E 3</li>
+                <hr class="mc-divider">
+                <li>Qwen-VL</li>
+                <hr class="mc-divider">
+                <li>DeepSeek-Multimodal</li>
+                <hr class="mc-divider">
+                <li>Blip-2</li>
+                <hr class="mc-divider">
+                <li>VisualGLM</li>
+            </ul>
+        </div>
+        <div id="mc-category-code" class="mc-category-list" style="display: none; width: 100%;">
+            <ul class="mc-model-list">
+                <li>GPT-4o-Code</li>
+                <hr class="mc-divider">
+                <li>Qwen-Code</li>
+                <hr class="mc-divider">
+                <li>Claude-3.7-Code</li>
+                <hr class="mc-divider">
+                <li>StarCoder</li>
+                <hr class="mc-divider">
+                <li>CodeGen</li>
+            </ul>
+        </div>
+    </div>
+</div>
+<style>
+.mc-v-divider {
+    width: 2px;
+    background: linear-gradient(to bottom, #444 10%, #222 90%);
+    min-height: 90vh;
+    margin: 0 0 0 0;
+    border-radius: 2px;
+    box-shadow: 0 0 8px #222;
+}
+.mc-tab-btn {
+    background: #232a36;
+    color: #e6e6e6;
+    border: 1.5px solid #4da3ff;
+    border-radius: 8px;
+    padding: 14px 38px;
+    font-size: 20px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, border 0.2s;
+    margin-bottom: 0;
+    outline: none;
+}
+.mc-tab-btn.active, .mc-tab-btn:focus {
+    background: #4da3ff;
+    color: #fff;
+    border-color: #fff;
+    font-weight: bold;
+}
+.mc-tab-btn:hover {
+    background: #3a8cd4;
+    color: #fff;
+}
+.mc-model-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 auto;
+    max-width: 420px;
+    min-width: 320px;
+    background: rgba(35,42,54,0.7);
+    border-radius: 16px;
+    box-shadow: 0 4px 32px rgba(0,0,0,0.18);
+}
+.mc-model-list li {
+    font-size: 22px;
+    padding: 22px 0 12px 0;
+    color: #e6e6e6;
+    letter-spacing: 1px;
+    text-align: center;
+    border-radius: 8px;
+    transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+    cursor: pointer;
+    margin: 0 18px;
+}
+.mc-model-list li:hover {
+    background: #4da3ff;
+    color: #fff;
+    box-shadow: 0 2px 16px #4da3ff44;
+    font-weight: bold;
+}
+.mc-divider {
+    border: none;
+    border-top: 2px solid #444;
+    margin: 0 18px;
+    opacity: 0.5;
+}
+</style>
+<script>
+function showCategory(cat) {
+    document.getElementById('mc-category-text').style.display = (cat === 'text') ? 'block' : 'none';
+    document.getElementById('mc-category-vision').style.display = (cat === 'vision') ? 'block' : 'none';
+    document.getElementById('mc-category-code').style.display = (cat === 'code') ? 'block' : 'none';
+    var btns = document.querySelectorAll('.mc-tab-btn');
+    btns.forEach(function(btn){ btn.classList.remove('active'); });
+    if(cat==='text') btns[0].classList.add('active');
+    if(cat==='vision') btns[1].classList.add('active');
+    if(cat==='code') btns[2].classList.add('active');
+}
+</script>
+{% endblock %}
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    if (document.getElementById('model-center-container')) {
+        const grid = document.getElementById('mc-grid');
+        const searchInput = document.getElementById('mc-search-input');
+        const typeFilter = document.getElementById('mc-type-filter');
+        let modelsData = [];
+        let activeCharts = {};
+
+        function renderModels(filter = {}) {
+            grid.innerHTML = '';
+            let filteredModels = modelsData;
+
+            // 搜索过滤
+            if (filter.search) {
+                filteredModels = filteredModels.filter(m => m.name.toLowerCase().includes(filter.search.toLowerCase()));
+            }
+
+            // 类型过滤
+            if (filter.type && filter.type !== 'all') {
+                filteredModels = filteredModels.filter(m => m.formats.includes(filter.type));
+            }
+            
+            if (filteredModels.length === 0) {
+                grid.innerHTML = '<p class="mc-no-data">未找到匹配的模型。</p>';
+                return;
+            }
+
+            filteredModels.forEach(model => {
+                const card = document.createElement('div');
+                card.className = 'mc-card';
+                card.dataset.modelId = model.id;
+
+                const statusClass = model.status === 'online' ? 'online' : 'offline';
+                const statusText = model.status === 'online' ? '在线' : '离线';
+
+                card.innerHTML = `
+                    <div class="mc-card-header">
+                        <div class="mc-card-logo"><i class="${model.logo}"></i></div>
+                        <div class="mc-card-name">${model.name}</div>
+                        <div class="mc-card-status">
+                            <span class="mc-status-indicator ${statusClass}"></span>
+                            ${statusText}
+                        </div>
+                    </div>
+                    <div class="mc-card-body">
+                        <div class="mc-card-meta">
+                            <span><strong>版本:</strong> ${model.version}</span>
+                            <span><strong>格式:</strong> ${model.formats.join(', ')}</span>
+                            <span><strong>更新:</strong> ${model.updated_time}</span>
+                        </div>
+                        <div class="mc-perf-metrics">
+                            <div class="mc-perf-item">
+                                <label>准确率</label>
+                                <div class="mc-progress-bar">
+                                    <div style="width: ${model.performance.accuracy}%">${model.performance.accuracy}%</div>
+                                </div>
+                            </div>
+                            <div class="mc-perf-item">
+                                <label>响应速度</label>
+                                <div class="mc-progress-bar">
+                                    <div style="width: ${model.performance.speed}%">${model.performance.speed}%</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mc-card-footer">
+                        <button class="mc-btn mc-btn-primary">调用测试</button>
+                        <button class="mc-btn mc-btn-secondary mc-details-toggle">
+                            详情 <i class="fas fa-chevron-down"></i>
+                        </button>
+                    </div>
+                    <div class="mc-details-panel">
+                        <p>${model.details.description}</p>
+                        <h5>技术参数</h5>
+                        <table class="mc-details-table">
+                            <tr><td>开发者</td><td>${model.details.developer}</td></tr>
+                            <tr><td>训练数据量</td><td>${model.details.data_size}</td></tr>
+                            <tr><td>支持语言</td><td>${model.details.languages.join(', ')}</td></tr>
+                        </table>
+                        <h5>API调用示例</h5>
+                        <pre><code>${escapeHTML(model.details.api_example)}</code></pre>
+                        <h5>最近7天调用量</h5>
+                        <div class="mc-chart-container">
+                             <canvas id="chart-${model.id}"></canvas>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+        
+        // 新增：渲染当前类别下所有模型名称
+        function renderModelNames(filter = {}) {
+            let filteredModels = modelsData;
+            if (filter.type && filter.type !== 'all') {
+                filteredModels = filteredModels.filter(m => m.formats.includes(filter.type));
+            }
+            const namesDiv = document.getElementById('mc-model-names');
+            if (filter.type && filter.type !== 'all') {
+                if (filteredModels.length > 0) {
+                    namesDiv.innerHTML = `<b>本类别模型：</b> ${filteredModels.map(m => m.name).join('，')}`;
+                } else {
+                    namesDiv.innerHTML = `<b>本类别模型：</b> 暂无`;
+                }
+            } else {
+                namesDiv.innerHTML = '';
+            }
+        }
+
+        function toggleDetails(card) {
+            const panel = card.querySelector('.mc-details-panel');
+            const icon = card.querySelector('.mc-details-toggle i');
+            const modelId = card.dataset.modelId;
+
+            if (panel.style.maxHeight) {
+                panel.style.maxHeight = null;
+                icon.classList.remove('fa-chevron-up');
+                icon.classList.add('fa-chevron-down');
+                // 销毁图表
+                if (activeCharts[modelId]) {
+                    activeCharts[modelId].destroy();
+                    delete activeCharts[modelId];
+                }
+            } else {
+                panel.style.maxHeight = panel.scrollHeight + "px";
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-up');
+                // 创建图表
+                createChart(modelId);
+            }
+        }
+
+        function createChart(modelId) {
+            const model = modelsData.find(m => m.id === modelId);
+            if (!model) return;
+
+            const ctx = document.getElementById(`chart-${modelId}`).getContext('2d');
+            
+            // 销毁旧图表实例（如果存在）
+            if (activeCharts[modelId]) {
+                activeCharts[modelId].destroy();
+            }
+
+            const labels = Array.from({length: 7}, (_, i) => {
+                const d = new Date();
+                d.setDate(d.getDate() - (6 - i));
+                return `${d.getMonth() + 1}-${d.getDate()}`;
+            });
+
+            activeCharts[modelId] = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '调用次数',
+                        data: model.details.usage_stats,
+                        borderColor: '#3f51b5',
+                        backgroundColor: 'rgba(63, 81, 181, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+        
+        function escapeHTML(str) {
+            return str.replace(/[&<>"']/g, match => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[match]));
+        }
+
+        // Event Listeners
+        fetch('/models/api/list')
+            .then(response => response.json())
+            .then(data => {
+                modelsData = data;
+                renderModels();
+                renderModelNames({type: typeFilter.value});
+            })
+            .catch(error => {
+                console.error('获取模型数据失败:', error);
+                grid.innerHTML = '<p class="mc-no-data error">无法加载模型列表，请稍后重试。</p>';
+            });
+
+        let searchTimeout;
+        searchInput.addEventListener('input', () => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                const filters = { search: searchInput.value, type: typeFilter.value };
+                renderModels(filters);
+                renderModelNames(filters);
+            }, 300);
+        });
+
+        typeFilter.addEventListener('change', () => {
+            const filters = { search: searchInput.value, type: typeFilter.value };
+            renderModels(filters);
+            renderModelNames(filters);
+        });
+        
+        grid.addEventListener('click', e => {
+             const toggleBtn = e.target.closest('.mc-details-toggle');
+             if (toggleBtn) {
+                 const card = e.target.closest('.mc-card');
+                 toggleDetails(card);
+             }
+        });
+    }
+});
+</script> 
