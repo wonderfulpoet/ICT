@@ -4,6 +4,7 @@
     height: 100%;
     display: flex;
     flex-direction: column;
+    background-color: #000 !important;
 }
 
 .settings-header h1 {
@@ -35,28 +36,34 @@
     padding: 12px 15px;
     border-radius: 6px;
     cursor: pointer;
-    background: none;
-    border: none;
+    background-color: #181c23;
+    color: #fff;
+    border: 1.5px solid #4da3ff;
+    box-shadow: 0 2px 8px rgba(77,163,255,0.08);
     text-align: left;
     font-size: 15px;
-    color: var(--text-color-secondary);
     margin-bottom: 5px;
     transition: all 0.2s;
 }
-.tab-link:hover {
-    background-color: var(--hover-color);
-    color: var(--text-color-primary);
+#settings-container .tab-link:hover, 
+#settings-container .tab-link.active {
+    background-color: #4da3ff !important;
+    color: #fff !important;
+    box-shadow: 0 4px 16px rgba(77,163,255,0.18) !important;
+    border-color: #fff !important;
+    transition: all 0.2s !important;
+    outline: 2px solid #fff !important;
+    filter: brightness(1.15) !important;
 }
-.tab-link.active {
-    background-color: var(--primary-color-light);
-    color: var(--primary-color);
-    font-weight: bold;
+#settings-container .tab-link {
+    background-color: #181c23 !important;
 }
 
 .settings-content {
     flex-grow: 1;
     padding: 25px;
     overflow-y: auto;
+    background-color: #000 !important;
 }
 
 .tab-content { display: none; }
@@ -67,6 +74,7 @@
     margin-bottom: 30px;
     padding-bottom: 20px;
     border-bottom: 1px solid var(--border-color);
+    background-color: #000 !important;
 }
 .settings-group:last-child {
     border-bottom: none;
@@ -119,19 +127,38 @@
     background-color: var(--primary-color);
     color: white;
     border: none;
-    padding: 10px 15px;
+    padding: 16px 32px;
     border-radius: 5px;
     cursor: pointer;
+    font-size: 20px;
+    height: 56px;
 }
 .btn-danger-outline {
-    background: none;
-    border: 1px solid #dc3545;
-    color: #dc3545;
-    padding: 8px 15px;
+    background-color: var(--primary-color);
+    border: none;
+    color: white;
+    padding: 16px 32px;
     border-radius: 5px;
     cursor: pointer;
+    font-size: 20px;
+    height: 56px;
+}
+.btn-danger-outline:hover {
+    background-color: #4da3ff !important;
+    color: #fff !important;
+    border-color: #fff !important;
+    box-shadow: 0 4px 16px rgba(77,163,255,0.18) !important;
+    font-weight: bold !important;
+    transition: all 0.2s !important;
 }
 .btn-sm { font-size: 12px; padding: 5px 10px; }
+.btn-sm:hover {
+    background-color: #4da3ff !important;
+    color: #fff !important;
+    box-shadow: 0 4px 16px rgba(77,163,255,0.18);
+    border-color: #fff !important;
+    transition: all 0.2s;
+}
 
 
 /* --- iOS Switch --- */
@@ -180,26 +207,41 @@
 }
 
 /* --- Display Settings --- */
-.color-picker { display: flex; gap: 10px; }
+.color-picker {
+    display: flex;
+    gap: 16px;
+    margin-top: 8px;
+}
 .color-option {
-    width: 28px;
-    height: 28px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     cursor: pointer;
-    border: 3px solid transparent;
-    transition: border-color 0.2s;
+    border: 3px solid #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+    display: inline-block;
 }
-.color-option.active {
-    border-color: white;
-    box-shadow: 0 0 0 2px var(--primary-color);
+.color-option.active,
+.color-option:hover {
+    border-color: #4da3ff;
+    box-shadow: 0 0 0 4px rgba(77,163,255,0.18);
+    transform: scale(1.12);
 }
 .slider-container { display: flex; align-items: center; gap: 10px; }
 #font-size-slider { flex-grow: 1; }
 #font-size-value { font-weight: bold; }
 
 /* --- Account Security --- */
-#change-password-form { display: flex; flex-direction: column; gap: 10px; max-width: 300px; }
-#change-password-form input { padding: 8px; border-radius: 4px; border: 1px solid var(--border-color); }
+#change-password-form { display: flex; flex-direction: column; gap: 20px; max-width: 300px; }
+#change-password-form input[type='password'] {
+    height: 48px !important;
+    width: 100% !important;
+    padding: 16px 8px !important;
+    font-size: 18px !important;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+}
 #change-password-form button { align-self: flex-start; }
 
 .device-list { display: flex; flex-direction: column; gap: 15px; }
@@ -230,7 +272,7 @@
 
 /* --- About --- */
 .about-card { text-align: center; padding: 20px; background: var(--primary-color-light); border-radius: 8px; }
-.about-card .fas { font-size: 40px; color: var(--primary-color); margin-bottom: 10px; }
+.about-card .fas { font-size: 60px; color: var(--primary-color); margin-bottom: 10px; }
 
 .resource-item { margin-bottom: 15px; }
 .resource-item label { display: block; margin-bottom: 5px; }
@@ -266,4 +308,23 @@
     bottom: 0;
     left: 0;
     right: 0;
+}
+
+#settings-footer .btn-danger-outline:hover,
+#settings-footer button.btn-danger-outline:hover {
+    background-color: #4da3ff !important;
+    color: #fff !important;
+    border-color: #fff !important;
+    box-shadow: 0 4px 16px rgba(77,163,255,0.18) !important;
+    font-weight: bold !important;
+    transition: all 0.2s !important;
 } 
+
+.tab-divider {
+    border: none;
+    border-top: 2px solid #444;
+    margin: 32px 0 24px 0;
+    opacity: 0.5;
+}
+
+

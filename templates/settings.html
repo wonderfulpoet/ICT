@@ -26,58 +26,61 @@
                 <i class="fas fa-info-circle"></i> 关于系统
             </button>
         </div>
-
+        <br>
         <div class="settings-content">
             <!-- 显示设置 -->
             <div id="display-tab" class="tab-content active">
                 <div class="settings-group">
-                    <h3 class="group-title">外观</h3>
-                    <div class="setting-item">
-                        <div class="item-text">
-                            <label for="dark-mode-toggle">夜间模式</label>
-                            <p>在光线较暗的环境中提供更舒适的视觉体验。</p>
-                        </div>
-                        <div class="item-control">
-                            <label class="ios-switch">
-                                <input type="checkbox" id="dark-mode-toggle">
-                                <span></span>
-                            </label>
-                        </div>
+                    <h2 class="group-title">外观</h2>
+                    <div class="setting-item" style="display: flex; align-items: center; gap: 10px;">
+                        <input type="checkbox" id="dark-mode-toggle">
+                        <label for="dark-mode-toggle" style="margin-bottom: 0;">夜间模式</label>
+                        <span style="color: var(--text-color-secondary); font-size: 14px;">在光线较暗的环境中提供更舒适的视觉体验。</span>
                     </div>
-                     <div class="setting-item">
-                        <div class="item-text">
-                            <label for="auto-dark-mode">自动切换</label>
-                            <p>在设定的时间段内自动开启夜间模式。</p>
+                     <div class="setting-item" style="display: flex; align-items: center; gap: 16px;">
+                        <label for="auto-dark-mode" style="margin-bottom: 0;">自动切换</label>
+                        <span style="color: var(--text-color-secondary); font-size: 14px;">在设定的时间段内自动开启夜间模式。</span>
+                        <select id="auto-dark-mode" disabled style="margin-left: 10px;">
+                            <option value="off">关闭</option>
+                            <option value="sunset-sunrise">日落到日出</option>
+                            <option value="custom">自定义时间 (22:00 - 07:00)</option>
+                        </select>
+                    </div>
+                    <br>
+                    <div class="settings-group">
+                        <h2 class="group-title">个性化</h2>
+                        <div class="setting-item">
+                            <div class="item-text">
+                                <label style="font-size: 20px;">主题色</label>
+                                <p>选择一个你喜欢的主题色应用于整个系统。</p>
+                            </div>
+                            <div class="item-control">
+                                <div class="color-picker">
+                                    <span class="color-option" data-color="#3f51b5" style="background: #3f51b5;" title="默认蓝"></span>
+                                    <span class="color-option" data-color="#4CAF50" style="background: #4CAF50;" title="活力绿"></span>
+                                    <span class="color-option" data-color="#e91e63" style="background: #e91e63;" title="优雅粉"></span>
+                                    <span class="color-option" data-color="#ff9800" style="background: #ff9800;" title="温暖橙"></span>
+                                    <span class="color-option" data-color="#673ab7" style="background: #673ab7;" title="神秘紫"></span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="item-control">
-                            <select id="auto-dark-mode" disabled>
-                                <option value="off">关闭</option>
-                                <option value="sunset-sunrise">日落到日出</option>
-                                <option value="custom">自定义时间 (22:00 - 07:00)</option>
+                        <div class="setting-item" style="display: flex; align-items: center; gap: 16px; margin-top: 10px;">
+                            <label for="theme-select" style="font-size: 18px;">主题配色</label>
+                            <select id="theme-select" style="padding: 8px 16px; border-radius: 6px; font-size: 16px;">
+                                <option value="default">默认主题</option>
+                                <option value="dark">暗黑主题</option>
+                                <option value="blue">蓝色主题</option>
+                                <option value="green">绿色主题</option>
                             </select>
                         </div>
                     </div>
                 </div>
+                <br>
                 <div class="settings-group">
-                    <h3 class="group-title">个性化</h3>
+                    <h2 class="group-title"></h2>
                     <div class="setting-item">
                          <div class="item-text">
-                            <label>主题色</label>
-                            <p>选择一个你喜欢的主题色应用于整个系统。</p>
-                        </div>
-                         <div class="item-control">
-                             <div class="color-picker">
-                                <span class="color-option" data-color="#3f51b5" style="background: #3f51b5;" title="默认蓝"></span>
-                                <span class="color-option" data-color="#4CAF50" style="background: #4CAF50;" title="活力绿"></span>
-                                <span class="color-option" data-color="#e91e63" style="background: #e91e63;" title="优雅粉"></span>
-                                <span class="color-option" data-color="#ff9800" style="background: #ff9800;" title="温暖橙"></span>
-                                <span class="color-option" data-color="#673ab7" style="background: #673ab7;" title="神秘紫"></span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="setting-item">
-                         <div class="item-text">
-                            <label for="font-size-slider">字体大小</label>
+                            <label for="font-size-slider" style="font-size: 20px;">字体大小</label>
                             <p>调整界面字体的大小。</p>
                         </div>
                          <div class="item-control">
@@ -91,65 +94,69 @@
                     </div>
                 </div>
             </div>
-
+            <hr class="tab-divider">
             <!-- 账户安全 -->
             <div id="account-tab" class="tab-content">
                  <div class="settings-group">
-                    <h3 class="group-title">密码管理</h3>
+                    <h1 class="group-title">账户安全</h1>
                      <div class="setting-item-col">
-                        <label>修改密码</label>
+                        <br>
+                        <label style="font-size: 20px;">修改密码</label>
                         <form id="change-password-form">
-                            <input type="password" placeholder="旧密码" required>
-                            <input type="password" placeholder="新密码" required>
+                            <input type="password" placeholder="旧密码" required><br>
+                            <input type="password" placeholder="新密码" required><br>
                             <input type="password" placeholder="确认新密码" required>
                             <button type="submit" class="btn-primary">确认修改</button>
                         </form>
                     </div>
                 </div>
                 <div class="settings-group">
-                    <h3 class="group-title">增强安全</h3>
-                    <div class="setting-item">
-                        <div class="item-text">
-                            <label for="2fa-toggle">两步验证 (2FA)</label>
-                            <p>启用后，登录时需要额外输入验证码以保护账户安全。</p>
-                        </div>
-                        <div class="item-control">
-                            <label class="ios-switch">
-                                <input type="checkbox" id="2fa-toggle" checked>
-                                <span></span>
-                            </label>
-                        </div>
+                    <br>
+                    <h3 class="group-title" >增强安全</h3>
+                    <div class="setting-item" style="display: flex; align-items: center; gap: 10px;">
+                        <input type="checkbox" id="2fa-toggle" checked>
+                        <label for="2fa-toggle" style="margin-bottom: 0;">两步验证 (2FA)</label>
+                        <span style="color: var(--text-color-secondary); font-size: 14px;">启用后，登录时需要额外输入验证码以保护账户安全。</span>
                     </div>
                 </div>
                 <div class="settings-group">
-                    <h3 class="group-title">登录设备管理</h3>
+                    <br>
+                    <h2 class="group-title">登录设备管理</h2>
                     <div id="device-list" class="device-list">
                         <!-- 登录设备将通过JS动态插入 -->
                     </div>
                 </div>
             </div>
-
+            <hr class="tab-divider">
             <!-- 通知管理 -->
             <div id="notifications-tab" class="tab-content">
                 <div class="settings-group">
-                    <h3 class="group-title">通知渠道</h3>
+                    <h1 class="group-title">通知管理</h1>
+                    <br>
                     <p class="group-desc">选择你希望接收通知的方式。</p>
                     <div class="setting-item">
-                        <div class="item-text"><label for="email-notify">邮件通知</label></div>
-                        <div class="item-control"><label class="ios-switch"><input type="checkbox" id="email-notify" checked><span></span></label></div>
+                        <label style="display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" id="email-notify" checked>
+                            邮件通知
+                        </label>
                     </div>
-                     <div class="setting-item">
-                        <div class="item-text"><label for="site-notify">站内通知</label></div>
-                        <div class="item-control"><label class="ios-switch"><input type="checkbox" id="site-notify" checked><span></span></label></div>
+                    <div class="setting-item">
+                        <label style="display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" id="site-notify" checked>
+                            站内通知
+                        </label>
                     </div>
-                     <div class="setting-item">
-                        <div class="item-text"><label for="sms-notify">短信通知</label></div>
-                        <div class="item-control"><label class="ios-switch"><input type="checkbox" id="sms-notify" disabled><span></span></label></div>
+                    <div class="setting-item">
+                        <label style="display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" id="sms-notify" disabled>
+                            短信通知
+                        </label>
                     </div>
                 </div>
+                <br>
                 <div class="settings-group">
-                    <h3 class="group-title">通知类型</h3>
-                     <p class="group-desc">选择你关心的通知内容。</p>
+                    <h2 class="group-title">通知类型</h3>
+                     <p class="group-desc" style="margin-bottom: 16px;">选择你关心的通知内容。</p>
                      <div class="checkbox-group">
                         <label><input type="checkbox" checked> 系统更新</label>
                         <label><input type="checkbox" checked> 安全警报</label>
@@ -157,30 +164,29 @@
                         <label><input type="checkbox"> 模型调用报告</label>
                      </div>
                 </div>
+                <br>
                 <div class="settings-group">
-                    <h3 class="group-title">免打扰</h3>
-                     <div class="setting-item">
-                         <div class="item-text">
-                            <label for="dnd-toggle">免打扰模式</label>
-                            <p>在特定时段内屏蔽所有通知。</p>
-                        </div>
-                        <div class="item-control"><label class="ios-switch"><input type="checkbox" id="dnd-toggle"><span></span></label></div>
-                    </div>
-                    <div class="setting-item">
-                        <div class="item-text"><label for="dnd-time">免打扰时段</label></div>
-                        <div class="item-control">
-                            <input type="time" value="23:00" id="dnd-time" disabled>
-                            <span> - </span>
-                            <input type="time" value="08:00" disabled>
-                        </div>
+                    <h2 class="group-title">免打扰</h2>
+                     <div class="setting-item" style="display: flex; align-items: center; gap: 10px;">
+                         <input type="checkbox" id="dnd-toggle">
+                         <label for="dnd-toggle" style="margin-bottom: 0;">免打扰模式</label>
+                         <span style="color: var(--text-color-secondary); font-size: 14px;">在特定时段内屏蔽所有通知。</span>
+                     </div>
+                    <div class="setting-item" style="display: flex; align-items: center; gap: 18px;">
+                        <label for="dnd-time" style="margin-bottom: 0;font-size: 16px;">免打扰时段</label>
+                        <input type="time" value="23:00" id="dnd-time" disabled style="font-size: 1.4rem; padding: 8px 16px; width: 130px;">
+                        <span style="font-size: 1.5rem;">-</span>
+                        <input type="time" value="08:00" disabled style="font-size: 1.4rem; padding: 8px 16px; width: 130px;">
                     </div>
                 </div>
             </div>
-            
+            <hr class="tab-divider">
             <!-- 关于系统 -->
             <div id="about-tab" class="tab-content">
                 <div class="about-card">
                     <i class="fas fa-rocket"></i>
+                    <h1>关于系统</h1>
+                    <br>
                     <h2>智鉴惟真</h2>
                     <p>版本: <span id="app-version">1.2.0</span></p>
                     <button class="btn-primary" id="check-update-btn">检查更新</button>
@@ -207,6 +213,8 @@
     </div>
     <div class="settings-footer">
         <button id="reset-settings-btn" class="btn-danger-outline">重置</button>
+        <br>
+        <br>
         <button id="save-settings-btn" class="btn-primary">保存设置</button>
     </div>
 </div>
@@ -298,7 +306,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 tabs.forEach(t => t.classList.remove('active'));
                 contents.forEach(c => c.classList.remove('active'));
                 tab.classList.add('active');
-                document.getElementById(tab.dataset.tab + '-tab').classList.add('active');
+                const target = document.getElementById(tab.dataset.tab + '-tab');
+                target.classList.add('active');
+                target.scrollIntoView({behavior: 'smooth', block: 'start'});
             });
         });
 
@@ -309,10 +319,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         colorOptions.forEach(opt => {
-            opt.addEventListener('click', () => {
-                settings.themeColor = opt.dataset.color;
+            opt.addEventListener('click', function() {
                 colorOptions.forEach(o => o.classList.remove('active'));
-                opt.classList.add('active');
+                this.classList.add('active');
+                document.documentElement.style.setProperty('--primary-color', this.dataset.color);
+                localStorage.setItem('themeColor', this.dataset.color);
             });
         });
         
@@ -405,6 +416,38 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Initial load
         loadSettings();
+
+        // 页面加载时恢复主题色
+        const savedColor = localStorage.getItem('themeColor');
+        if (savedColor) {
+            document.documentElement.style.setProperty('--primary-color', savedColor);
+            colorOptions.forEach(o => {
+                o.classList.toggle('active', o.dataset.color === savedColor);
+            });
+        }
+
+        // 主题配色切换
+        const themeSelect = document.getElementById('theme-select');
+        const body = document.body;
+        if (themeSelect) {
+            themeSelect.addEventListener('change', function() {
+                body.classList.remove('dark-theme', 'blue-theme', 'green-theme');
+                if (this.value === 'dark') {
+                    body.classList.add('dark-theme');
+                } else if (this.value === 'blue') {
+                    body.classList.add('blue-theme');
+                } else if (this.value === 'green') {
+                    body.classList.add('green-theme');
+                }
+                localStorage.setItem('theme', this.value);
+            });
+            // 页面加载时恢复主题
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                themeSelect.value = savedTheme;
+                themeSelect.dispatchEvent(new Event('change'));
+            }
+        }
     }
 });
 </script> 

@@ -96,11 +96,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
      // Ensure particle colors match initial theme
-    if (body.classList.contains('dark-theme')) {
-        canvas.style.backgroundColor = '#1a1a2e';
-        particles.forEach(p => p.color = 'rgba(255, 255, 255, 0.8)');
-    } else {
-        canvas.style.backgroundColor = '#f0f0f0'; // Assuming default is light
-        particles.forEach(p => p.color = 'rgba(0, 0, 0, 0.5)');
-    }
+    canvas.style.backgroundColor = '#1a1a2e';
+    particles.forEach(p => p.color = 'rgba(255, 255, 255, 0.8)');
 });

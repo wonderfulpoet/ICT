@@ -8,32 +8,147 @@
 
 {% block body %}
 
-<div id="model-center-container">
-    <div class="mc-header">
-        <h1>模型中心</h1>
-        <p>探索、评估并与我们最先进的AI模型进行交互。</p>
-    </div>
-
-    <div class="mc-toolbar">
-        <div class="mc-filter-group">
-            <select id="mc-type-filter">
-                <option value="all">所有类型</option>
-                <option value="Text">文本</option>
-                <option value="Vision">视觉</option>
-                <option value="Code">代码</option>
-                <option value="Audio">音频</option>
-            </select>
+<div id="model-center-outer" style="display: flex; height: 100%;">
+    <!-- 删除左侧空白栏 -->
+    <div class="mc-v-divider"></div>
+    <div id="model-center-container" style="flex:1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; min-height: 100vh;">
+        <div class="mc-header" style="text-align: center; margin-top: 40px;">
+            <h1 style="font-size: 2.6rem; letter-spacing: 2px;">模型中心</h1>
+            <p style="font-size: 1.1rem; color: #aaa;">探索、评估并与我们最先进的AI模型进行交互。</p>
         </div>
-        <div class="mc-search-box">
-            <input type="text" id="mc-search-input" placeholder="搜索模型名称...">
-            <i class="fas fa-search"></i>
+        <div class="mc-category-tabs" style="display: flex; gap: 32px; margin: 40px 0 32px 0; justify-content: center;">
+            <button class="mc-tab-btn active" onclick="showCategory('text')">文本类</button>
+            <button class="mc-tab-btn" onclick="showCategory('vision')">视觉类</button>
+            <button class="mc-tab-btn" onclick="showCategory('code')">代码类</button>
         </div>
-    </div>
-
-    <div id="mc-grid" class="mc-grid">
-        <!-- 模型卡片将通过JS动态插入 -->
+        <div id="mc-category-text" class="mc-category-list" style="display: block; width: 100%;">
+            <ul class="mc-model-list">
+                <li>GPT-4o</li>
+                <hr class="mc-divider">
+                <li>Claude-3.7</li>
+                <hr class="mc-divider">
+                <li>Qwen</li>
+                <hr class="mc-divider">
+                <li>Bard</li>
+                <hr class="mc-divider">
+                <li>Llama 3</li>
+                <hr class="mc-divider">
+                <li>Starling-7B</li>
+                <hr class="mc-divider">
+                <li>Athene-V2-72B-Chat</li>
+                <hr class="mc-divider">
+                <li>DeepSeek V3</li>
+                <hr class="mc-divider">
+                <li>Mistral 7B</li>
+                <hr class="mc-divider">
+                <li>Falcon 40B</li>
+            </ul>
+        </div>
+        <div id="mc-category-vision" class="mc-category-list" style="display: none; width: 100%;">
+            <ul class="mc-model-list">
+                <li>DALL・E 3</li>
+                <hr class="mc-divider">
+                <li>Qwen-VL</li>
+                <hr class="mc-divider">
+                <li>DeepSeek-Multimodal</li>
+                <hr class="mc-divider">
+                <li>Blip-2</li>
+                <hr class="mc-divider">
+                <li>VisualGLM</li>
+            </ul>
+        </div>
+        <div id="mc-category-code" class="mc-category-list" style="display: none; width: 100%;">
+            <ul class="mc-model-list">
+                <li>GPT-4o-Code</li>
+                <hr class="mc-divider">
+                <li>Qwen-Code</li>
+                <hr class="mc-divider">
+                <li>Claude-3.7-Code</li>
+                <hr class="mc-divider">
+                <li>StarCoder</li>
+                <hr class="mc-divider">
+                <li>CodeGen</li>
+            </ul>
+        </div>
     </div>
 </div>
+<style>
+.mc-v-divider {
+    width: 2px;
+    background: linear-gradient(to bottom, #444 10%, #222 90%);
+    min-height: 90vh;
+    margin: 0 0 0 0;
+    border-radius: 2px;
+    box-shadow: 0 0 8px #222;
+}
+.mc-tab-btn {
+    background: #232a36;
+    color: #e6e6e6;
+    border: 1.5px solid #4da3ff;
+    border-radius: 8px;
+    padding: 14px 38px;
+    font-size: 20px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, border 0.2s;
+    margin-bottom: 0;
+    outline: none;
+}
+.mc-tab-btn.active, .mc-tab-btn:focus {
+    background: #4da3ff;
+    color: #fff;
+    border-color: #fff;
+    font-weight: bold;
+}
+.mc-tab-btn:hover {
+    background: #3a8cd4;
+    color: #fff;
+}
+.mc-model-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 auto;
+    max-width: 420px;
+    min-width: 320px;
+    background: rgba(35,42,54,0.7);
+    border-radius: 16px;
+    box-shadow: 0 4px 32px rgba(0,0,0,0.18);
+}
+.mc-model-list li {
+    font-size: 22px;
+    padding: 22px 0 12px 0;
+    color: #e6e6e6;
+    letter-spacing: 1px;
+    text-align: center;
+    border-radius: 8px;
+    transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+    cursor: pointer;
+    margin: 0 18px;
+}
+.mc-model-list li:hover {
+    background: #4da3ff;
+    color: #fff;
+    box-shadow: 0 2px 16px #4da3ff44;
+    font-weight: bold;
+}
+.mc-divider {
+    border: none;
+    border-top: 2px solid #444;
+    margin: 0 18px;
+    opacity: 0.5;
+}
+</style>
+<script>
+function showCategory(cat) {
+    document.getElementById('mc-category-text').style.display = (cat === 'text') ? 'block' : 'none';
+    document.getElementById('mc-category-vision').style.display = (cat === 'vision') ? 'block' : 'none';
+    document.getElementById('mc-category-code').style.display = (cat === 'code') ? 'block' : 'none';
+    var btns = document.querySelectorAll('.mc-tab-btn');
+    btns.forEach(function(btn){ btn.classList.remove('active'); });
+    if(cat==='text') btns[0].classList.add('active');
+    if(cat==='vision') btns[1].classList.add('active');
+    if(cat==='code') btns[2].classList.add('active');
+}
+</script>
 {% endblock %}
 
 
@@ -92,13 +207,13 @@ document.addEventListener('DOMContentLoaded', function() {
                             <div class="mc-perf-item">
                                 <label>准确率</label>
                                 <div class="mc-progress-bar">
-                                    <div style="width: ${model.performance.accuracy}%;">${model.performance.accuracy}%</div>
+                                    <div style="width: ${model.performance.accuracy}%">${model.performance.accuracy}%</div>
                                 </div>
                             </div>
                             <div class="mc-perf-item">
                                 <label>响应速度</label>
                                 <div class="mc-progress-bar">
-                                    <div style="width: ${model.performance.speed}%;">${model.performance.speed}%</div>
+                                    <div style="width: ${model.performance.speed}%">${model.performance.speed}%</div>
                                 </div>
                             </div>
                         </div>
@@ -129,6 +244,24 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
         
+        // 新增：渲染当前类别下所有模型名称
+        function renderModelNames(filter = {}) {
+            let filteredModels = modelsData;
+            if (filter.type && filter.type !== 'all') {
+                filteredModels = filteredModels.filter(m => m.formats.includes(filter.type));
+            }
+            const namesDiv = document.getElementById('mc-model-names');
+            if (filter.type && filter.type !== 'all') {
+                if (filteredModels.length > 0) {
+                    namesDiv.innerHTML = `<b>本类别模型：</b> ${filteredModels.map(m => m.name).join('，')}`;
+                } else {
+                    namesDiv.innerHTML = `<b>本类别模型：</b> 暂无`;
+                }
+            } else {
+                namesDiv.innerHTML = '';
+            }
+        }
+
         function toggleDetails(card) {
             const panel = card.querySelector('.mc-details-panel');
             const icon = card.querySelector('.mc-details-toggle i');
@@ -205,6 +338,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(data => {
                 modelsData = data;
                 renderModels();
+                renderModelNames({type: typeFilter.value});
             })
             .catch(error => {
                 console.error('获取模型数据失败:', error);
@@ -217,12 +351,14 @@ document.addEventListener('DOMContentLoaded', function() {
             searchTimeout = setTimeout(() => {
                 const filters = { search: searchInput.value, type: typeFilter.value };
                 renderModels(filters);
+                renderModelNames(filters);
             }, 300);
         });
 
         typeFilter.addEventListener('change', () => {
             const filters = { search: searchInput.value, type: typeFilter.value };
             renderModels(filters);
+            renderModelNames(filters);
         });
         
         grid.addEventListener('click', e => {
