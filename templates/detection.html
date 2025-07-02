@@ -1,6 +1,96 @@
+{% extends 'base.html' %}
 
-<body>
+{% block style %}
 
+<style>
+.ds-chat-root {
+  display: flex; height: 80vh; background: #191c22; border-radius: 18px; font-family: 'Microsoft YaHei', '微软雅黑', Arial, sans-serif;
+}
+.ds-sidebar {
+  width: 260px; background: #181c23; color: #fff; display: flex; flex-direction: column; border-radius: 18px 0 0 18px;
+}
+.ds-sidebar-header { padding: 24px 18px 12px 18px; display: flex; flex-direction: column; gap: 12px; }
+.ds-logo { font-size: 1.5rem; font-weight: bold; letter-spacing: 2px; color: #4da3ff; }
+.ds-new-chat { background: #232a36; color: #4da3ff; border: none; border-radius: 8px; padding: 8px 0; font-size: 1rem; cursor: pointer; margin-top: 8px; }
+.ds-new-chat:hover { background: #26304a; }
+.ds-history-list { flex: 1; overflow-y: auto; padding: 0 8px; }
+.ds-history-group { margin-bottom: 18px; }
+.ds-history-group-title { font-size: 0.95rem; color: #7bb6f9; margin: 10px 0 6px 6px; }
+.ds-history-item { display: flex; align-items: center; padding: 8px 6px; border-radius: 7px; cursor: pointer; transition: background 0.2s; font-size: 1rem; }
+.ds-history-item.active, .ds-history-item:hover { background: #232a36; color: #4da3ff; font-weight: bold; }
+.ds-history-item .ds-history-title { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ds-history-item .ds-history-del { color: #888; margin-left: 8px; font-size: 0.95em; cursor: pointer; }
+.ds-history-item .ds-history-del:hover { color: #e74c3c; }
+.ds-sidebar-footer { padding: 18px 12px; border-top: 1px solid #232a36; }
+.ds-user-info { display: flex; align-items: center; gap: 10px; font-size: 1rem; }
+.ds-avatar { width: 32px; height: 32px; border-radius: 50%; background: #232a36; }
+.ds-logout { color: #e74c3c; margin-left: 8px; font-size: 0.95em; text-decoration: none; }
+.ds-logout:hover { text-decoration: underline; }
+.ds-main { flex: 1; display: flex; flex-direction: column; background: #20232a; border-radius: 0 18px 18px 0; }
+.ds-main-header { padding: 24px 0 8px 0; text-align: center; border-bottom: 1px solid #232a36; }
+.ds-main-header h1 { font-size: 2.1rem; font-weight: bold; color: #fff; margin-bottom: 6px; letter-spacing: 2px; }
+.ds-risk-tip { color: #ffb84d; font-size: 0.98rem; }
+.ds-chat-section { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; }
+.ds-messages { flex: 1; overflow-y: auto; padding: 24px 32px 12px 32px; display: flex; flex-direction: column; gap: 18px; }
+.ds-bubble { max-width: 70%; padding: 16px 20px; border-radius: 16px; font-size: 1.08rem; line-height: 1.7; box-shadow: 0 2px 8px rgba(0,0,0,0.08); position: relative; word-break: break-all; }
+.ds-bubble.user { align-self: flex-end; background: linear-gradient(90deg,#4da3ff 60%,#7bb6f9 100%); color: #fff; font-weight: 500; }
+.ds-bubble.ai { align-self: flex-start; background: #232a36; color: #e3e3e3; }
+.ds-bubble .ds-bubble-actions { margin-top: 8px; display: flex; gap: 10px; font-size: 1.1em; }
+.ds-bubble .ds-bubble-actions button { background: none; border: none; color: #888; cursor: pointer; }
+.ds-bubble .ds-bubble-actions button.active, .ds-bubble .ds-bubble-actions button:hover { color: #4da3ff; }
+.ds-input-bar { display: flex; align-items: center; gap: 10px; padding: 16px 32px 20px 32px; border-top: 1px solid #232a36; background: #20232a; }
+.ds-upload-label { cursor: pointer; color: #4da3ff; font-size: 1.3em; }
+.ds-send-btn { background: #4da3ff; color: #fff; border: none; border-radius: 8px; padding: 8px 18px; font-size: 1.1rem; cursor: pointer; transition: background 0.2s; }
+.ds-send-btn:hover { background: #7bb6f9; }
+.ds-attachments { display: flex; flex-wrap: wrap; gap: 10px; padding: 8px 32px 0 32px; }
+.ds-attachment-item { background: #232a36; color: #fff; border-radius: 6px; padding: 4px 10px; display: flex; align-items: center; gap: 6px; font-size: 0.98rem; }
+.ds-attachment-item img { max-width: 40px; max-height: 40px; border-radius: 4px; }
+.ds-attachment-remove { color: #e74c3c; cursor: pointer; font-size: 1.1em; margin-left: 2px; }
+.ds-attachment-remove:hover { color: #ff4d4f; }
+@media (max-width: 900px) {
+  .ds-chat-root { flex-direction: column; height: auto; }
+  .ds-sidebar { width: 100%; border-radius: 18px 18px 0 0; flex-direction: row; }
+  .ds-main { border-radius: 0 0 18px 18px; }
+}
+
+.wrapper {
+      background: 181A20; border-radius: 18px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.10);
+      width: 100%; max-width: 1280px; text-align: center;
+  }
+  h2 { color: #FFF; margin-bottom: 36px; font-weight: 700; font-size: 2.4rem; }
+  .content-area { display: flex; gap: 80px; margin-bottom: 36px; }
+  .panel { flex: 1; display: flex; flex-direction: column; }
+  .panel h3 { color: lightblue; font-size: 20px; margin-bottom: 18px; font-weight: 600; }
+  .image-box {
+      border: 2.5px dashed #d0dbe5; border-radius: 12px; min-height: 480px; flex-grow: 1;
+      display: flex; justify-content: center; align-items: center; position: relative;
+      overflow: hidden; background-color: #fcfdff; transition: all 0.3s ease;
+      color: #8a99a8; font-size: 20px;
+  }
+  #upload-box { cursor: pointer; }
+  #upload-box:hover { border-color: #6a5acd; background-color: #f5f3ff; }
+  .preview-image {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      object-fit: contain; padding: 18px; box-sizing: border-box; background-color: white;
+  }
+  .btn {
+      padding: 18px 48px; background: linear-gradient(45deg, #6a5acd, #836FFF); color: white;
+      border: none; border-radius: 12px; cursor: pointer; font-size: 22px; font-weight: 600;
+      transition: all 0.3s ease; box-shadow: 0 6px 18px rgba(106, 90, 205, 0.3);
+  }
+  .btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(106, 90, 205, 0.4); }
+  .btn:disabled { background: #b5b5b5; cursor: not-allowed; box-shadow: none; }
+  .result-info {
+      margin-top: 32px; padding: 24px; border: 1.5px solid #e0e6ed; border-radius: 12px;
+      text-align: left; background-color: #f8f9fa; display: none;
+  }
+  .result-info p { font-size: 18px; margin: 12px 0; color: #333; white-space: pre-wrap; }
+  .result-info p span { font-weight: 700; color: #6a5acd; }
+</style>
+
+{% endblock %}
+
+{% block body %}
 <div class="wrapper">
     <h2>图像伪造检测</h2>
     <div class="content-area">
@@ -38,42 +128,239 @@
 
 
 </body>
-    
-<style>
+<div class="ds-chat-root">
+  <aside class="ds-sidebar">
+    <div class="ds-sidebar-header">
+      <!-- <span class="ds-logo">deepseek</span> -->
+      <button class="ds-new-chat" id="dsNewChatBtn">➕ 开启新对话</button>
+    </div>
+    <div class="ds-history-list" id="dsHistoryList"></div>
+    <div class="ds-sidebar-footer">
+      <div class="ds-user-info">
+        <img src="https://api.dicebear.com/7.x/identicon/svg?seed={{ username or 'guest' }}" class="ds-avatar">
+        {% if logged_in %}<a href="/logout" class="ds-logout">退出</a>{% endif %}
+      </div>
+    </div>
+  </aside>
+  <main class="ds-main">
+    <header class="ds-main-header">
+      <!-- <span class="ds-risk-tip">⚠️ 本回答由AI生成，仅供参考，请仔细甄别。</span> -->
+    </header>
+    <section class="ds-chat-section" id="dsChatSection">
+      <!-- 附件预览区 -->
+      <div class="ds-attachments" id="dsAttachments"></div>
+      <!-- 对话气泡区 -->
+      <div class="ds-messages" id="dsMessages"></div>
+      <!-- 文件上传、输入区 -->
+      <div class="ds-input-bar">
+        <label class="ds-upload-label">
+          <input type="file" id="dsFileInput" accept=".pdf,image/*,.txt,.doc,.docx" multiple style="display:none">
+          <i class="fas fa-paperclip"></i>
+        </label>
+        <textarea id="dsPromptInput" placeholder="请输入您的问题..." rows="1"></textarea>
+        <button id="dsSendBtn" class="ds-send-btn"><i class="fas fa-paper-plane"></i></button>
+      </div>
+    </section>
+  </main>
+</div>
+{% endblock %}
 
-    .wrapper {
-        background: 181A20; border-radius: 18px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.10);
-        width: 100%; max-width: 1280px; text-align: center;
-    }
-    h2 { color: #FFF; margin-bottom: 36px; font-weight: 700; font-size: 2.4rem; }
-    .content-area { display: flex; gap: 80px; margin-bottom: 36px; }
-    .panel { flex: 1; display: flex; flex-direction: column; }
-    .panel h3 { color: lightblue; font-size: 20px; margin-bottom: 18px; font-weight: 600; }
-    .image-box {
-        border: 2.5px dashed #d0dbe5; border-radius: 12px; min-height: 480px; flex-grow: 1;
-        display: flex; justify-content: center; align-items: center; position: relative;
-        overflow: hidden; background-color: #fcfdff; transition: all 0.3s ease;
-        color: #8a99a8; font-size: 20px;
-    }
-    #upload-box { cursor: pointer; }
-    #upload-box:hover { border-color: #6a5acd; background-color: #f5f3ff; }
-    .preview-image {
-        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        object-fit: contain; padding: 18px; box-sizing: border-box; background-color: white;
-    }
-    .btn {
-        padding: 18px 48px; background: linear-gradient(45deg, #6a5acd, #836FFF); color: white;
-        border: none; border-radius: 12px; cursor: pointer; font-size: 22px; font-weight: 600;
-        transition: all 0.3s ease; box-shadow: 0 6px 18px rgba(106, 90, 205, 0.3);
-    }
-    .btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(106, 90, 205, 0.4); }
-    .btn:disabled { background: #b5b5b5; cursor: not-allowed; box-shadow: none; }
-    .result-info {
-        margin-top: 32px; padding: 24px; border: 1.5px solid #e0e6ed; border-radius: 12px;
-        text-align: left; background-color: #f8f9fa; display: none;
-    }
-    .result-info p { font-size: 18px; margin: 12px 0; color: #333; white-space: pre-wrap; }
-    .result-info p span { font-weight: 700; color: #6a5acd; }
-</style>
+{% block script %}
 
+<script>
+// 附件全局变量
+let dsAttachments = [];
+// 历史对话本地存储结构: [{id, title, date, messages: [{role, content, time}], ...}]
+function getTodayStr() {
+  const d = new Date();
+  return d.toISOString().slice(0,10);
+}
+function getYesterdayStr() {
+  const d = new Date(Date.now()-86400000);
+  return d.toISOString().slice(0,10);
+}
+function groupHistoryByDate(history) {
+  const today = getTodayStr(), yesterday = getYesterdayStr();
+  const groups = { today: [], yesterday: [], earlier: [] };
+  history.forEach(item => {
+    if(item.date === today) groups.today.push(item);
+    else if(item.date === yesterday) groups.yesterday.push(item);
+    else groups.earlier.push(item);
+  });
+  return groups;
+}
+function saveHistory(history) {
+  localStorage.setItem('dsChatHistory', JSON.stringify(history));
+}
+function loadHistory() {
+  return JSON.parse(localStorage.getItem('dsChatHistory')||'[]');
+}
+function renderHistoryList() {
+  const history = loadHistory();
+  const groups = groupHistoryByDate(history);
+  const list = document.getElementById('dsHistoryList');
+  list.innerHTML = '';
+  function renderGroup(title, arr) {
+    if(arr.length===0) return;
+    const groupDiv = document.createElement('div');
+    groupDiv.className = 'ds-history-group';
+    groupDiv.innerHTML = `<div class="ds-history-group-title">${title}</div>`;
+    arr.forEach(item => {
+      const li = document.createElement('div');
+      li.className = 'ds-history-item';
+      li.dataset.id = item.id;
+      li.innerHTML = `<span class="ds-history-title">${item.title}</span><span class="ds-history-del" title="删除">🗑️</span>`;
+      li.onclick = e => {
+        if(e.target.classList.contains('ds-history-del')) {
+          // 删除
+          const idx = history.findIndex(h=>h.id===item.id);
+          if(idx>-1) { history.splice(idx,1); saveHistory(history); renderHistoryList(); }
+          return;
+        }
+        // 切换对话
+        document.querySelectorAll('.ds-history-item').forEach(x=>x.classList.remove('active'));
+        li.classList.add('active');
+        renderMessages(item.messages);
+        localStorage.setItem('dsCurrentChatId', item.id);
+      };
+      groupDiv.appendChild(li);
+    });
+    list.appendChild(groupDiv);
+  }
+  renderGroup('今天', groups.today);
+  renderGroup('昨天', groups.yesterday);
+  renderGroup('更早', groups.earlier);
+  // 高亮当前
+  const curId = localStorage.getItem('dsCurrentChatId');
+  if(curId) {
+    const cur = list.querySelector(`.ds-history-item[data-id="${curId}"]`);
+    if(cur) cur.classList.add('active');
+  }
+}
+function renderMessages(messages) {
+  const box = document.getElementById('dsMessages');
+  box.innerHTML = '';
+  messages.forEach(msg => {
+    const div = document.createElement('div');
+    div.className = 'ds-bubble ' + (msg.role==='user'?'user':'ai');
+    div.innerHTML = `<div>${msg.content}</div><div class="ds-bubble-actions">
+      <button title="复制" onclick="navigator.clipboard.writeText(this.parentNode.parentNode.innerText)">📋</button>
+      <button title="点赞">👍</button><button title="点踩">👎</button>
+    </div>`;
+    box.appendChild(div);
+  });
+  box.scrollTop = box.scrollHeight;
+}
+function newChat() {
+  const history = loadHistory();
+  const id = 'chat'+Date.now();
+  const item = {id, title:'新对话', date:getTodayStr(), messages:[]};
+  history.unshift(item);
+  saveHistory(history);
+  localStorage.setItem('dsCurrentChatId', id);
+  renderHistoryList();
+  renderMessages([]);
+}
+function getCurrentChat() {
+  const history = loadHistory();
+  const curId = localStorage.getItem('dsCurrentChatId');
+  return history.find(x=>x.id===curId);
+}
+function renderAttachments() {
+  const box = document.getElementById('dsAttachments');
+  box.innerHTML = '';
+  dsAttachments.forEach((file, idx) => {
+    const div = document.createElement('div');
+    div.className = 'ds-attachment-item';
+    if(file.type.startsWith('image/')) {
+      const img = document.createElement('img');
+      img.src = file.preview;
+      div.appendChild(img);
+    } else {
+      div.innerHTML += `<i class='fas fa-file'></i>`;
+    }
+    div.innerHTML += `<span>${file.name}</span><span class='ds-attachment-remove' title='移除'>&times;</span>`;
+    div.querySelector('.ds-attachment-remove').onclick = () => {
+      dsAttachments.splice(idx,1); renderAttachments();
+    };
+    box.appendChild(div);
+  });
+}
+document.addEventListener('DOMContentLoaded',function(){
+  renderHistoryList();
+  // 默认显示当前对话
+  const cur = getCurrentChat();
+  if(cur) renderMessages(cur.messages); else newChat();
+  document.getElementById('dsNewChatBtn').onclick = newChat;
+  // 发送消息
+  document.getElementById('dsSendBtn').onclick = sendMsg;
+  document.getElementById('dsPromptInput').onkeydown = function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}};
+  // 文件上传
+  document.getElementById('dsFileInput').onchange = function(){
+    const files = Array.from(this.files);
+    files.forEach(file=>{
+      const reader = new FileReader();
+      reader.onload = function(e){
+        file.preview = file.type.startsWith('image/') ? e.target.result : '';
+        dsAttachments.push(file);
+        renderAttachments();
+      };
+      if(file.type.startsWith('image/')) reader.readAsDataURL(file);
+      else reader.readAsArrayBuffer(file); // 其他类型不预览
+    });
+    this.value = '';
+  };
+});
+function sendMsg(){
+  const input = document.getElementById('dsPromptInput');
+  const text = input.value.trim();
+  if(!text) return;
+  const cur = getCurrentChat();
+  if(!cur) return;
+  cur.messages.push({role:'user',content:text});
+  saveHistory(loadHistory());
+  renderMessages(cur.messages);
+  input.value = '';
+  // 显示AI思考中
+  cur.messages.push({role:'ai',content:'<i class="fas fa-spinner fa-spin"></i> 思考中...'});
+  renderMessages(cur.messages);
 
+  // ======= 这里是deepseek大模型API调用位置 =======
+  const apiKey = 'sk-0d8f31e1cf5d4774bcf82f2f7624c02d'; // 替换为你的API KEY
+  const apiUrl = 'https://api.deepseek.com/v1/chat/completions';
+
+  fetch(apiUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + apiKey
+    },
+    body: JSON.stringify({
+      model: 'deepseek-chat',
+      messages: [
+        { role: 'user', content: text }
+      ]
+    })
+  })
+  .then(r => r.json())
+  .then(data => {
+    cur.messages.pop(); // 移除思考中
+    if (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) {
+      cur.messages.push({ role: 'ai', content: data.choices[0].message.content });
+    } else {
+      cur.messages.push({ role: 'ai', content: `<span style='color:#e74c3c'>${data.error || 'AI出错'}</span>` });
+    }
+    saveHistory(loadHistory());
+    renderMessages(cur.messages);
+  })
+  .catch(e => {
+    cur.messages.pop();
+    cur.messages.push({ role: 'ai', content: `<span style='color:#e74c3c'>${e.message || 'AI出错'}</span>` });
+    saveHistory(loadHistory());
+    renderMessages(cur.messages);
+  });
+  // ======= 结束 =======
+}
+</script>
+<script src="{{ url_for('static', filename='js/detection.js') }}"></script>
+{% endblock %}

@@ -112,9 +112,47 @@
             color: #2e7d32;
             border: 1px solid #66bb6a;
         }
+                /* 新增返回箭头样式 */
+        .home-arrow {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1001;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .home-arrow:hover {
+            transform: scale(1.1);
+            background: rgba(255, 255, 255, 1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .home-arrow i {
+            font-size: 24px;
+            color: #4a6baf;
+            transition: all 0.3s ease;
+        }
+        
+        .home-arrow:hover i {
+            color: #2c4da8;
+            transform: translateX(-3px);
+        }
+        
     </style>
 </head>
 <body>
+    <a href="/" class="home-arrow" title="返回主页">
+        <i class="fas fa-arrow-left"></i>
+    </a>
     <div class="container">
         <header>
             <h1>智鉴惟真</h1>
@@ -132,7 +170,7 @@
                     {% endif %}
                 {% endwith %}
                 
-                <form class="auth-form" method="POST" action="{{ url_for('login') }}">
+                <form class="auth-form" method="POST" action="/login_action">
                     <div class="form-group">
                         <label for="username">用户名</label>
                         <input type="text" id="username" name="username" required>
@@ -145,7 +183,7 @@
                 </form>
                 
                 <div class="auth-links">
-                    <a href="{{ url_for('register') }}">没有账号？立即注册</a>
+                    <a href="/register">没有账号？立即注册</a>
                 </div>
             </div>
         </main>
@@ -181,7 +219,7 @@
             });
             
             function updateThemeIcon(theme) {
-                if (theme === 'dark') {
+                if (theme === 'light') {
                     themeIcon.className = 'fas fa-sun';
                 } else {
                     themeIcon.className = 'fas fa-moon';

@@ -1,6 +1,12 @@
+{% extends 'base.html' %}
+
+{% block style %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/model_center.css') }}">
 <!-- 引入Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block body %}
 
 <div id="model-center-container">
     <div class="mc-header">
@@ -28,6 +34,8 @@
         <!-- 模型卡片将通过JS动态插入 -->
     </div>
 </div>
+{% endblock %}
+
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, jsonify, current_app, g
+from flask import Blueprint, render_template, request, jsonify, current_app, g, redirect
 from functools import wraps
 import csv
 import os
@@ -26,7 +26,7 @@ def login_required(f):
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return jsonify(error='请先登录以访问此页面'), 401
             # 对于普通请求，可以重定向到登录页，但在此SPA结构中返回错误更合适
-            return "请先登录以访问此页面", 401
+            return redirect('/login')
         return f(*args, **kwargs)
     return decorated_function
 

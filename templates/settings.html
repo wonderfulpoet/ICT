@@ -1,4 +1,11 @@
+{% extends 'base.html' %}
+
+{% block style %}
+
 <link rel="stylesheet" href="{{ url_for('static', filename='css/settings.css') }}">
+{% endblock %}
+
+{% block body %}
 
 <div id="settings-container">
     <div class="settings-header">
@@ -204,6 +211,10 @@
     </div>
 </div>
 
+{% endblock %}
+
+{% block script%}
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     if (document.getElementById('settings-container')) {
@@ -397,3 +408,4 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script> 
+{% endblock %}

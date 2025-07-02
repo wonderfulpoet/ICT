@@ -54,7 +54,9 @@ body {
     font-family: 'Microsoft YaHei', 'Arial', sans-serif;
     line-height: 1.6;
     transition: background-color 0.3s, color 0.3s;
+    padding-top: 70px;
 }
+
 
 .container {
     background: #181A20 !important;
@@ -66,7 +68,13 @@ body {
     min-height: 100vh;
 }
 
+
 header {
+    position: fixed;
+    top: 0;
+    left: 10 px;
+    right: 0;
+    z-index: 1000;
     text-align: center;
     margin-bottom: 30px;
     padding: 20px;
@@ -608,8 +616,26 @@ input, textarea, select {
 .side-menu li:hover {
     background: #232a36;
 }
+.side-menu li.active {
+    background: #232a36 !important;
+    color: #4da3ff !important;
+    font-weight: bold;
+    border-left: 5px solid #4da3ff;
+    box-shadow: 0 2px 8px rgba(77,163,255,0.08);
+}
 @media (max-width: 900px) {
     .sidebar { width: 60px; }
     .side-menu li { padding: 18px 10px; font-size: 1rem; }
     .side-menu li span:not(.icon) { display: none; }
+}
+
+/* effects.css */
+#particle-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1; /* Ensure it's behind other content */
+    background-color: #1a1a2e; /* Fallback background color */
 }
