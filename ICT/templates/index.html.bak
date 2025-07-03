@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>大模型平台</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/preview.css') }}">
+    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">        <header>
+            <h1>DeepSeek 大模型交互平台</h1>
+            <p class="subtitle">与先进AI模型对话，自动联网获取最新信息</p>
+        </header>
+
+        <main>
+            <div class="chat-container">
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message system">
+                        <div class="message-content">
+                            <p>您好！我是DeepSeek助手，有什么可以帮您的吗？</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-area">                    <div class="model-selector">
+                        <label for="modelSelect">选择模型:</label>
+                        <select id="modelSelect" name="model">
+                            {% for key, value in models.items() %}
+                                <option value="{{ value }}">{{ value }}</option>
+                            {% endfor %}
+                        </select>
+                          <div class="options-container">
+                            <label class="option-label">
+                                <input type="checkbox" id="autoSearch" name="auto_search" checked>
+                                自动联网搜索
+                            </label>
+                            <label class="option-label">
+                                <input type="checkbox" id="showSearchDetails" name="show_search_details" checked>
+                                显示搜索详情
+                            </label>
+                        </div>
+                    </div>                    <div class="tools-box">
+                        <div class="file-upload">
+                            <label for="fileUpload" class="file-label">
+                                <i class="fas fa-file-upload"></i> 上传文件
+                            </label>
+                            <input type="file" id="fileUpload" name="file" class="hidden-file-input">
+                            <span id="fileName" class="file-name"></span>
+                        </div>
+                    </div>
+
+                    <div class="message-input-box">
+                        <textarea id="promptInput" placeholder="输入您的问题..." rows="3"></textarea>
+                        <button id="sendBtn" class="send-btn">
+                            <i class="fas fa-paper-plane"></i> 发送
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>© 2025 DeepSeek 大模型交互平台</p>        </footer>
+    </div>
+
+    <!-- 主题切换按钮 -->
+    <div class="theme-toggle" id="themeToggle">
+        <i class="fas fa-moon" id="themeIcon"></i>
+    </div>    <!-- 引入自定义JS -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/preview.js') }}"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {            const chatMessages = document.getElementById('chatMessages');
+            const promptInput = document.getElementById('promptInput');
+            const sendBtn = document.getElementById('sendBtn');
+            const fileUpload = document.getElementById('fileUpload');
+            const fileName = document.getElementById('fileName');
+            const modelSelect = document.getElementById('modelSelect');// 显示上传的文件名
+            fileUpload.addEventListener('change', function() {
+                if (this.files.length > 0) {
+                    fileName.textContent = this.files[0].name;
+                    // 显示文件预览
+                    previewFile(this.files[0]);
+                } else {
+                    fileName.textContent = '';
+                }
+            });            // 发送消息
+            sendBtn.addEventListener('click', sendMessage);
+            promptInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+            
+            function sendMessage() {
+                const prompt = promptInput.value.trim();
+                const file = fileUpload.files[0];
+                const model = modelSelect.value;
+                const autoSearch = document.getElementById('autoSearch').checked;
+                const showSearchDetails = document.getElementById('showSearchDetails').checked;
+                
+                if (!prompt && !file) {
+                    alert('请输入问题或上传文件!');
+                    return;
+                }
+
+                // 添加用户消息
+                addMessage('user', prompt);
+                  // 显示文件信息（如果有）
+                if (file) {
+                    const fileInfo = `<p><strong>上传文件:</strong> ${file.name}</p>`;
+                    addCustomMessage('user', fileInfo);
+                }
+                
+                // 显示加载状态
+                const loadingMessage = addCustomMessage('system', '<p class="loading"><i class="fas fa-spinner fa-spin"></i> 思考中...</p>');
+                
+                // 发送请求
+                const formData = new FormData();
+                formData.append('prompt', prompt);
+                formData.append('model', model);
+                formData.append('auto_search', autoSearch);
+                formData.append('show_search_details', showSearchDetails);
+                if (file) formData.append('file', file);
+
+                // 使用普通请求
+                fetch('/chat', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // 移除加载消息
+                    loadingMessage.remove();
+                    
+                    if (data.error) {
+                        addCustomMessage('system', `<p class="error">错误: ${data.error}</p>`);
+                    } else {
+                        // 将回答格式化处理
+                        const formattedAnswer = formatAnswer(data.answer);
+                        const messageDiv = addCustomMessage('system', formattedAnswer);                        // 添加搜索详情（如果有）
+                        if (showSearchDetails && data.search_details && data.search_details.length > 0) {
+                            console.log("搜索详情数据:", data.search_details); // 添加调试信息
+                            const contentDiv = messageDiv.querySelector('.message-content');
+                            appendSearchDetails(contentDiv, data.search_details);
+                        }
+                    }
+                })
+                .catch(error => {
+                    loadingMessage.remove();
+                    addCustomMessage('system', `<p class="error">请求出错: ${error.message}</p>`);
+                });
+                
+                // 清空输入
+                promptInput.value = '';
+                fileUpload.value = '';
+                fileName.textContent = '';
+            }
+
+            function addMessage(type, text) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${type}`;
+                
+                const content = document.createElement('div');
+                content.className = 'message-content';
+                
+                const p = document.createElement('p');
+                p.textContent = text;
+                
+                content.appendChild(p);
+                messageDiv.appendChild(content);
+                chatMessages.appendChild(messageDiv);
+                
+                // 滚动到底部
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                return messageDiv;
+            }
+
+            function addCustomMessage(type, html) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${type}`;
+                
+                const content = document.createElement('div');
+                content.className = 'message-content';
+                content.innerHTML = html;
+                
+                messageDiv.appendChild(content);
+                chatMessages.appendChild(messageDiv);
+                
+                // 滚动到底部
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                return messageDiv;
+            }
+
+            function formatAnswer(text) {
+                // 处理代码块
+                text = text.replace(/```(\w*)([\s\S]*?)```/g, function(match, language, code) {
+                    return `<div class="code-block">
+                                <div class="code-header">
+                                    <span>${language || 'code'}</span>
+                                    <button class="copy-btn" onclick="copyToClipboard('${escapeHtml(code.trim())}');this.textContent='已复制!';setTimeout(() => this.textContent='复制', 2000)">复制</button>
+                                </div>
+                                <pre><code class="${language}">${escapeHtml(code.trim())}</code></pre>
+                            </div>`;
+                });
+                
+                // 处理单行代码
+                text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
+                
+                // 处理粗体
+                text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+                
+                // 处理斜体
+                text = text.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+                
+                // 处理标题
+                text = text.replace(/^### (.*$)/gm, '<h3>$1</h3>');
+                text = text.replace(/^## (.*$)/gm, '<h2>$1</h2>');
+                text = text.replace(/^# (.*$)/gm, '<h1>$1</h1>');
+                
+                // 处理链接
+                text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+                
+                // 处理列表
+                text = text.replace(/^\s*-\s+(.+)$/gm, '<li>$1</li>');
+                text = text.replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>');
+                
+                // 处理换行
+                text = text.replace(/\n/g, '<br>');
+                
+                return text;
+            }
+              function escapeHtml(unsafe) {
+                return unsafe
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+            }
+              // 添加搜索详情到消息中            function appendSearchDetails(contentDiv, searchDetails) {
+                console.log("正在添加搜索详情:", searchDetails); // 添加调试信息
+                const searchContainer = document.createElement('div');
+                searchContainer.className = 'search-container';
+                
+                const searchHeader = document.createElement('div');
+                searchHeader.className = 'search-header';
+                searchHeader.innerHTML = '<span>搜索详情</span><button class="search-toggle"><i class="fas fa-chevron-down"></i></button>';
+                
+                const searchContent = document.createElement('div');
+                searchContent.className = 'search-content';
+                
+                // 创建搜索来源列表
+                const sourcesList = document.createElement('ul');
+                sourcesList.className = 'search-sources-list';
+                
+                searchDetails.forEach(detail => {
+                    const sourceItem = document.createElement('li');
+                    if (detail.url) {
+                        sourceItem.innerHTML = `<a href="${detail.url}" target="_blank">${detail.source || detail.url}</a>`;
+                    } else {
+                        sourceItem.textContent = detail.source || "未知来源";
+                    }
+                    sourcesList.appendChild(sourceItem);
+                });
+                
+                searchContent.appendChild(sourcesList);
+                searchContainer.appendChild(searchHeader);
+                searchContainer.appendChild(searchContent);
+                contentDiv.appendChild(searchContainer);
+                
+                // 添加折叠/展开功能
+                searchHeader.addEventListener('click', function() {
+                    const toggle = this.querySelector('.search-toggle');
+                    const content = this.nextElementSibling;
+                    
+                    toggle.classList.toggle('collapsed');
+                    content.classList.toggle('collapsed');
+                });
+            }
+        });
+    </script>
+</body>
+</html>
