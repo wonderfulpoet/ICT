@@ -18,6 +18,7 @@ from blueprints.data_management import bp as data_bp
 from blueprints.model_center import bp as model_center_bp
 from blueprints.settings import bp as settings_bp
 from blueprints.menu import bp as menu_bp
+from blueprints.api import bp as api_bp
 from config import *
 # 加载环境变量
 load_dotenv()
@@ -35,6 +36,7 @@ app.register_blueprint(data_bp)
 app.register_blueprint(model_center_bp)
 app.register_blueprint(settings_bp)
 app.register_blueprint(menu_bp)
+app.register_blueprint(api_bp)
 
 # 确保上传文件夹存在
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
