@@ -1,0 +1,227 @@
+/* --- 主要检测页面布局 --- */
+.detection-container {
+    width: 100%;
+    padding: 2rem;
+    background-color: var(--background-color);
+    border-radius: var(--border-radius);
+    text-align: center;
+}
+
+.detection-container h2 {
+    color: var(--text-color);
+    margin-bottom: 2.5rem;
+    font-weight: 700;
+    font-size: 2.2rem;
+}
+
+.content-area {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 2.5rem;
+}
+
+.panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--container-bg);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+}
+
+.panel h3 {
+    color: var(--subheading-color);
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    text-align: left;
+}
+
+.image-box {
+    border: 2px dashed var(--border-color);
+    border-radius: var(--border-radius);
+    min-height: 400px;
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    background-color: var(--secondary-color);
+    transition: all 0.3s ease;
+    color: var(--placeholder-color);
+    font-size: 1.1rem;
+}
+
+#upload-box {
+    cursor: pointer;
+}
+
+#upload-box:hover {
+    border-color: var(--accent-color);
+    background-color: var(--secondary-hover-color);
+}
+
+.preview-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 1rem;
+    box-sizing: border-box;
+}
+
+.panel-actions {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.btn-detect {
+    padding: 1rem 3rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.result-info {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    text-align: left;
+    background-color: var(--container-bg);
+    display: none; /* 初始隐藏 */
+}
+
+.result-info p {
+    font-size: 1.1rem;
+    margin: 0.5rem 0;
+    color: var(--text-color);
+    white-space: pre-wrap; /* 为了尊重置信度得分中的换行符 */
+}
+
+.result-info p strong {
+    font-weight: 700;
+    color: var(--accent-color);
+    min-width: 120px;
+    display: inline-block;
+}
+
+/* --- 悬浮聊天窗口 --- */
+.chat-widget {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 400px;
+    max-width: 90vw;
+    z-index: 1001; /* 确保在主题切换按钮之上 */
+    background-color: #1f232a;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: all 0.3s ease-in-out;
+}
+
+.chat-widget.is-collapsed {
+    height: 60px; /* 折叠时只显示头部 */
+    width: 250px;
+}
+
+.chat-widget-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    height: 60px;
+    background-color: #232a36;
+    color: #fff;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.chat-widget-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+#chat-toggle-icon {
+    transition: transform 0.3s ease;
+}
+.is-collapsed #chat-toggle-icon {
+    transform: rotate(180deg);
+}
+
+.chat-widget-body {
+    height: 500px;
+    max-height: 70vh;
+    display: flex;
+    flex-direction: column;
+    opacity: 1;
+    transition: opacity 0.3s ease-in-out;
+}
+.is-collapsed .chat-widget-body {
+    height: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* --- 为聊天窗口重新设计样式 --- */
+.ds-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.ds-bubble {
+    max-width: 85%;
+    padding: 10px 15px;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    word-break: break-word;
+}
+.ds-bubble.user { align-self: flex-end; background: #4da3ff; color: #fff; }
+.ds-bubble.ai { align-self: flex-start; background: #2c313a; color: #e3e3e3; }
+.ds-bubble .ds-bubble-actions { display: none; } /* 在小窗口中简化，不显示操作按钮 */
+
+.ds-input-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 15px;
+    border-top: 1px solid #2a3240;
+    background: #1f232a;
+}
+#dsPromptInput {
+    flex: 1;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background-color: #2c313a;
+    color: #fff;
+    border: 1px solid #3e4654;
+    resize: none;
+    font-size: 0.9rem;
+    max-height: 80px;
+}
+#dsSendBtn {
+    background: #4da3ff;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    width: 40px;
+    height: 38px;
+    font-size: 1rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.ds-upload-label { display: none; } /* 在小窗口中简化，隐藏上传功能 */

@@ -89,8 +89,12 @@ function initStartButton() {
             easing: 'easeInOutQuad'
         }).finished.then(() => {
             document.getElementById('homeContainer').style.display = 'none';
-            // 直接跳转，不依赖mainApp
-            window.location.href = "/detection";
+                // 根据登录状态决定跳转
+            {% if logged_in %}
+                window.location.href = "/detection";
+            {% else %}
+                window.location.href = "/login";
+            {% endif %}
         });
     });
 }
