@@ -3,7 +3,7 @@ import json
 import requests
 import csv
 from flask import Flask, render_template, request, jsonify, url_for, redirect, send_from_directory, session, flash, g
-
+from datetime import timedelta
 from io import BytesIO
 from PIL import Image
 
@@ -29,6 +29,14 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH  # 限制上传文件大小为16MB
 app.config['PORT'] = PORT
 app.config['PASSWORD_FILE'] = PASSWORD_FILE
+# 在创建 app 后添加这些配置
+app.config.update(
+    SECRET_KEY=os.environ.get("SECRET_KEY") or 'your-fallback-secret-key-here',
+    PERMANENT_SESSION_LIFETIME=timedelta(days=7),
+    SESSION_COOKIE_SECURE=False,  # 开发时设为 False，生产环境设为 True
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE='Lax'
+)
 
 app.register_blueprint(dect_bp)
 app.register_blueprint(chat_bp)
@@ -63,6 +71,7 @@ PREMIUM_MODELS = ["DeepSeek-R1", "DeepSeek-V3-250324-P001", "QwQ-N011-32B", "GLM
 # 上下文传递
 @app.before_request
 def my_before_request():
+    session.permanent = True  # 确保会话是永久的
     username=session.get('username', None)
     logged_in = session.get('logged_in', False)
     if username:
@@ -71,6 +80,7 @@ def my_before_request():
     else:
         setattr(g,'username',None)
         setattr(g,'logged_in',False)
+
 @app.context_processor
 def my_context_porcessor():
     return {'username':g.username,'logged_in':g.logged_in}

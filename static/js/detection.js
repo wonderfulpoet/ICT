@@ -14,23 +14,21 @@ const uploadBtn = document.getElementById('upload-btn');
 const clearBtn = document.getElementById('clear-btn');
 const downloadBtn = document.getElementById('download-btn');
 
-// // --- 模拟数据 ---
-// const dummyResult = {
-//     isFake: "是",
-//     fakeType: "Photoshop编辑篡改",
-//     confidence: { photoshop: 0.89, deepfake: 0.12, aigc: 0.08 },
-//     resultImageUrl: "https://source.unsplash.com/random/800x600?abstract,art" 
-// };
-
 // --- 事件监听区域 ---
 
-// 重点：为可见的div（uploadBox）注册点击事件
+// 为可见的div（uploadBox）注册点击事件
 if (uploadBox) {
     uploadBox.addEventListener('click', () => {
         imageInput.click();
     });
-    uploadBox.addEventListener('dragover', e => { e.preventDefault(); uploadBox.style.borderColor = '#6a5acd'; });
-    uploadBox.addEventListener('dragleave', e => { e.preventDefault(); uploadBox.style.borderColor = '#d0dbe5'; });
+    uploadBox.addEventListener('dragover', e => { 
+        e.preventDefault(); 
+        uploadBox.style.borderColor = '#6a5acd'; 
+    });
+    uploadBox.addEventListener('dragleave', e => { 
+        e.preventDefault(); 
+        uploadBox.style.borderColor = '#d0dbe5'; 
+    });
     uploadBox.addEventListener('drop', e => {
         e.preventDefault();
         uploadBox.style.borderColor = '#d0dbe5';
@@ -41,7 +39,7 @@ if (uploadBox) {
     });
 }
 
-// 为隐藏的input注册change事件，以便在选择文件后进行预览
+// 为隐藏的input注册change事件
 if (imageInput) {
     imageInput.addEventListener('change', previewImage);
 }
@@ -49,7 +47,7 @@ if (imageInput) {
 // 检测按钮点击事件
 if (detectBtn) {
     detectBtn.addEventListener('click', () => {
-        if (!imageInput.files.length) {
+        if (!imageInput.files || !imageInput.files.length) {
             alert("请先上传一张图片！");
             return;
         }
@@ -107,67 +105,101 @@ function previewImage() {
         reader.readAsDataURL(file);
     }
 }
-
 async function startDetection() {
-detectBtn.disabled = true;
-    detectBtn.textContent = '检测中...';
+    detectBtn.disabled = true;
+    detectBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 检测中...';
     resultPlaceholder.textContent = '正在分析图像，请稍候...';
     resultPlaceholder.style.display = 'block';
     resultImagePreview.style.display = 'none';
     resultInfoDetails.style.display = 'none';
     
     try {
-        const formData = new FormData();
-        formData.append('image', imageInput.files[0]);
+        const file = imageInput.files[0];
+        if (!file) {
+            throw new Error('没有选择文件');
+        }
+
+        // 读取文件为Base64 (完整的数据URL)
+        const imageBase64 = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
         
-        const response = await fetch('/detect_action', {
+        // 发送请求
+        const response = await fetch('/call_api', {
             method: 'POST',
-            body: formData
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ image_data: imageBase64.split(',')[1] })  // 只发送base64部分
         });
         
         if (!response.ok) {
-            throw new Error(`检测失败: ${response.status}`);
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || `检测失败: ${response.status}`);
         }
         
         const result = await response.json();
         
         // 显示结果
-        resultImagePreview.src = 'data:image/jpeg;base64,' + result.processed_image;
-        resultImagePreview.style.display = 'block';
-        resultPlaceholder.style.display = 'none';
-        
-        resultIsFake.textContent = result.is_fake ? '是' : '否';
-        resultFakeType.textContent = result.fake_type;
-        
-        // 格式化置信度评分
-        if (result.confidence_scores) {
-            const scores = result.confidence_scores;
-            resultConfidenceScore.textContent = 
-                `Photoshop: ${scores.photoshop}%\n` +
-                `Deepfake: ${scores.deepfake}%\n` +
-                `AIGC: ${scores.aigc}%`;
-        }
-        
-        resultInfoDetails.style.display = 'block';
+        displayDetectionResult(result);
         
     } catch (error) {
         console.error('检测错误:', error);
-        alert('检测失败: ' + error.message);
+        resultPlaceholder.textContent = '检测失败: ' + error.message;
+        resultPlaceholder.style.display = 'block';
     } finally {
         detectBtn.disabled = false;
-        detectBtn.textContent = '开始检测';
+        detectBtn.innerHTML = '<i class="fas fa-search"></i> 开始检测';
     }
 }
 
+function displayDetectionResult(result) {
+    if (result.status !== "success") {
+        throw new Error(result.error || "未知错误");
+    }
 
-function showDetectionResult(result) {
-    resultImagePreview.src = result.resultImageUrl;
-    resultImagePreview.style.display = 'block';
-    resultPlaceholder.style.display = 'none';
-    resultIsFake.textContent = result.isFake;
-    resultFakeType.textContent = result.fakeType;
-    resultConfidenceScore.textContent = `\n  - Photoshop: ${(result.confidence.photoshop * 100).toFixed(1)}%\n  - Deepfake: ${(result.confidence.deepfake * 100).toFixed(1)}%\n  - AIGC: ${(result.confidence.aigc * 100).toFixed(1)}%`;
+    const data = result.result;
+    
+    // 1. 显示处理后的图片
+    if (data.processed_image) {
+        resultImagePreview.src = data.processed_image;  // 直接使用完整的data URL
+        resultImagePreview.style.display = 'block';
+        resultPlaceholder.style.display = 'none';
+    }
+
+    // 2. 显示检测结果信息
+    resultIsFake.textContent = data.is_fake ? '是' : '否';
+    resultFakeType.textContent = data.fake_type || '未知';
+    
+    if (data.confidence_scores) {
+        const scores = data.confidence_scores;
+        resultConfidenceScore.innerHTML = `
+            <span>Photoshop: ${scores.photoshop}%</span><br>
+            <span>Deepfake: ${scores.deepfake}%</span><br>
+            <span>AI生成: ${scores.aigc}%</span>
+        `;
+    }
+    
     resultInfoDetails.style.display = 'block';
+    
+    // 3. 启用下载按钮
+    downloadBtn.disabled = false;
+}
+
+function readFileAsBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            // 移除data:image/...;base64,前缀
+            const base64String = reader.result.split(',')[1];
+            resolve(base64String);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
 }
 
 function resetResultArea() {
@@ -176,5 +208,7 @@ function resetResultArea() {
     resultPlaceholder.textContent = '检测结果将在此显示';
     resultPlaceholder.style.display = 'block';
     resultInfoDetails.style.display = 'none';
-} 
-
+    resultIsFake.textContent = '';
+    resultFakeType.textContent = '';
+    resultConfidenceScore.textContent = '';
+}
