@@ -29,25 +29,14 @@
                 <hr class="mc-divider">
                 <li>Qwen</li>
                 <hr class="mc-divider">
-                <li>Bard</li>
-                <hr class="mc-divider">
                 <li>Llama 3</li>
                 <hr class="mc-divider">
-                <li>Starling-7B</li>
-                <hr class="mc-divider">
-                <li>Athene-V2-72B-Chat</li>
-                <hr class="mc-divider">
                 <li>DeepSeek V3</li>
-                <hr class="mc-divider">
-                <li>Mistral 7B</li>
-                <hr class="mc-divider">
-                <li>Falcon 40B</li>
             </ul>
+            <div class="mc-category-desc">适合人文社科等学科</div>
         </div>
         <div id="mc-category-vision" class="mc-category-list" style="display: none; width: 100%;">
             <ul class="mc-model-list">
-                <li>DALL・E 3</li>
-                <hr class="mc-divider">
                 <li>Qwen-VL</li>
                 <hr class="mc-divider">
                 <li>DeepSeek-Multimodal</li>
@@ -56,6 +45,7 @@
                 <hr class="mc-divider">
                 <li>VisualGLM</li>
             </ul>
+            <div class="mc-category-desc">适配各类学科</div>
         </div>
         <div id="mc-category-code" class="mc-category-list" style="display: none; width: 100%;">
             <ul class="mc-model-list">
@@ -69,6 +59,7 @@
                 <hr class="mc-divider">
                 <li>CodeGen</li>
             </ul>
+            <div class="mc-category-desc">适合理工类等学科</div>
         </div>
     </div>
 </div>
@@ -136,6 +127,14 @@
     margin: 0 18px;
     opacity: 0.5;
 }
+
+.mc-category-desc {
+  text-align: center;
+  color: #4da3ff;
+  font-size: 1.08rem;
+  margin: 18px 0 0 0;
+  letter-spacing: 1px;
+}
 </style>
 <script>
 function showCategory(cat) {
@@ -148,6 +147,26 @@ function showCategory(cat) {
     if(cat==='vision') btns[1].classList.add('active');
     if(cat==='code') btns[2].classList.add('active');
 }
+</script>
+
+<!-- Toast提示 -->
+<div id="model-toast" style="display:none;position:fixed;right:40px;bottom:40px;z-index:9999;background:#4da3ff;color:#fff;padding:16px 32px;border-radius:12px;font-size:1.2rem;box-shadow:0 2px 16px #4da3ff44;transition:opacity 0.3s;opacity:0;pointer-events:none;">已选择该模型！</div>
+<script>
+function showModelToast(msg) {
+  var toast = document.getElementById('model-toast');
+  toast.textContent = msg;
+  toast.style.display = 'block';
+  toast.style.opacity = '1';
+  setTimeout(function(){ toast.style.opacity = '0'; }, 1500);
+  setTimeout(function(){ toast.style.display = 'none'; }, 1800);
+}
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.mc-model-list li').forEach(function(li) {
+    li.addEventListener('click', function() {
+      showModelToast('已选择该模型！');
+    });
+  });
+});
 </script>
 {% endblock %}
 

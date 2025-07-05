@@ -238,3 +238,11 @@
     height: 200px;
     margin-bottom: 15px;
 } 
+
+.mc-category-desc {
+    text-align: center;
+    color: #4da3ff;
+    font-size: 1.08rem;
+    margin: 18px 0 0 0;
+    letter-spacing: 1px;
+  }
