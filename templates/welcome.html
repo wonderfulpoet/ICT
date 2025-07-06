@@ -91,7 +91,7 @@ function initStartButton() {
             document.getElementById('homeContainer').style.display = 'none';
                 // 根据登录状态决定跳转
             {% if logged_in %}
-                window.location.href = "/detection";
+                window.location.href = "/index";
             {% else %}
                 window.location.href = "/login";
             {% endif %}

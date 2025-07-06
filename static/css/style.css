@@ -86,9 +86,10 @@ header {
 
 header h1 {
     color: #fff !important;
-    font-family: 'SimSun', '宋体', serif !important;
+    font-family: '黑体', 'SimSun', serif !important;
     font-weight: bold;
     font-size: 3rem !important;
+    
 }
 
 .subtitle {

@@ -90,6 +90,10 @@ def my_context_porcessor():
 def welcome():
     return render_template('welcome.html')
 
+@app.route('/index')
+def index():
+    return render_template('index.html')
+
 
 # 全局错误处理
 @app.errorhandler(413)
@@ -127,4 +131,4 @@ def uploaded_file(filename):
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=app.config['PORT'])
+    app.run(debug=True, host='0.0.0.0', port=5000)

@@ -23,6 +23,24 @@
         position: relative;
         z-index: 1;
     }
+    .global-footer {
+        width: 100%;
+        background: #232a36;
+        color: #fff;
+        text-align: center;
+        padding: 20px 0 10px 0;
+        margin: 0;
+        font-size: 0.9rem;
+        z-index: 100;
+        box-shadow: 0 -2px 16px rgba(0,0,0,0.08);
+        border-radius: 0 0 18px 18px;
+    }
+    @media (max-width: 900px) {
+        .global-footer {
+            left: 60px;
+            width: calc(100vw - 60px);
+        }
+    }
     </style>
     
 </head>
@@ -34,11 +52,12 @@
 
         <div class="sidebar">
             <ul class="side-menu">
+                <li id="indexBtn" class="menu-item" ><span class="icon"><i class="fas fa-house" style="color:#bdbdbd;"></i></span> 首页</li>
                 <li id="detectionBtn" class="menu-item" ><span class="icon"><i class="fas fa-vial" style="color:#7efc9a;"></i></span> 综合检测</li>
                 <!-- <li id="chatBtn" class="menu-item"><span class="icon"><i class="fas fa-robot" style="color:#b48cf2;"></i></span> 交互式问答</li> -->
                 <li id="dataBtn" class="menu-item"><span class="icon"><i class="fas fa-folder" style="color:#ffe066;"></i></span> 数据管理</li>
-                <li id="modelsBtn" class="menu-item"><span class="icon"><i class="fas fa-glasses" style="color:#ff7eb9;"></i></span> 模型中心</li>
-                <li id="settingsBtn" class="menu-item"><span class="icon"><i class="fas fa-cog" style="color:#bdbdbd;"></i></span> 系统设置</li>
+                <li id="modelsBtn" class="menu-item" ><span class="icon"><i class="fas fa-glasses" style="color:#ff7eb9;"></i></span> 模型中心</li>
+                <li id="settingsBtn" class="menu-item" ><span class="icon"><i class="fas fa-cog" style="color:#bdbdbd;"></i></span> 系统设置</li>
             </ul>
         </div>
 
@@ -63,8 +82,7 @@
                 {% block body %}
                 {% endblock %}
             </main>
-
-            <footer>
+            <footer class="global-footer">
                 <p>© 2025 HDU智鉴惟真团队</p>
             </footer>
         </div>
@@ -76,6 +94,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             // 绑定菜单事件
+            document.getElementById('indexBtn')?.addEventListener('click', () => window.location.href = '/index');
             document.getElementById('detectionBtn')?.addEventListener('click', () => window.location.href = '/detection');
             document.getElementById('dataBtn')?.addEventListener('click', () => window.location.href = '/data');
             document.getElementById('modelsBtn')?.addEventListener('click', () => window.location.href = '/models');
@@ -90,6 +109,7 @@
             
             // 定义路由与菜单项的映射关系
             const routeMap = {
+                'index': 'indexBtn',
                 '/detection': 'detectionBtn',
                 // '/chat_page': 'chatBtn',
                 '/data': 'dataBtn',
