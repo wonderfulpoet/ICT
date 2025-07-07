@@ -60,11 +60,23 @@
         <div class="ds-messages" id="dsMessages">
             <!-- 消息将由 JS 在此渲染 -->
         </div>
-        <div class="ds-input-bar">
-            <textarea id="dsPromptInput" placeholder="请输入您的问题..." rows="1"></textarea>
-            <button id="dsSendBtn" class="ds-send-btn" title="发送">
-                <i class="fas fa-paper-plane"></i>
-            </button>
+        <div class="ds-input-container">
+            <!-- 新增：图片预览区 -->
+            <div id="dsImagePreviewContainer" class="ds-image-preview-container">
+                <img id="dsImagePreview" src="" alt="Image Preview"/>
+                <button id="dsRemoveImageBtn" class="ds-remove-image-btn" title="移除图片">×</button>
+            </div>
+            <div class="ds-input-bar">
+                <!-- 新增：文件上传按钮 -->
+                <input type="file" id="dsFileInput" accept="image/*" style="display: none;"/>
+                <label for="dsFileInput" id="dsUploadBtn" class="ds-tool-btn" title="上传图片">
+                    <i class="fas fa-paperclip"></i>
+                </label>
+                <textarea id="dsPromptInput" placeholder="请输入您的问题..." rows="1"></textarea>
+                <button id="dsSendBtn" class="ds-send-btn" title="发送">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
         </div>
     </div>
 </div>

@@ -181,47 +181,119 @@
 .ds-bubble {
     max-width: 85%;
     padding: 10px 15px;
-    border-radius: 12px;
+    border-radius: 18px; /* 更圆润的角 */
     font-size: 0.95rem;
     line-height: 1.6;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
     word-break: break-word;
+    display: flex; /* 使用 flex 布局来排列图片和文字 */
+    flex-direction: column;
+    gap: 8px; /* 图片和文字的间距 */
 }
-.ds-bubble.user { align-self: flex-end; background: #4da3ff; color: #fff; }
+.ds-bubble.user { align-self: flex-end; background: #007bff; color: #fff; } /* 鲜艳的蓝色 */
 .ds-bubble.ai { align-self: flex-start; background: #2c313a; color: #e3e3e3; }
-.ds-bubble .ds-bubble-actions { display: none; } /* 在小窗口中简化，不显示操作按钮 */
+.ds-bubble-image {
+    max-width: 100%;
+    border-radius: 10px; /* 图片圆角 */
+    cursor: pointer; /* 提示可以点击放大 */
+}
+.ds-bubble .ds-bubble-actions { display: none; }
 
-.ds-input-bar {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 15px;
+/* -- 输入区域整体容器 -- */
+.ds-input-container {
+    padding: 10px 15px;
     border-top: 1px solid #2a3240;
     background: #1f232a;
 }
+
+/* -- 新增：图片预览区样式 -- */
+.ds-image-preview-container {
+    position: relative;
+    margin-bottom: 10px;
+    display: none; /* 默认隐藏 */
+}
+#dsImagePreview {
+    max-width: 100px;
+    max-height: 100px;
+    border-radius: 8px;
+    border: 1px solid #3e4654;
+}
+.ds-remove-image-btn {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 14px;
+    line-height: 20px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.ds-input-bar {
+    display: flex;
+    align-items: flex-end; /* 垂直底部对齐，以适应多行文本框 */
+    gap: 10px;
+}
 #dsPromptInput {
     flex: 1;
-    padding: 8px 12px;
-    border-radius: 8px;
+    padding: 10px 15px;
+    border-radius: 20px; /* 胶囊形状 */
     background-color: #2c313a;
     color: #fff;
     border: 1px solid #3e4654;
     resize: none;
     font-size: 0.9rem;
-    max-height: 80px;
+    max-height: 100px;
+    line-height: 1.4;
+    transition: border-color 0.2s;
 }
+#dsPromptInput:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
+/* -- 通用工具按钮样式 -- */
+.ds-tool-btn {
+    background: transparent;
+    color: #a0a0a0;
+    border: none;
+    border-radius: 50%;
+    width: 42px;
+    height: 42px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s, background-color 0.2s;
+}
+.ds-tool-btn:hover {
+    color: #fff;
+    background-color: #2c313a;
+}
+
 #dsSendBtn {
-    background: #4da3ff;
+    background: #007bff;
     color: #fff;
     border: none;
-    border-radius: 8px;
-    width: 40px;
-    height: 38px;
+    border-radius: 50%;
+    width: 42px;
+    height: 42px;
     font-size: 1rem;
     cursor: pointer;
     flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: background-color 0.2s;
 }
-.ds-upload-label { display: none; } /* 在小窗口中简化，隐藏上传功能 */
+#dsSendBtn:hover {
+    background: #0056b3;
+}
+.ds-upload-label { display: none; }

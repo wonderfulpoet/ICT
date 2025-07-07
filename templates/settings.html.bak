@@ -1,0 +1,452 @@
+{% extends 'base.html' %}
+
+{% block style %}
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/settings.css') }}">
+{% endblock %}
+
+{% block script %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    if (document.getElementById('settings-container')) {
+        const tabs = document.querySelectorAll('.tab-link');
+        const contents = document.querySelectorAll('.tab-content');
+
+        const settings = {
+            darkMode: false,
+            autoDarkMode: 'off',
+            themeColor: '#3f51b5',
+            fontSize: '14'
+        };
+
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+        const autoDarkModeSelect = document.getElementById('auto-dark-mode');
+        const colorOptions = document.querySelectorAll('.color-option');
+        const fontSizeSlider = document.getElementById('font-size-slider');
+        const fontSizeValue = document.getElementById('font-size-value');
+        const dndToggle = document.getElementById('dnd-toggle');
+        const dndTimeInputs = document.querySelectorAll('#dnd-time, #dnd-time + span + input');
+
+        function applySettings(s) {
+            // Apply dark mode
+            document.body.classList.toggle('dark-mode', s.darkMode);
+            autoDarkModeSelect.disabled = !s.darkMode;
+
+            // Apply theme color
+            document.documentElement.style.setProperty('--primary-color', s.themeColor);
+
+            // Apply font size
+            document.documentElement.style.setProperty('--base-font-size', `${s.fontSize}px`);
+        }
+
+        function saveSettings() {
+            localStorage.setItem('userSettings', JSON.stringify(settings));
+            applySettings(settings);
+            // Show a saved message
+            const saveBtn = document.getElementById('save-settings-btn');
+            const originalText = saveBtn.textContent;
+            saveBtn.textContent = '已保存!';
+            saveBtn.style.backgroundColor = '#28a745';
+            setTimeout(() => {
+                saveBtn.textContent = originalText;
+                saveBtn.style.backgroundColor = '';
+            }, 2000);
+        }
+
+        function loadSettings() {
+            const savedSettings = localStorage.getItem('userSettings');
+            if (savedSettings) {
+                Object.assign(settings, JSON.parse(savedSettings));
+            }
+            updateUIFromSettings();
+            applySettings(settings);
+        }
+
+        function updateUIFromSettings() {
+            darkModeToggle.checked = settings.darkMode;
+            autoDarkModeSelect.value = settings.autoDarkMode;
+            autoDarkModeSelect.disabled = !settings.darkMode;
+
+            colorOptions.forEach(opt => {
+                opt.classList.toggle('active', opt.dataset.color === settings.themeColor);
+            });
+
+            fontSizeSlider.value = settings.fontSize;
+            fontSizeValue.textContent = `${settings.fontSize}px`;
+        }
+
+        function resetSettings() {
+            if (confirm('确定要重置所有设置为默认值吗？')) {
+                localStorage.removeItem('userSettings');
+                // Reload to apply default state
+                window.location.reload();
+            }
+        }
+
+        // Tab switching
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                contents.forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                const target = document.getElementById(tab.dataset.tab + '-tab');
+                target.classList.add('active');
+                target.scrollIntoView({behavior: 'smooth', block: 'start'});
+            });
+        });
+
+        // Event listeners for controls
+        darkModeToggle.addEventListener('change', () => {
+            settings.darkMode = darkModeToggle.checked;
+            autoDarkModeSelect.disabled = !settings.darkMode;
+        });
+
+        colorOptions.forEach(opt => {
+            opt.addEventListener('click', function() {
+                colorOptions.forEach(o => o.classList.remove('active'));
+                this.classList.add('active');
+                document.documentElement.style.setProperty('--primary-color', this.dataset.color);
+                localStorage.setItem('themeColor', this.dataset.color);
+            });
+        });
+
+        fontSizeSlider.addEventListener('input', () => {
+            settings.fontSize = fontSizeSlider.value;
+            fontSizeValue.textContent = `${settings.fontSize}px`;
+        });
+
+        dndToggle.addEventListener('change', () => {
+            dndTimeInputs.forEach(input => input.disabled = !dndToggle.checked);
+        });
+
+        document.getElementById('save-settings-btn').addEventListener('click', saveSettings);
+        document.getElementById('reset-settings-btn').addEventListener('click', resetSettings);
+
+        // --- Account Security Tab ---
+        function loadAccountInfo() {
+            const deviceList = document.getElementById('device-list');
+            deviceList.innerHTML = '<p>加载中...</p>';
+            fetch('/settings/api/system-info')
+                .then(res => res.json())
+                .then(data => {
+                    deviceList.innerHTML = '';
+                    data.devices.forEach(device => {
+                        const deviceItem = document.createElement('div');
+                        deviceItem.className = 'device-item';
+                        const icon = device.type === 'Desktop' ? 'fa-desktop' : (device.type === 'Mobile' ? 'fa-mobile-alt' : 'fa-tablet-alt');
+                        deviceItem.innerHTML = `
+                            <i class="fas ${icon}"></i>
+                            <div class="device-info">
+                                <strong>${device.os}</strong> on ${device.browser} ${device.is_current ? '<span class="current-device">当前设备</span>' : ''}
+                                <small>IP: ${device.ip} | 最近活动: ${device.last_active}</small>
+                            </div>
+                            ${!device.is_current ? '<button class="btn-danger-outline btn-sm">退出登录</button>' : ''}
+                        `;
+                        deviceList.appendChild(deviceItem);
+                    });
+                }).catch(err => {
+                    deviceList.innerHTML = '<p class="error">无法加载设备信息。</p>';
+                });
+        }
+
+        // --- About Tab ---
+        let resourceInterval;
+        function loadSystemInfo() {
+            const monitor = document.getElementById('resource-monitor');
+            if(resourceInterval) clearInterval(resourceInterval);
+
+            function update() {
+                fetch('/settings/api/system-info')
+                    .then(res => res.json())
+                    .then(data => {
+                        const res = data.resources;
+                        monitor.innerHTML = `
+                        <div class="resource-item">
+                            <label>CPU 使用率</label>
+                            <div class="progress-bar"><div style="width: ${res.cpu_usage}%">${res.cpu_usage}%</div></div>
+                        </div>
+                        <div class="resource-item">
+                            <label>内存使用</label>
+                            <div class="progress-bar"><div style="width: ${res.memory.usage_percent}%">${res.memory.used_gb} GB / ${res.memory.total_gb} GB</div></div>
+                        </div>
+                        `;
+                    }).catch(err => {
+                        monitor.innerHTML = '<p class="error">无法加载系统资源信息。</p>';
+                        clearInterval(resourceInterval);
+                    });
+            }
+            update();
+            resourceInterval = setInterval(update, 5000); // Update every 5 seconds
+        }
+
+        // Load data for the visible tab
+        const observer = new IntersectionObserver((entries) => {
+            if(entries[0].isIntersecting) {
+                const visibleTabId = document.querySelector('.tab-content.active').id;
+                if (visibleTabId === 'account-tab') {
+                    loadAccountInfo();
+                } else if (visibleTabId === 'about-tab') {
+                    loadSystemInfo();
+                } else {
+                     if(resourceInterval) clearInterval(resourceInterval);
+                }
+            } else {
+                if(resourceInterval) clearInterval(resourceInterval);
+            }
+        }, { threshold: 0.1 });
+
+        observer.observe(document.getElementById('settings-container'));
+
+        // Initial load
+        loadSettings();
+
+        // 页面加载时恢复主题色
+        const savedColor = localStorage.getItem('themeColor');
+        if (savedColor) {
+            document.documentElement.style.setProperty('--primary-color', savedColor);
+            colorOptions.forEach(o => {
+                o.classList.toggle('active', o.dataset.color === savedColor);
+            });
+        }
+
+        // 主题配色切换
+        const themeSelect = document.getElementById('theme-select');
+        const body = document.body;
+        if (themeSelect) {
+            themeSelect.addEventListener('change', function() {
+                body.classList.remove('dark-theme', 'blue-theme', 'green-theme');
+                if (this.value === 'dark') {
+                    body.classList.add('dark-theme');
+                } else if (this.value === 'blue') {
+                    body.classList.add('blue-theme');
+                } else if (this.value === 'green') {
+                    body.classList.add('green-theme');
+                }
+                localStorage.setItem('theme', this.value);
+            });
+            // 页面加载时恢复主题
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                themeSelect.value = savedTheme;
+                themeSelect.dispatchEvent(new Event('change'));
+            }
+        }
+    }
+});
+</script>
+{% endblock %}
+
+{% block body %}
+
+<div id="settings-container">
+    <div class="settings-header">
+        <h1>系统设置</h1>
+    </div>
+    <div class="settings-body">
+        <div class="settings-tabs">
+            <button class="tab-link active" data-tab="display">
+                <i class="fas fa-palette"></i> 显示设置
+            </button>
+            <button class="tab-link" data-tab="account">
+                <i class="fas fa-user-shield"></i> 账户安全
+            </button>
+            <button class="tab-link" data-tab="notifications">
+                <i class="fas fa-bell"></i> 通知管理
+            </button>
+            <button class="tab-link" data-tab="about">
+                <i class="fas fa-info-circle"></i> 关于系统
+            </button>
+        </div>
+        <br>
+        <div class="settings-content">
+            <!-- 显示设置 -->
+            <div id="display-tab" class="tab-content active">
+                <div class="settings-group">
+                    <h2 class="group-title">外观</h2>
+                    <div class="setting-item setting-item-row">
+                        <input type="checkbox" id="dark-mode-toggle">
+                        <label for="dark-mode-toggle">夜间模式</label>
+                        <span class="text-muted">在光线较暗的环境中提供更舒适的视觉体验。</span>
+                    </div>
+                     <div class="setting-item setting-item-row">
+                        <label for="auto-dark-mode">自动切换</label>
+                        <span class="text-muted">在设定的时间段内自动开启夜间模式。</span>
+                        <select id="auto-dark-mode" disabled>
+                            <option value="off">关闭</option>
+                            <option value="sunset-sunrise">日落到日出</option>
+                            <option value="custom">自定义时间 (22:00 - 07:00)</option>
+                        </select>
+                    </div>
+                    <br>
+                    <div class="settings-group">
+                        <h2 class="group-title">个性化</h2>
+                        <div class="setting-item">
+                            <div class="item-text">
+                                <label>主题色</label>
+                                <p>选择一个你喜欢的主题色应用于整个系统。</p>
+                            </div>
+                            <div class="item-control">
+                                <div class="color-picker">
+                                    <span class="color-option" data-color="#3f51b5" style="background: #3f51b5;" title="默认蓝"></span>
+                                    <span class="color-option" data-color="#4CAF50" style="background: #4CAF50;" title="活力绿"></span>
+                                    <span class="color-option" data-color="#e91e63" style="background: #e91e63;" title="优雅粉"></span>
+                                    <span class="color-option" data-color="#ff9800" style="background: #ff9800;" title="温暖橙"></span>
+                                    <span class="color-option" data-color="#673ab7" style="background: #673ab7;" title="神秘紫"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="setting-item setting-item-row" style="margin-top: 10px;">
+                            <label for="theme-select">主题配色</label>
+                            <select id="theme-select">
+                                <option value="default">默认主题</option>
+                                <option value="dark">暗黑主题</option>
+                                <option value="blue">蓝色主题</option>
+                                <option value="green">绿色主题</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <div class="settings-group">
+                    <h2 class="group-title"></h2>
+                    <div class="setting-item">
+                         <div class="item-text">
+                            <label for="font-size-slider">字体大小</label>
+                            <p>调整界面字体的大小。</p>
+                        </div>
+                         <div class="item-control">
+                             <div class="slider-container">
+                                 <span>12px</span>
+                                 <input type="range" id="font-size-slider" min="12" max="18" value="14">
+                                 <span>18px</span>
+                                 <b id="font-size-value">14px</b>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <hr class="tab-divider">
+            <!-- 账户安全 -->
+            <div id="account-tab" class="tab-content">
+                 <div class="settings-group">
+                    <h1 class="group-title">账户安全</h1>
+                     <div class="setting-item-col">
+                        <label>修改密码</label>
+                        <form id="change-password-form">
+                            <input type="password" placeholder="旧密码" required>
+                            <input type="password" placeholder="新密码" required>
+                            <input type="password" placeholder="确认新密码" required>
+                            <button type="submit" class="btn-primary">确认修改</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="settings-group">
+                    <br>
+                    <h3 class="group-title" >增强安全</h3>
+                    <div class="setting-item setting-item-row">
+                        <input type="checkbox" id="2fa-toggle" checked>
+                        <label for="2fa-toggle">两步验证 (2FA)</label>
+                        <span class="text-muted">启用后，登录时需要额外输入验证码以保护账户安全。</span>
+                    </div>
+                </div>
+                <div class="settings-group">
+                    <br>
+                    <h2 class="group-title">登录设备管理</h2>
+                    <div id="device-list" class="device-list">
+                        <!-- 登录设备将通过JS动态插入 -->
+                    </div>
+                </div>
+            </div>
+            <hr class="tab-divider">
+            <!-- 通知管理 -->
+            <div id="notifications-tab" class="tab-content">
+                <div class="settings-group">
+                    <h1 class="group-title">通知管理</h1>
+                    <br>
+                    <p class="group-desc">选择你希望接收通知的方式。</p>
+                    <div class="setting-item">
+                        <label class="setting-item-row">
+                            <input type="checkbox" id="email-notify" checked>
+                            邮件通知
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <label class="setting-item-row">
+                            <input type="checkbox" id="site-notify" checked>
+                            站内通知
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <label class="setting-item-row">
+                            <input type="checkbox" id="sms-notify" disabled>
+                            短信通知
+                        </label>
+                    </div>
+                </div>
+                <br>
+                <div class="settings-group">
+                    <h2 class="group-title">通知类型</h3>
+                     <p class="group-desc" style="margin-bottom: 16px;">选择你关心的通知内容。</p>
+                     <div class="checkbox-group">
+                        <label><input type="checkbox" checked> 系统更新</label>
+                        <label><input type="checkbox" checked> 安全警报</label>
+                        <label><input type="checkbox"> 文件处理完成</label>
+                        <label><input type="checkbox"> 模型调用报告</label>
+                     </div>
+                </div>
+                <br>
+                <div class="settings-group">
+                    <h2 class="group-title">免打扰</h2>
+                     <div class="setting-item setting-item-row">
+                         <input type="checkbox" id="dnd-toggle">
+                         <label for="dnd-toggle">免打扰模式</label>
+                         <span class="text-muted">在特定时段内屏蔽所有通知。</span>
+                     </div>
+                    <div class="setting-item setting-item-row dnd-time-inputs">
+                        <label for="dnd-time">免打扰时段</label>
+                        <input type="time" value="23:00" id="dnd-time" disabled>
+                        <span>-</span>
+                        <input type="time" value="08:00" disabled>
+                    </div>
+                </div>
+            </div>
+            <hr class="tab-divider">
+            <!-- 关于系统 -->
+            <div id="about-tab" class="tab-content">
+                <div class="about-card">
+                    <i class="fas fa-rocket"></i>
+                    <h1>关于系统</h1>
+                    <br>
+                    <h2>智鉴惟真</h2>
+                    <p>版本: <span id="app-version">1.2.0</span></p>
+                    <button class="btn-primary" id="check-update-btn">检查更新</button>
+                </div>
+                 <div class="settings-group">
+                    <h3 class="group-title">系统资源监控</h3>
+                    <div id="resource-monitor">
+                        <!-- 资源监控将通过JS动态插入 -->
+                    </div>
+                </div>
+                <div class="settings-group">
+                    <h3 class="group-title">法律信息</h3>
+                     <div class="setting-item">
+                        <div class="item-text"><label>开源协议</label></div>
+                        <div class="item-control"><a href="#" class="link">Apache 2.0 License <i class="fas fa-external-link-alt"></i></a></div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="item-text"><label>隐私政策</label></div>
+                        <div class="item-control"><a href="#" class="link">查看详情 <i class="fas fa-chevron-right"></i></a></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="settings-footer">
+        <button id="reset-settings-btn" class="btn-danger-outline">重置</button>
+        <br>
+        <br>
+        <button id="save-settings-btn" class="btn-primary">保存设置</button>
+    </div>
+</div>
+
+{% endblock %}

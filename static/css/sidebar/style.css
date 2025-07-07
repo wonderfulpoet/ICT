@@ -1,9 +1,29 @@
-
-/*layui优化*/
-table .layui-form-switch {
-    margin-top: 0;
+/* Reset & Global Styles */
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    overflow: hidden; /* Prevents the main page from scrolling */
+    background-color: #2d333b; /* A dark background to match the theme */
+    font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+    color: #333;
 }
-.layui-form-select{
+#app, .main {
+    height: 100%;
+    width: 100%;
+}
+a {
+    color: #1E9FFF;
+    text-decoration: none;
+    transition: opacity 0.2s;
+}
+a:hover {
+    opacity: 0.8;
+}
+
+/* layui Optimizations */
+.layui-form-select {
     z-index: 1000;
 }
 .layui-form-item .layui-input-inline,
@@ -11,270 +31,119 @@ table .layui-form-switch {
     width: 500px;
 }
 .layui-form-onswitch,
-.layui-form-checked[lay-skin="primary"] i{
-    border-color: #1aa094;
-    background-color: #1aa094;
+.layui-form-checked[lay-skin="primary"] i {
+    border-color: #009688;
+    background-color: #009688;
 }
 
-/*公共样式*/
+/* Utility classes */
+.cl { zoom: 1 }
+.cl:after { content: '\20'; display: block; height: 0; clear: both; visibility: hidden }
+.l { float: left }
+.r { float: right }
 
-html,body,#app,.main,.right{
-    height: 100%;
-}
-body {
-    background-color: rgba(238, 238, 238, 0.2);
-}
-
-
-a {
-    color: #1aa094;
-}
-
-a:hover {
-    color: #333;
-}
-
-
-.cl {
-    zoom: 1
-}
-
-.cl:after {
-    content: '\20';
-    display: block;
-    height: 0;
-    clear: both;
-    visibility: hidden
-}
-
-.l {
-    float: left
-}
-
-.r {
-    float: right
-}
-
-foo, .foo {
-    color: #f00;
-}
-
-/*滚动条*/
-
-
-
-::-webkit-scrollbar-corner{
-    background: #1aa094;
-}
+/* Scrollbar (hidden by default) */
 ::-webkit-scrollbar {
     width: 0px;
 }
 
-::-webkit-scrollbar-thumb {
-    background: #1aa094;
-}
-::-webkit-scrollbar-thumb:window-inactive { background: #1aa094}
-
-
-/*顶栏*/
-header {
-    height: 50px;
-    line-height: 50px;
-    width: 100%;
-    box-sizing: border-box;
-    background-color: #eee;
-    position: fixed;
-    z-index: 1001;
-    color: #333;
-}
-header h1{
-    height: 50px;
-    line-height: 50px;
-    width: 150px;
-    display: block;
-    color: #FFF;
-    float: left;
-    background-color: #404852;
-    text-align: center;
-    font-size: 36px;
-}
-
-header .breadcrumb{
-    margin-left: 150px;
-    padding-left: 20px;
-}
-header .breadcrumb i{
-    float: left;
-}
-header .breadcrumb ul{
-    float: left;
-}
-header .breadcrumb li{
-    float: left;
-    margin: 0 3px;
-}
-
-
-
-
-.main {
-    min-height: 100%;
-    width: 100%;
-    overflow: hidden;
-}
-
-/*左栏*/
-
+/* --- Left Sidebar --- */
 .left {
     position: fixed;
     left: 0;
-    top: 50px;
+    top: 0;
     width: 150px;
     height: 100%;
     background: #3c444d;
-    overflow-x: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
     z-index: 100;
+    box-shadow: 2px 0 8px rgba(0,0,0,0.15); /* Adds depth */
 }
-
-.left ul li {
-    float: left;
-    color: #333;
-    width: 100%;
-    box-sizing: border-box;
-}
-.left ul li.hidden div{
-    display: none;
-}
-.left ul li.hidden i.arrow{
-    transform:rotate(180deg);
-    -ms-transform:rotate(180deg);
-    -moz-transform:rotate(180deg);
-    -webkit-transform:rotate(180deg);
-    -o-transform:rotate(180deg);
-    padding-bottom: 4px;
-}
-
-.left ul li a {
-    color: #ececec;
-    padding: 10px 0 10px 20px;
-    display: block;
-}
-
-.left ul li a:hover,
-.left ul li a.active {
-    color: #009688;
-    background: #28313c;
-}
-
-.left ul li i:first-child {
-    margin-right: 5px;
-}
-
-.left ul li i.arrow {
-    float: right;
-    margin-right: 20px;
-    font-size: 12px;
-    padding-top: 4px;
-}
-.left ul li>div{
-    position: relative;
-    background-color: #404852;
-}
-.left ul li>div a {
-    padding-left: 45px;
-    color: #b2b2b2;
-}
-
-.left ul li i.active {
-    color: #eee;
-    position: absolute;
-    right: -6px;
-    height: 40px;
-    line-height: 40px;
-    top: 0px;
+.left ul {
     margin: 0;
-    font-size: 20px;
-    z-index: 1;
-    transform: rotateY(180deg);
+    padding: 10px 0;
+    list-style: none;
 }
-
-
-/*右侧*/
-.right {
-    margin: 50px 0px 0px 150px;
-    box-sizing: border-box;
-    height: 100%;
-}
-
-.right iframe{
-    position: absolute;
+.left ul li {
     width: 100%;
-    height: 100%;
-    /*left: 150px;*/
-    /*top: 50px;*/
-    padding-left: 150px;
-    padding-top: 50px;
+    box-sizing: border-box;
+}
+
+/* --- Menu Item Links --- */
+.left ul li a {
+    color: #aeb2b7; /* Softer text color */
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    font-weight: 500; /* Bolder text for readability */
+    position: relative;
+    border-left: 3px solid transparent; /* Placeholder for active indicator */
+    transition: color 0.2s, background-color 0.2s;
+}
+
+.left ul li a:hover {
+    color: #ffffff;
+    background-color: #4a5461;
+}
+
+.left ul li a.active {
+    color: #ffffff;
+    background-color: #2d333b; /* Darker background to make border pop */
+    border-left-color: #1E9FFF; /* Bright accent color for active item */
+}
+
+/* Menu Icons */
+.left ul li a .layui-icon:first-child {
+    font-size: 16px;
+    margin-right: 10px;
+    width: 20px;
+    text-align: center;
+}
+
+/* Arrow for expandable menus */
+.left ul li a .arrow {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 12px;
+    transition: transform 0.3s ease-in-out;
+}
+.left ul li.hidden a .arrow {
+    transform: translateY(-50%) rotate(-180deg); /* Points up when menu is closed */
+}
+
+/* --- Submenu --- */
+.left ul li > div {
+    background-color: #28313c; /* Darker for hierarchy */
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+.left ul li > div a {
+    padding-left: 47px; /* Indent sub-items */
+    font-size: 13px;
+    font-weight: 400; /* Lighter weight for sub-items */
+    border-left: 3px solid transparent !important; /* No border indicator for submenu items */
+}
+.left ul li > div a.active {
+    color: #ffffff;
+    background-color: #009688; /* Use LayUI green for active sub-item */
+}
+
+/* --- Right Content Area & Iframe --- */
+.right {
+    position: absolute;
     top: 0;
-    left: 0;
+    left: 150px;
     right: 0;
     bottom: 0;
     box-sizing: border-box;
-}
-
-.right>a>i {
-    margin-right: 5px;
-}
-
-.bform {
-    margin: 20px 30px 0 10px
-}
-
-.right .arz a {
-    color: #fff;
-    padding: 10px 18px;
-    background: #009688;
-    height: 36px;
-    line-height: 36px;
-    border-radius: 2px
-}
-
-.right .arz a i {
-    position: relative;
-    right: 3px;
-    top: 1px
-}
-
-.right .arz {
-    margin: 20px 0 0 30px
-}
-
-.right .arz a:hover {
-    opacity: .8;
-    filter: alpha(opacity=80);
-    color: #fff
-}
-
-
-
-/*分页*/
-
-.page{
-    margin-top: 10px;
-    margin-bottom: 10px;
     overflow: hidden;
 }
-
-.page li{
-    float: left;
-}
-
-.page li a, .page li span{
-    padding: 5px 10px;
-    background-color: #009688;
-    color: #FFF;
-    margin-right: 5px;
-    display: block;
-}
-.page li a:hover, .page li span{
-    background-color: #999;
+.right iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
 }

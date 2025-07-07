@@ -10,59 +10,38 @@
     <script src="{{ url_for('static', filename='js/sidebar/jquery-3.3.1.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/sidebar/vue.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/sidebar/layui.js') }}"></script>
-
-    <style>
-        iframe {
-            width: 100%;
-            height: calc(100vh - 60px);
-            border: none;
-        }
-        body {
-            margin: 0;
-            padding: 0;
-        }
-    </style>
 </head>
 
 <body>
 <div id="app">
-    <!--顶栏-->
-    <header>
-        <h1 v-text="webname"></h1>
-        <div class="breadcrumb">
-            <i class="layui-icon">&#xe715;</i>
-
-        </div>
-    </header>
-
     <div class="main">
         <!--左栏-->
         <div class="left">
             <ul class="cl">
                 <!--顶级分类-->
                 <li v-for="(vo, index) in menu" :class="{hidden: vo.hidden}">
-                    <a v-if="vo.url && vo.list.length === 0" 
-                       :href="vo.url" 
-                       target="main" 
+                    <a v-if="vo.url && vo.list.length === 0"
+                       :href="vo.url"
+                       target="main"
                        :class="{active: vo.active}"
                        @click="setActive(index)">
                         <i class="layui-icon" v-html="vo.icon"></i>
                         <span v-text="vo.name"></span>
                     </a>
-                    <a v-else 
-                       href="javascript:;" 
-                       :class="{active: vo.active}" 
+                    <a v-else
+                       href="javascript:;"
+                       :class="{active: vo.active}"
                        @click="toggleMenu(index)">
                         <i class="layui-icon" v-html="vo.icon"></i>
                         <span v-text="vo.name"></span>
-                        <i class="layui-icon arrow" v-if="vo.list.length > 0">&#xe61a;</i>
+                        <i class="layui-icon arrow" v-if="vo.list.length > 0"></i>
                     </a>
                     <!--子级分类-->
                     <div v-show="vo.active && vo.list.length > 0">
-                        <a v-for="vo2 in vo.list" 
-                           :href="vo2.url" 
-                           target="main" 
-                           :class="{active: vo2.active}" 
+                        <a v-for="vo2 in vo.list"
+                           :href="vo2.url"
+                           target="main"
+                           :class="{active: vo2.active}"
                            @click="setSubActive(index, vo2)">
                             <span v-text="vo2.name"></span>
                         </a>
@@ -103,30 +82,13 @@
         "hidden": false,
         "active": false,
         "list": []
-    }, 
+    },
     {
         "name": "系统设置",
         "url": "settings",
         "hidden": false,
         "active": false,
         "list": []
-        // "list": [{
-        //     "name": "显示设置",
-        //     "url": "setting1",
-        //     "active": false
-        // },{
-        //     "name": "账户安全",
-        //     "url": "setting2",
-        //     "active": false
-        // },{
-        //     "name": "通知管理",
-        //     "url": "setting3",
-        //     "active": false
-        // },{
-        //     "name": "关于系统",
-        //     "url": "setting4",
-        //     "active": false
-        // }]
     }, {
         "name": "退出登录",
         "url": "logout",
@@ -139,13 +101,12 @@
     let config = {
         webName : "智鉴唯真",
         menuList : menu,
-        //layer全局提示层
         layerMsg: {
-            offset: 't', //坐标 (详细说明 https://www.layui.com/doc/modules/layer.html#offset)
-            shade: [0.4, '#000'] //遮罩 (详细说明 https://www.layui.com/doc/modules/layer.html#shade)
+            offset: 't',
+            shade: [0.4, '#000']
         }
     };
-    
+
     new Vue({
         el: '#app',
         data: {
@@ -157,41 +118,38 @@
             setActive(index) {
                 const item = this.menu[index];
                 if (item.external) {
-                    // 如果是外部链接，直接跳转不在iframe中加载
                     window.location.href = item.url;
                     return;
                 }
-                
+
                 this.menu.forEach((item, i) => {
                     item.active = i === index;
                     item.list.forEach(subItem => subItem.active = false);
                 });
                 this.updateBreadcrumb(item);
-                
-                // 如果不是外部链接，正常在iframe中加载
+
                 if (!item.external && item.url) {
                     window.frames['main'].location.href = item.url;
                 }
             },
             setSubActive(index, subItem) {
                 if (subItem.external) {
-                    // 如果是外部链接，直接跳转不在iframe中加载
                     window.location.href = subItem.url;
                     return;
                 }
-                
+
                 this.menu.forEach((item, i) => {
                     item.active = i === index;
                     item.list.forEach(sub => sub.active = sub === subItem);
                 });
                 this.updateBreadcrumb(subItem);
-                
-                // 如果不是外部链接，正常在iframe中加载
+
                 if (!subItem.external && subItem.url) {
                     window.frames['main'].location.href = subItem.url;
                 }
             },
             updateBreadcrumb(item) {
+                // This method is now unused visually but kept to avoid breaking the Vue instance.
                 this.address = [
                     {name: '首页', url: 'home_page'},
                     {name: item.name, url: item.url}
@@ -199,7 +157,6 @@
             }
         },
         mounted() {
-            // 默认加载首页
             window.frames['main'].location.href = 'home_page';
         }
     });
