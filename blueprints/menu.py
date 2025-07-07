@@ -17,6 +17,11 @@ from config import *
 bp = Blueprint('menu', __name__, url_prefix='/')
 
 
+@bp.route('/home_page', methods=['GET', 'POST'])
+def home_page():
+    """渲染主页"""
+    return render_template('home_page.html')
+
 @bp.route('/login', methods=['GET', 'POST'])
 def login():    
     return render_template('login.html')
@@ -37,7 +42,7 @@ def login_action():
             session['premium_access'] = True  # 所有登录用户都有高级访问权限
             
             flash('登录成功!', 'success')
-            return redirect('/detection')
+            return redirect('/index')
         flash('用户名或密码错误!', 'error')
         return redirect('/login')
         

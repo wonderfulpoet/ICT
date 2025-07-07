@@ -50,16 +50,6 @@
     <div class="main-app" id="mainApp">
         <canvas id="particle-canvas"></canvas>
 
-        <div class="sidebar">
-            <ul class="side-menu">
-                <li id="indexBtn" class="menu-item" ><span class="icon"><i class="fas fa-house" style="color:#bdbdbd;"></i></span> 首页</li>
-                <li id="detectionBtn" class="menu-item" ><span class="icon"><i class="fas fa-vial" style="color:#7efc9a;"></i></span> 综合检测</li>
-                <!-- <li id="chatBtn" class="menu-item"><span class="icon"><i class="fas fa-robot" style="color:#b48cf2;"></i></span> 交互式问答</li> -->
-                <li id="dataBtn" class="menu-item"><span class="icon"><i class="fas fa-folder" style="color:#ffe066;"></i></span> 数据管理</li>
-                <li id="modelsBtn" class="menu-item" ><span class="icon"><i class="fas fa-glasses" style="color:#ff7eb9;"></i></span> 模型中心</li>
-                <li id="settingsBtn" class="menu-item" ><span class="icon"><i class="fas fa-cog" style="color:#bdbdbd;"></i></span> 系统设置</li>
-            </ul>
-        </div>
 
         <div class="container">
             <header>
@@ -67,7 +57,7 @@
                 <div class="user-info">
                     {% if logged_in %}
                     <span class="user-greeting">您好，{{ username }}</span>
-                    <a href="/logout" class="logout-btn"><i class="fas fa-sign-out-alt"></i> 退出登录</a>
+                    <!-- <a href="/logout" class="logout-btn"><i class="fas fa-sign-out-alt"></i> 退出登录</a> -->
                     {% else %}
                     <div class="login-prompt">
                         <span>登录可使用更高级的推理模型</span>
@@ -87,53 +77,10 @@
             </footer>
         </div>
     </div>
-
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script src="{{ url_for('static', filename='js/preview.js') }}"></script>
     <script src="{{ url_for('static', filename='js/effects.js') }}"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // 绑定菜单事件
-            document.getElementById('indexBtn')?.addEventListener('click', () => window.location.href = '/index');
-            document.getElementById('detectionBtn')?.addEventListener('click', () => window.location.href = '/detection');
-            document.getElementById('dataBtn')?.addEventListener('click', () => window.location.href = '/data');
-            document.getElementById('modelsBtn')?.addEventListener('click', () => window.location.href = '/models');
-            document.getElementById('settingsBtn')?.addEventListener('click', () => window.location.href = '/settings');
-            // document.getElementById('chatBtn')?.addEventListener('click', () => window.location.href = '/chat_page');
-        });
-    </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // 获取当前路径
-            const currentPath = window.location.pathname;
-            
-            // 定义路由与菜单项的映射关系
-            const routeMap = {
-                'index': 'indexBtn',
-                '/detection': 'detectionBtn',
-                // '/chat_page': 'chatBtn',
-                '/data': 'dataBtn',
-                '/models': 'modelsBtn',
-                '/settings': 'settingsBtn'
-            };
-            
-            // 移除所有菜单项的active类
-            document.querySelectorAll('.menu-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            
-            // 找到当前路径对应的菜单项并添加active类
-            for (const [route, menuId] of Object.entries(routeMap)) {
-                if (currentPath.startsWith(route)) {
-                    const menuItem = document.getElementById(menuId);
-                    if (menuItem) {
-                        menuItem.classList.add('active');
-                    }
-                    break; // 找到匹配项后退出循环
-                }
-            }
-        });
-    </script>
+
     {% block script %}
     {% endblock %}
 </body>

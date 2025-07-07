@@ -92,6 +92,8 @@ def welcome():
 
 @app.route('/index')
 def index():
+    if not session.get('logged_in', False):
+        return redirect("/login")
     return render_template('index.html')
 
 
