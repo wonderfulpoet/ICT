@@ -37,8 +37,18 @@
                 <span id="result-placeholder">检测结果将在此显示</span>
                 <img id="result-image-preview" class="preview-image" style="display:none;" alt="Result Preview">
             </div>
+            
+            <!-- Text Output Area -->
+            <div class="text-output-container">
+                <label><i class="fas fa-align-left"></i> 分析结果</label>
+                <div class="text-output" id="result-text-output">
+                    <p>检测结果文本将在此显示...</p>
+                </div>
+            </div>
+            
             <div class="panel-actions">
                 <button class="btn btn-primary" id="download-btn"><i class="fas fa-download"></i> 下载结果</button>
+                <button class="btn" id="copy-text-btn" style="background-color: #555;"><i class="fas fa-copy"></i> 复制文本</button>
             </div>
         </div>
     </div>
@@ -57,11 +67,7 @@
     </div>
 </div>
 
-<<<<<<< HEAD
-<!-- Chat Widget -->
-=======
-<!-- 悬浮聊天窗口 (MODIFIED) -->
->>>>>>> 03d668f24fd1d3790862a1d1529160d1959fcf17
+<!-- 悬浮聊天窗口 -->
 <div id="chat-widget" class="chat-widget is-collapsed">
     <div class="chat-widget-header" id="chat-widget-toggle">
         <h3><i class="fas fa-robot"></i> 智能助手</h3>
@@ -71,12 +77,7 @@
     <div class="chat-widget-body">
         <div class="ds-messages" id="dsMessages"></div>
         <div class="ds-input-container">
-<<<<<<< HEAD
-            <div id="dsImagePreviewContainer" class="ds-image-preview-container">
-=======
-            <!-- MODIFIED: 文件预览区，支持图片和其他文件 -->
             <div id="dsFilePreviewContainer" class="ds-file-preview-container">
->>>>>>> 03d668f24fd1d3790862a1d1529160d1959fcf17
                 <img id="dsImagePreview" src="" alt="Image Preview"/>
                 <div id="dsFilePreviewInfo" class="ds-file-preview-info">
                     <i class="fas fa-file-alt"></i>
@@ -85,14 +86,8 @@
                 <button id="dsRemoveFileBtn" class="ds-remove-image-btn" title="移除文件">×</button>
             </div>
             <div class="ds-input-bar">
-<<<<<<< HEAD
-                <input type="file" id="dsFileInput" accept="image/*" style="display: none;"/>
-                <label for="dsFileInput" id="dsUploadBtn" class="ds-tool-btn" title="上传图片">
-=======
-                <!-- MODIFIED: 允许上传多种文件类型 -->
                 <input type="file" id="dsFileInput" accept="image/*,application/pdf,.doc,.docx" style="display: none;"/>
                 <label for="dsFileInput" id="dsUploadBtn" class="ds-tool-btn" title="上传文件">
->>>>>>> 03d668f24fd1d3790862a1d1529160d1959fcf17
                     <i class="fas fa-paperclip"></i>
                 </label>
                 <textarea id="dsPromptInput" placeholder="请输入您的问题..." rows="1"></textarea>

@@ -16,6 +16,8 @@ const clearBtn = document.getElementById('clear-btn');
 const downloadBtn = document.getElementById('download-btn');
 const imageDescription = document.getElementById('image-description');
 const charCount = document.getElementById('char-count');
+const resultTextOutput = document.getElementById('result-text-output');
+const copyTextBtn = document.getElementById('copy-text-btn');
 
 // Event Listeners
 if (uploadBox) {
@@ -45,6 +47,9 @@ if (clearBtn) clearBtn.addEventListener('click', resetInputArea);
 if (downloadBtn) downloadBtn.addEventListener('click', downloadResult);
 if (imageDescription && charCount) {
     imageDescription.addEventListener('input', updateCharCount);
+}
+if (copyTextBtn) {
+    copyTextBtn.addEventListener('click', copyResultText);
 }
 
 // Functions
@@ -85,10 +90,12 @@ async function startDetection() {
     resultPlaceholder.style.display = 'block';
     resultImagePreview.style.display = 'none';
     resultInfoDetails.style.display = 'none';
+    resultTextOutput.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> 正在生成分析结果...</p>';
     
     try {
         const file = imageInput.files[0];
         const description = imageDescription.value || '';
+        const fileName = file.name;
 
         const imageBase64 = await new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -104,7 +111,8 @@ async function startDetection() {
             },
             body: JSON.stringify({ 
                 image_data: imageBase64.split(',')[1],
-                description: description 
+                description: description,
+                file_name: fileName
             })
         });
         
@@ -120,6 +128,7 @@ async function startDetection() {
         console.error('检测错误:', error);
         resultPlaceholder.textContent = '检测失败: ' + error.message;
         resultPlaceholder.style.display = 'block';
+        resultTextOutput.innerHTML = `<p class="error-text">检测失败: ${error.message}</p>`;
     } finally {
         detectBtn.disabled = false;
         detectBtn.innerHTML = '<i class="fas fa-search"></i> 开始检测';
@@ -139,24 +148,46 @@ function displayDetectionResult(result) {
         resultPlaceholder.style.display = 'none';
     }
 
-    resultIsFake.textContent = data.is_fake ? '是' : '否';
-    resultFakeType.textContent = data.fake_type || '未知';
-    
-    if (data.confidence_scores) {
-        const scores = data.confidence_scores;
-        resultConfidenceScore.innerHTML = `
-            <span>Photoshop: ${scores.photoshop}%</span><br>
-            <span>Deepfake: ${scores.deepfake}%</span><br>
-            <span>AI生成: ${scores.aigc}%</span>
-        `;
+    if (data.description){
+        resultTextOutput.innerHTML = data.description;
     }
+    // resultIsFake.textContent = data.is_fake ? '是' : '否';
+    // resultFakeType.textContent = data.fake_type || '未知';
     
-    if (data.analysis) {
-        resultAnalysis.textContent = data.analysis;
-    }
+    // if (data.confidence_scores) {
+    //     const scores = data.confidence_scores;
+    //     resultConfidenceScore.innerHTML = `
+    //         <span>Photoshop: ${scores.photoshop}%</span><br>
+    //         <span>Deepfake: ${scores.deepfake}%</span><br>
+    //         <span>AI生成: ${scores.aigc}%</span>
+    //     `;
+    // }
     
-    resultInfoDetails.style.display = 'block';
+    // if (data.analysis) {
+    //     resultAnalysis.textContent = data.analysis;
+    // }
+    
+    // // Update text output
+    // if (data.text_result) {
+    //     resultTextOutput.innerHTML = data.text_result;
+    // } else {
+    //     let textContent = `<p><strong>伪造判断:</strong> ${data.is_fake ? '是' : '否'}</p>`;
+    //     textContent += `<p><strong>主要伪造类型:</strong> ${data.fake_type || '未知'}</p>`;
+    //     if (data.confidence_scores) {
+    //         textContent += `<p><strong>置信度评分:</strong><br>`;
+    //         textContent += `Photoshop: ${data.confidence_scores.photoshop}%<br>`;
+    //         textContent += `Deepfake: ${data.confidence_scores.deepfake}%<br>`;
+    //         textContent += `AI生成: ${data.confidence_scores.aigc}%</p>`;
+    //     }
+    //     if (data.analysis) {
+    //         textContent += `<p><strong>分析说明:</strong> ${data.analysis}</p>`;
+    //     }
+    //     resultTextOutput.innerHTML = textContent;
+    // }
+    
+    resultInfoDetails.style.display = 'none';
     downloadBtn.disabled = false;
+    copyTextBtn.disabled = false;
 }
 
 function resetInputArea() {
@@ -174,13 +205,15 @@ function resetResultArea() {
     resultImagePreview.src = '';
     resultImagePreview.style.display = 'none';
     resultPlaceholder.textContent = '检测结果将在此显示';
-    resultPlaceholder.style.display = 'block';
+    resultPlaceholder.style.display = ';none';
     resultInfoDetails.style.display = 'none';
     resultIsFake.textContent = '';
     resultFakeType.textContent = '';
     resultConfidenceScore.textContent = '';
     resultAnalysis.textContent = '';
+    resultTextOutput.innerHTML = '<p>检测结果文本将在此显示...</p>';
     downloadBtn.disabled = true;
+    copyTextBtn.disabled = true;
 }
 
 function downloadResult() {
@@ -194,4 +227,20 @@ function downloadResult() {
     } else {
         alert('暂无可下载的检测结果图片！');
     }
+}
+
+function copyResultText() {
+    const textToCopy = resultTextOutput.innerText;
+    navigator.clipboard.writeText(textToCopy).then(() => {
+        const originalText = copyTextBtn.innerHTML;
+        copyTextBtn.innerHTML = '<i class="fas fa-check"></i> 已复制';
+        copyTextBtn.style.backgroundColor = '#28a745';
+        setTimeout(() => {
+            copyTextBtn.innerHTML = originalText;
+            copyTextBtn.style.backgroundColor = '#555';
+        }, 2000);
+    }).catch(err => {
+        console.error('复制失败:', err);
+        alert('复制文本失败，请手动选择文本复制');
+    });
 }

@@ -427,3 +427,40 @@
 #dsSendBtn:hover {
     background: #0056b3;
 }
+
+/* Text Output Area Styles */
+.text-output-container {
+    margin-top: 1rem;
+}
+
+.text-output-container label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--subheading-color);
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.text-output {
+    width: 100%;
+    padding: 12px 15px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+    font-size: 0.95rem;
+    min-height: 100px;
+    max-height: 200px;
+    overflow-y: auto;
+    text-align: left;
+    line-height: 1.6;
+}
+
+.text-output p {
+    margin: 0.5em 0;
+}
+
+/* Copy Text Button */
+#copy-text-btn {
+    margin-left: auto;
+}

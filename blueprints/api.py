@@ -5,6 +5,8 @@ import cv2
 import numpy as np
 import base64
 import random
+import json
+from pathlib import Path
 
 bp = Blueprint('api', __name__, url_prefix="/")
 
@@ -14,7 +16,10 @@ def call_api():
         data = request.get_json()   
         
         # 解码Base64图像
-        image_data = base64.b64decode(data['image_data'])  # 移除data:image前缀
+        image_data = base64.b64decode(data['image_data'])
+        description = data['description']
+        file_name = data['file_name']
+        
         np_img = np.frombuffer(image_data, np.uint8)
         img = cv2.imdecode(np_img, cv2.IMREAD_COLOR)
         
@@ -25,75 +30,90 @@ def call_api():
         temp_path = f'./temp_image/temp_image_{random.randint(1000, 9999)}.jpg'
         cv2.imwrite(temp_path, img)
         
-        # 调用模型API
+        # 调用模型API - 正确的方式
         with open(temp_path, 'rb') as f:
             response = requests.post(
-                'http://localhost:3000/model_api',
-                files={'img': f}
+                'http://localhost:5000/model_api',
+                files={'img': f},  # 只发送文件
+                data={  # 其他数据作为表单数据
+                    'description': description,
+                    'file_name': file_name,
+                    'image_data': data['image_data']  # 如果需要的话
+                }
             )
         
         # 删除临时文件
         os.remove(temp_path)
-        print(response.json())
+        
         if response.status_code == 200:
             return jsonify(response.json())
         else:
-            return jsonify({'error': 'Model API failed'}), 500
-
-
+            return jsonify({'error': 'Model API failed', 'details': response.text}), 500
+        
 @bp.route('/model_api', methods=['POST'])
 def model_api():
     try:
+        # 检查是否有文件上传
         if 'img' not in request.files:
             return jsonify({'error': 'No image file provided'}), 400
-            
+
+        # 获取上传的文件
         file = request.files['img']
+        
+        # 获取表单数据
+        file_name = Path(request.form.get('file_name')).stem
+        # description = request.form.get('description')
+        # image_data = request.form.get('image_data')  # 可选
+        
+        if not file_name:
+            return jsonify({'error': 'file_name is required'}), 400
+
+        results_path = f'./all_results/{file_name}'
+        
+        # 读取 mask 图像
+        mask = cv2.imread(f'{results_path}/{file_name}-mask.jpg', cv2.IMREAD_COLOR)
+        if mask is None:
+            return jsonify({'error': 'Failed to load mask image'}), 400
+
+        # 将 mask 编码为 Base64
+        _, mask_buffer = cv2.imencode('.jpg', mask)
+        mask_base64 = base64.b64encode(mask_buffer).decode('utf-8')
+        mask_url = f"data:image/jpeg;base64,{mask_base64}"
+
+        # 读取 JSON 文件
+        try:
+            with open(f'{results_path}/{file_name}.json', 'r') as f:
+                json_data = json.load(f)  # 首先解析外层JSON
+                
+                # description字段本身是一个JSON字符串，需要再次解析
+                description_data = json.loads(json_data['description'])
+                
+                # 现在可以获取outputs
+                description_output = description_data['outputs']
+                
+        except Exception as e:
+            return jsonify({'error': f'Failed to read JSON file: {str(e)}'}), 400
+
+        # print(description_output)
+        # 处理上传的图像
         img_bytes = file.read()
         np_img = np.frombuffer(img_bytes, np.uint8)
         img = cv2.imdecode(np_img, cv2.IMREAD_COLOR)
         
         if img is None:
             return jsonify({'error': 'Invalid image format'}), 400
-        
-        # 模拟模型处理
-        is_fake = random.choice([True, False])
-        fake_types = ["Photoshop编辑", "Deepfake换脸", "AI生成", "复制粘贴篡改"]
-        fake_type = random.choice(fake_types)
-        
-        confidence = {
-            "photoshop": round(random.uniform(0, 100), 1),
-            "deepfake": round(random.uniform(0, 100), 1),
-            "aigc": round(random.uniform(0, 100), 1)
-        }
-        
-        # 添加红色边框作为处理效果
-        processed_img = cv2.copyMakeBorder(
-            img, 10, 10, 10, 10, 
-            cv2.BORDER_CONSTANT, 
-            value=[0, 0, 255]  # 红色边框
-        )
-        
-        # 编码为Base64 (完整的数据URL)
-        _, buffer = cv2.imencode('.jpg', processed_img)
-        img_base64 = base64.b64encode(buffer).decode('utf-8')
-        processed_image_url = f"data:image/jpeg;base64,{img_base64}"
-        
+
+        # 编码原始图像为 Base64
+        _, img_buffer = cv2.imencode('.jpg', img)
+        img_base64 = base64.b64encode(img_buffer).decode('utf-8')
+        img_url = f"data:image/jpeg;base64,{img_base64}"
+
         return jsonify({
             "status": "success",
             "result": {
-                "is_fake": is_fake,
-                "fake_type": fake_type,
-                "confidence_scores": confidence,  # 保持前端使用的字段名一致
-                "processed_image": processed_image_url,  # 完整的data URL
-                "text_report": f"""
-                    检测报告：
-                    - 伪造可能性: {'高' if is_fake else '低'}
-                    - 主要伪造类型: {fake_type}
-                    - 置信度:
-                      * Photoshop: {confidence['photoshop']}%
-                      * Deepfake: {confidence['deepfake']}%
-                      * AI生成: {confidence['aigc']}%
-                """
+                "original_image": img_url,
+                "processed_image": mask_url,
+                "description": description_output,
             }
         })
         
