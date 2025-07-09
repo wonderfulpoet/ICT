@@ -8,20 +8,29 @@
 <div class="detection-container">
     <h2>图像伪造智能检测</h2>
     <div class="content-area">
-        <!-- 上传图片面板 -->
+        <!-- Upload Panel with Text Input -->
         <div class="panel">
-            <h3>原始图片</h3>
+            <h3>原始图片与描述</h3>
             <div class="image-box" id="upload-box">
                 <span id="upload-placeholder"><i class="fas fa-cloud-upload-alt"></i> 点击或拖拽图片到此处</span>
                 <input type="file" id="image-input" accept="image/*" style="display:none;">
                 <img id="input-preview" class="preview-image" style="display:none;" alt="Input Preview">
             </div>
+            
+            <!-- Text Input Area -->
+            <div class="text-input-container">
+                <label for="image-description"><i class="fas fa-comment-alt"></i> 图片描述 (可选)</label>
+                <textarea id="image-description" placeholder="请输入图片的相关描述或问题..."></textarea>
+                <div class="char-counter"><span id="char-count">0</span>/200</div>
+            </div>
+            
             <div class="panel-actions">
                 <button class="btn" id="upload-btn"><i class="fas fa-upload"></i> 上传图片</button>
-                <button class="btn" id="clear-btn" style="background-color: #555;"><i class="fas fa-trash"></i> 清除图片</button>
+                <button class="btn" id="clear-btn" style="background-color: #555;"><i class="fas fa-trash"></i> 清除</button>
             </div>
         </div>
-        <!-- 检测结果面板 -->
+        
+        <!-- Results Panel -->
         <div class="panel">
             <h3>检测结果</h3>
             <div class="image-box" id="result-box">
@@ -34,40 +43,35 @@
         </div>
     </div>
 
-    <!-- 主要检测按钮 -->
+    <!-- Detect Button -->
     <button class="btn btn-primary btn-detect" id="detect-btn">
         <i class="fas fa-search"></i> 开始检测
     </button>
 
-    <!-- 结果信息详情 -->
+    <!-- Results Details -->
     <div class="result-info" id="result-info-details">
         <p><strong>伪造判断:</strong> <span id="result-is-fake"></span></p>
         <p><strong>主要伪造类型:</strong> <span id="result-fake-type"></span></p>
         <p><strong>置信度评分:</strong> <span id="result-confidence-score"></span></p>
+        <p><strong>分析说明:</strong> <span id="result-analysis"></span></p>
     </div>
 </div>
 
-<!-- 悬浮聊天窗口 -->
+<!-- Chat Widget -->
 <div id="chat-widget" class="chat-widget is-collapsed">
-    <!-- 用于展开/折叠的头部 -->
     <div class="chat-widget-header" id="chat-widget-toggle">
         <h3><i class="fas fa-robot"></i> 智能助手</h3>
         <i class="fas fa-chevron-up" id="chat-toggle-icon"></i>
     </div>
 
-    <!-- 窗口主体 -->
     <div class="chat-widget-body">
-        <div class="ds-messages" id="dsMessages">
-            <!-- 消息将由 JS 在此渲染 -->
-        </div>
+        <div class="ds-messages" id="dsMessages"></div>
         <div class="ds-input-container">
-            <!-- 新增：图片预览区 -->
             <div id="dsImagePreviewContainer" class="ds-image-preview-container">
                 <img id="dsImagePreview" src="" alt="Image Preview"/>
                 <button id="dsRemoveImageBtn" class="ds-remove-image-btn" title="移除图片">×</button>
             </div>
             <div class="ds-input-bar">
-                <!-- 新增：文件上传按钮 -->
                 <input type="file" id="dsFileInput" accept="image/*" style="display: none;"/>
                 <label for="dsFileInput" id="dsUploadBtn" class="ds-tool-btn" title="上传图片">
                     <i class="fas fa-paperclip"></i>
@@ -83,8 +87,6 @@
 {% endblock %}
 
 {% block script %}
-    <!-- 检测页面的功能脚本 -->
     <script src="{{ url_for('static', filename='js/detection.js') }}"></script>
-    <!-- 聊天窗口的功能脚本 -->
     <script src="{{ url_for('static', filename='js/chat_widget.js') }}"></script>
 {% endblock %}

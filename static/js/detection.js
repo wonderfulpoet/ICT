@@ -1,4 +1,4 @@
-// --- DOM 元素获取 ---
+// DOM Elements
 const uploadBox = document.getElementById('upload-box');
 const imageInput = document.getElementById('image-input');
 const inputPreview = document.getElementById('input-preview');
@@ -10,17 +10,16 @@ const resultInfoDetails = document.getElementById('result-info-details');
 const resultIsFake = document.getElementById('result-is-fake');
 const resultFakeType = document.getElementById('result-fake-type');
 const resultConfidenceScore = document.getElementById('result-confidence-score');
+const resultAnalysis = document.getElementById('result-analysis');
 const uploadBtn = document.getElementById('upload-btn');
 const clearBtn = document.getElementById('clear-btn');
 const downloadBtn = document.getElementById('download-btn');
+const imageDescription = document.getElementById('image-description');
+const charCount = document.getElementById('char-count');
 
-// --- 事件监听区域 ---
-
-// 为可见的div（uploadBox）注册点击事件
+// Event Listeners
 if (uploadBox) {
-    uploadBox.addEventListener('click', () => {
-        imageInput.click();
-    });
+    uploadBox.addEventListener('click', () => imageInput.click());
     uploadBox.addEventListener('dragover', e => { 
         e.preventDefault(); 
         uploadBox.style.borderColor = '#6a5acd'; 
@@ -39,59 +38,16 @@ if (uploadBox) {
     });
 }
 
-// 为隐藏的input注册change事件
-if (imageInput) {
-    imageInput.addEventListener('change', previewImage);
+if (imageInput) imageInput.addEventListener('change', previewImage);
+if (detectBtn) detectBtn.addEventListener('click', startDetection);
+if (uploadBtn) uploadBtn.addEventListener('click', () => imageInput.click());
+if (clearBtn) clearBtn.addEventListener('click', resetInputArea);
+if (downloadBtn) downloadBtn.addEventListener('click', downloadResult);
+if (imageDescription && charCount) {
+    imageDescription.addEventListener('input', updateCharCount);
 }
 
-// 检测按钮点击事件
-if (detectBtn) {
-    detectBtn.addEventListener('click', () => {
-        if (!imageInput.files || !imageInput.files.length) {
-            alert("请先上传一张图片！");
-            return;
-        }
-        startDetection();
-    });
-}
-
-// 上传按钮：触发文件选择
-if (uploadBtn) {
-    uploadBtn.addEventListener('click', () => {
-        if (imageInput) imageInput.click();
-    });
-}
-
-// 清除按钮：清空图片
-if (clearBtn) {
-    clearBtn.addEventListener('click', () => {
-        if (imageInput) imageInput.value = '';
-        if (inputPreview) {
-            inputPreview.src = '';
-            inputPreview.style.display = 'none';
-        }
-        if (uploadPlaceholder) uploadPlaceholder.style.display = 'block';
-        resetResultArea();
-    });
-}
-
-// 下载按钮：下载检测结果图片
-if (downloadBtn) {
-    downloadBtn.addEventListener('click', () => {
-        if (resultImagePreview && resultImagePreview.src && resultImagePreview.style.display !== 'none') {
-            const link = document.createElement('a');
-            link.href = resultImagePreview.src;
-            link.download = '检测结果.png';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        } else {
-            alert('暂无可下载的检测结果图片！');
-        }
-    });
-}
-
-// --- 功能函数 ---
+// Functions
 function previewImage() {
     const file = imageInput.files[0];
     if (file) {
@@ -100,12 +56,29 @@ function previewImage() {
             inputPreview.src = e.target.result;
             inputPreview.style.display = 'block';
             uploadPlaceholder.style.display = 'none';
-            resetResultArea(); 
+            resetResultArea();
         };
         reader.readAsDataURL(file);
     }
 }
+
+function updateCharCount() {
+    const currentLength = imageDescription.value.length;
+    charCount.textContent = currentLength;
+    
+    if (currentLength > 180) {
+        charCount.style.color = '#ff6b6b';
+    } else {
+        charCount.style.color = 'inherit';
+    }
+}
+
 async function startDetection() {
+    if (!imageInput.files || !imageInput.files.length) {
+        alert("请先上传一张图片！");
+        return;
+    }
+
     detectBtn.disabled = true;
     detectBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 检测中...';
     resultPlaceholder.textContent = '正在分析图像，请稍候...';
@@ -115,11 +88,8 @@ async function startDetection() {
     
     try {
         const file = imageInput.files[0];
-        if (!file) {
-            throw new Error('没有选择文件');
-        }
+        const description = imageDescription.value || '';
 
-        // 读取文件为Base64 (完整的数据URL)
         const imageBase64 = await new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.onload = () => resolve(reader.result);
@@ -127,13 +97,15 @@ async function startDetection() {
             reader.readAsDataURL(file);
         });
         
-        // 发送请求
         const response = await fetch('/call_api', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ image_data: imageBase64.split(',')[1] })  // 只发送base64部分
+            body: JSON.stringify({ 
+                image_data: imageBase64.split(',')[1],
+                description: description 
+            })
         });
         
         if (!response.ok) {
@@ -142,8 +114,6 @@ async function startDetection() {
         }
         
         const result = await response.json();
-        
-        // 显示结果
         displayDetectionResult(result);
         
     } catch (error) {
@@ -163,14 +133,12 @@ function displayDetectionResult(result) {
 
     const data = result.result;
     
-    // 1. 显示处理后的图片
     if (data.processed_image) {
-        resultImagePreview.src = data.processed_image;  // 直接使用完整的data URL
+        resultImagePreview.src = data.processed_image;
         resultImagePreview.style.display = 'block';
         resultPlaceholder.style.display = 'none';
     }
 
-    // 2. 显示检测结果信息
     resultIsFake.textContent = data.is_fake ? '是' : '否';
     resultFakeType.textContent = data.fake_type || '未知';
     
@@ -183,23 +151,23 @@ function displayDetectionResult(result) {
         `;
     }
     
-    resultInfoDetails.style.display = 'block';
+    if (data.analysis) {
+        resultAnalysis.textContent = data.analysis;
+    }
     
-    // 3. 启用下载按钮
+    resultInfoDetails.style.display = 'block';
     downloadBtn.disabled = false;
 }
 
-function readFileAsBase64(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-            // 移除data:image/...;base64,前缀
-            const base64String = reader.result.split(',')[1];
-            resolve(base64String);
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-    });
+function resetInputArea() {
+    imageInput.value = '';
+    inputPreview.src = '';
+    inputPreview.style.display = 'none';
+    uploadPlaceholder.style.display = 'block';
+    imageDescription.value = '';
+    charCount.textContent = '0';
+    charCount.style.color = 'inherit';
+    resetResultArea();
 }
 
 function resetResultArea() {
@@ -211,4 +179,19 @@ function resetResultArea() {
     resultIsFake.textContent = '';
     resultFakeType.textContent = '';
     resultConfidenceScore.textContent = '';
+    resultAnalysis.textContent = '';
+    downloadBtn.disabled = true;
+}
+
+function downloadResult() {
+    if (resultImagePreview && resultImagePreview.src && resultImagePreview.style.display !== 'none') {
+        const link = document.createElement('a');
+        link.href = resultImagePreview.src;
+        link.download = '检测结果.png';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    } else {
+        alert('暂无可下载的检测结果图片！');
+    }
 }
