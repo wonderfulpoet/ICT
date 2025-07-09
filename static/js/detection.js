@@ -134,7 +134,6 @@ async function startDetection() {
         detectBtn.innerHTML = '<i class="fas fa-search"></i> 开始检测';
     }
 }
-
 function displayDetectionResult(result) {
     if (result.status !== "success") {
         throw new Error(result.error || "未知错误");
@@ -151,41 +150,28 @@ function displayDetectionResult(result) {
     if (data.description){
         resultTextOutput.innerHTML = data.description;
     }
-    // resultIsFake.textContent = data.is_fake ? '是' : '否';
-    // resultFakeType.textContent = data.fake_type || '未知';
+
+    resultIsFake.textContent = data.is_fake ? '是' : '否';
+    // 更新伪造类型显示
+    if (data.fake_type) {
+        resultFakeType.textContent = data.fake_type;
+    } else {
+        resultFakeType.textContent = '未知';
+    }
     
-    // if (data.confidence_scores) {
-    //     const scores = data.confidence_scores;
-    //     resultConfidenceScore.innerHTML = `
-    //         <span>Photoshop: ${scores.photoshop}%</span><br>
-    //         <span>Deepfake: ${scores.deepfake}%</span><br>
-    //         <span>AI生成: ${scores.aigc}%</span>
-    //     `;
-    // }
+    // 如果有置信度评分，可以这样显示
+    if (data.confidence_scores) {
+        const scores = data.confidence_scores;
+        resultConfidenceScore.innerHTML = scores;
+    }
     
-    // if (data.analysis) {
-    //     resultAnalysis.textContent = data.analysis;
-    // }
+    // 如果有分析说明
+    if (data.analysis) {
+        resultAnalysis.textContent = data.analysis;
+    }
     
-    // // Update text output
-    // if (data.text_result) {
-    //     resultTextOutput.innerHTML = data.text_result;
-    // } else {
-    //     let textContent = `<p><strong>伪造判断:</strong> ${data.is_fake ? '是' : '否'}</p>`;
-    //     textContent += `<p><strong>主要伪造类型:</strong> ${data.fake_type || '未知'}</p>`;
-    //     if (data.confidence_scores) {
-    //         textContent += `<p><strong>置信度评分:</strong><br>`;
-    //         textContent += `Photoshop: ${data.confidence_scores.photoshop}%<br>`;
-    //         textContent += `Deepfake: ${data.confidence_scores.deepfake}%<br>`;
-    //         textContent += `AI生成: ${data.confidence_scores.aigc}%</p>`;
-    //     }
-    //     if (data.analysis) {
-    //         textContent += `<p><strong>分析说明:</strong> ${data.analysis}</p>`;
-    //     }
-    //     resultTextOutput.innerHTML = textContent;
-    // }
-    
-    resultInfoDetails.style.display = 'none';
+    // 显示结果详情区域
+    resultInfoDetails.style.display = 'block';
     downloadBtn.disabled = false;
     copyTextBtn.disabled = false;
 }

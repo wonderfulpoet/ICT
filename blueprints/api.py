@@ -7,6 +7,7 @@ import base64
 import random
 import json
 from pathlib import Path
+from time import sleep
 
 bp = Blueprint('api', __name__, url_prefix="/")
 
@@ -107,13 +108,16 @@ def model_api():
         _, img_buffer = cv2.imencode('.jpg', img)
         img_base64 = base64.b64encode(img_buffer).decode('utf-8')
         img_url = f"data:image/jpeg;base64,{img_base64}"
-
+        sleep(2)  # 模拟处理时间
         return jsonify({
             "status": "success",
             "result": {
                 "original_image": img_url,
                 "processed_image": mask_url,
                 "description": description_output,
+                "is_fake": True,  # 假设处理结果为假
+                "fake_type": "Photoshop",
+                "confidence_scores": random.randint(70, 100),  # 随机生成一个分数
             }
         })
         
