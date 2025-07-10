@@ -7,30 +7,42 @@ import os
 import random
 import requests
 from werkzeug.utils import secure_filename
-import base64
 import csv
-import PyPDF2
 from config import *
 import json
-import re  # 确保导入
+import re
+from io import BytesIO  # 用于在内存中处理文件
+
+# --- 用于处理不同文件类型的库 ---
+# PyMuPDF性能更高，如果已安装，可以使用它代替PyPDF2
+try:
+    import fitz  # PyMuPDF
+
+    pdf_lib = 'fitz'
+except ImportError:
+    import PyPDF2
+
+    pdf_lib = 'PyPDF2'
+
+# import docx  # 用于处理.docx
 
 bp = Blueprint('chat', __name__, url_prefix="/")
 
 # API配置
 API_KEY = os.environ.get("API_KEY", "sk-0d8f31e1cf5d4774bcf82f2f7624c02d")
-# 注意：官方文档的V1版本URL路径可能不包含/v1，取决于具体API。这里保持您的原样。
 API_URL = os.environ.get("API_URL", "https://api.deepseek.com/v1")
 
+# --- 模型定义保持不变 ---
 MODELS = {
     "Moonshot-8K": "moonshot-v1-8k",
     "Moonshot-32K": "moonshot-v1-32k"
 }
-
-# 免费模型和高级模型
 FREE_MODELS = ["GLM-4-FlashX-P002"]
 PREMIUM_MODELS = ["DeepSeek-R1", "DeepSeek-V3-250324-P001", "QwQ-N011-32B", "GLM-4-Plus-P002",
                   "GLM-4V-Plus-0111-P002", "Qwen2.5-VL-72B-Instruct-P003"]
 
+
+# --- 路由 /chat_page, /chat, /search 和辅助函数保持不变 ---
 
 @bp.route('/chat_page', methods=['GET', 'POST'])
 def chat_page():
@@ -154,88 +166,83 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-# --- START: REPLACEMENT for call_llm_api function in chat.py ---
+# --- call_llm_api 保持不变 ---
 def call_llm_api(prompt, model_name, image_base64=None):
     headers = {
         "Authorization": f"Bearer {API_KEY}",
         "Content-Type": "application/json"
     }
-
-    # DeepSeek API 要求 messages 字段是一个列表，其中每个元素都是一个字典
-    # content 可以是字符串（仅文本）或列表（多模态）
     content_parts = []
     if prompt:
         content_parts.append({"type": "text", "text": prompt})
-
     if image_base64:
+        # 确保只传递Base64编码部分
+        if "base64," in image_base64:
+            image_base64 = image_base64.split(',', 1)[1]
         content_parts.append({
             "type": "image_url",
             "image_url": {"url": f"data:image/jpeg;base64,{image_base64}"}
         })
-
     if not content_parts:
         return {"error": "没有提供任何输入（文本或图片）"}
 
-    # 根据模型是否支持视觉来确定 content 的格式
-    # 'deepseek-vl-chat' 和 'deepseek-v2' 等视觉模型需要一个列表
     is_vision_model = 'vl' in model_name or 'v2' in model_name
+
+    # 修正 content 格式
+    content_to_send = content_parts if is_vision_model and image_base64 else prompt
 
     payload = {
         "model": model_name,
-        "messages": [
-            {
-                "role": "user",
-                # 如果是视觉模型，content是部件列表；否则，是纯文本
-                "content": content_parts if is_vision_model else prompt
-            }
-        ],
+        "messages": [{"role": "user", "content": content_to_send}],
         "temperature": 0.7,
         "max_tokens": 4096
     }
-
-    # 如果是非视觉模型但收到了图片，这是个逻辑错误，提前拦截
     if image_base64 and not is_vision_model:
         return {"error": f"模型 '{model_name}' 不支持图片输入。请选择视觉模型。"}
-
     try:
-        # 确保URL路径正确
         response = requests.post(f"{API_URL}/chat/completions", headers=headers, json=payload, timeout=60)
-
-        # 检查响应是否成功，如果不成功，会抛出异常
         response.raise_for_status()
-
         return response.json()
-
     except requests.exceptions.HTTPError as http_err:
-        # 捕获HTTP错误（如4xx, 5xx），并返回详细信息
         error_details = http_err.response.text
         try:
-            # 尝试解析API返回的JSON错误体
             error_json = http_err.response.json()
             error_message = error_json.get('error', {}).get('message', '未知API错误')
             details = f"API返回错误: {error_message} (状态码: {http_err.response.status_code})"
         except json.JSONDecodeError:
             details = f"API返回了非JSON格式的错误: {error_details} (状态码: {http_err.response.status_code})"
-
         return {"error": "API请求失败", "details": details}
     except Exception as e:
-        # 捕获其他所有异常
         return {"error": f"调用API过程中发生未知错误: {str(e)}"}
 
 
-# --- END: REPLACEMENT for call_llm_api function in chat.py ---
-
-
-def extract_text_from_pdf(file_path):
+# --- 辅助函数：extract_text_from_pdf, encode_image_to_base64, search_online 保持不变 ---
+def extract_text_from_pdf(file_path_or_stream):
     text = ""
     try:
-        with open(file_path, 'rb') as file:
-            reader = PyPDF2.PdfReader(file)
+        if pdf_lib == 'fitz':
+            # PyMuPDF 可以直接从内存流读取
+            with fitz.open(stream=file_path_or_stream, filetype="pdf") as doc:
+                for page in doc:
+                    text += page.get_text()
+        else:  # PyPDF2
+            # PyPDF2 需要一个文件对象
+            reader = PyPDF2.PdfReader(file_path_or_stream)
             for page in reader.pages:
-                text += page.extract_text() + "\n"
+                text += page.extract_text() or "" + "\n"  # 确保返回字符串
     except Exception as e:
         text = f"PDF解析错误: {str(e)}"
     return text
+
+
+# def extract_text_from_docx(stream):
+#     text = ""
+#     try:
+#         doc = docx.Document(stream)
+#         text = "\n".join([para.text for para in doc.paragraphs])
+#     except Exception as e:
+#         text = f"Word文档解析错误: {str(e)}"
+#     return text
 
 
 def encode_image_to_base64(image_path):
@@ -258,37 +265,76 @@ def search_online(query):
         return {"error": f"搜索过程中出错: {str(e)}"}
 
 
-# === 新增代码：为聊天窗口提供专用的API端点 ===
+# === 关键修改：重构 /api/chat 端点以处理多种文件类型 ===
 @bp.route('/api/chat', methods=['POST'])
 def api_chat():
-    """处理来自聊天小部件的AJAX请求"""
+    """处理来自聊天小部件的AJAX请求，支持图片、PDF和Word文档"""
     try:
         data = request.get_json()
         if not data:
             return jsonify({"error": "无效的请求，需要JSON格式数据"}), 400
 
-        prompt = data.get('prompt', '')
-        image_data_uri = data.get('image_base64')
+        user_prompt = data.get('prompt', '')
+        data_uri = data.get('image_base64')  # 这个字段现在可能包含任何文件类型
 
-        image_base64_string = None
-        if image_data_uri:
+        final_prompt = user_prompt
+        image_base64_for_api = None
+
+        # 如果有文件数据，进行处理
+        if data_uri:
+            # 1. 解析 Data URI
             try:
-                # 从 "data:image/jpeg;base64,..." 中提取纯Base64字符串
-                _header, encoded = image_data_uri.split(',', 1)
-                image_base64_string = encoded
-            except (ValueError, IndexError):
-                return jsonify({"error": "无效的图片Base64格式"}), 400
+                match = re.match(r'data:(?P<mime_type>.*?);base64,(?P<data>.*)', data_uri)
+                if not match:
+                    raise ValueError("无效的Data URI格式")
 
-        # 为包含图片的请求选择一个支持视觉功能的模型
-        # 注意：'deepseek-chat' 不支持图片，需要使用如 'deepseek-v2' 等模型
-        # 使用 deepseek-vl-chat 这个专门的视觉模型
-        model_name = "deepseek-vl-chat" if image_base64_string else "deepseek-chat"
+                mime_type = match.group('mime_type')
+                encoded_data = match.group('data')
+                decoded_bytes = base64.b64decode(encoded_data)
+                file_stream = BytesIO(decoded_bytes)
+            except (ValueError, IndexError, base64.binascii.Error) as e:
+                current_app.logger.error(f"Base64解码或Data URI解析失败: {e}")
+                return jsonify({"error": "无效的文件数据格式"}), 400
 
-        # 调用API函数
-        response = call_llm_api(prompt, model_name, image_base64_string)
+            # 2. 根据 MIME 类型分流处理
+            file_content_text = ""
+            if 'image' in mime_type:
+                # 如果是图片，保留Base64编码给视觉模型
+                image_base64_for_api = encoded_data
+                file_content_text = "[用户上传了一张图片]"
+
+            elif 'pdf' in mime_type:
+                # 如果是PDF，提取文本
+                file_content_text = extract_text_from_pdf(file_stream)
+                if "PDF解析错误" in file_content_text:
+                    return jsonify({"error": file_content_text}), 500
+
+            # elif 'vnd.openxmlformats-officedocument.wordprocessingml.document' in mime_type:
+            #     # 如果是 .docx，提取文本
+            #     file_content_text = extract_text_from_docx(file_stream)
+            #     if "Word文档解析错误" in file_content_text:
+            #         return jsonify({"error": file_content_text}), 500
+
+            else:
+                # 对于其他文本类型如.txt，可以直接解码
+                try:
+                    file_content_text = decoded_bytes.decode('utf-8')
+                except UnicodeDecodeError:
+                    file_content_text = "[用户上传了一个无法预览的二进制文件]"
+
+            # 3. 组合最终的 prompt
+            final_prompt = f"请基于以下文件内容回答问题。\n\n--- 文件内容开始 ---\n{file_content_text}\n--- 文件内容结束 ---\n\n用户问题：{user_prompt}"
+
+        # 4. 选择合适的模型并调用API
+        # 如果有图片，必须用视觉模型；否则用普通聊天模型
+        model_name = "deepseek-vl-chat" if image_base64_for_api else "deepseek-chat"
+
+        response = call_llm_api(final_prompt, model_name, image_base64_for_api)
 
         if "error" in response:
-            return jsonify({"error": response.get("details", response["error"])}), 500
+            error_msg = response.get("details", response["error"])
+            current_app.logger.error(f"LLM API call failed: {error_msg}")
+            return jsonify({"error": f"调用AI服务失败: {error_msg}"}), 500
 
         answer = response.get("choices", [{}])[0].get("message", {}).get("content", "抱歉，我无法生成回复。")
         answer = re.sub(r'<think>.*?</think>', '', answer, flags=re.DOTALL).strip()
@@ -297,5 +343,5 @@ def api_chat():
 
     except Exception as e:
         current_app.logger.error(f"Error in /api/chat: {e}", exc_info=True)
-        return jsonify({"error": f"服务器内部错误: {str(e)}"}), 500
+        return jsonify({"error": "服务器内部发生未知错误。"}), 500
 # --- END OF REPLACEMENT for chat.py ---

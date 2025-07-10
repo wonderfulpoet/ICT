@@ -15,12 +15,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const promptInput = document.getElementById('dsPromptInput');
     const sendBtn = document.getElementById('dsSendBtn');
     const fileInput = document.getElementById('dsFileInput');
-    const imagePreviewContainer = document.getElementById('dsImagePreviewContainer');
+    const filePreviewContainer = document.getElementById('dsFilePreviewContainer');
     const imagePreview = document.getElementById('dsImagePreview');
-    const removeImageBtn = document.getElementById('dsRemoveImageBtn');
+    const fileInfoPreview = document.getElementById('dsFilePreviewInfo');
+    const fileNameSpan = document.getElementById('dsFileName');
+    const removeFileBtn = document.getElementById('dsRemoveFileBtn');
 
     let chatHistory = [{ role: 'ai', content: '你好！有什么可以帮你的吗？' }];
     let selectedFileBase64 = null;
+    let selectedFile = null;
 
     function renderMessages() {
         if (!messagesBox) return;
@@ -29,19 +32,33 @@ document.addEventListener('DOMContentLoaded', function() {
             const div = document.createElement('div');
             div.className = 'ds-bubble ' + (msg.role === 'user' ? 'user' : 'ai');
 
-            if (typeof msg.content === 'object' && msg.content.image) {
-                const img = document.createElement('img');
-                img.src = msg.content.image;
-                img.className = 'ds-bubble-image';
-                img.alt = 'User uploaded image';
-                div.appendChild(img);
-                if (msg.content.text) {
+            const content = msg.content;
+
+            // 如果 content 是一个包含文件或图片的对象
+            if (typeof content === 'object' && content !== null) {
+                // 渲染图片
+                if (content.image) {
+                    const img = document.createElement('img');
+                    img.src = content.image;
+                    img.className = 'ds-bubble-image';
+                    img.alt = 'User uploaded image';
+                    div.appendChild(img);
+                }
+                // 渲染文件信息
+                if (content.file) {
+                    const fileDiv = document.createElement('div');
+                    fileDiv.className = 'ds-bubble-file';
+                    fileDiv.innerHTML = `<i class="fas fa-file-alt"></i> <span>${content.file.name}</span>`;
+                    div.appendChild(fileDiv);
+                }
+                // 渲染文本
+                if (content.text) {
                     const p = document.createElement('p');
-                    p.textContent = msg.content.text;
+                    p.textContent = content.text;
                     div.appendChild(p);
                 }
-            } else {
-                div.textContent = typeof msg.content === 'string' ? msg.content : msg.content.text;
+            } else { // 如果 content 只是一个字符串（例如AI的回复）
+                div.textContent = content;
             }
 
             messagesBox.appendChild(div);
@@ -51,18 +68,26 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function sendMsg() {
         const text = promptInput.value.trim();
-        if (!text && !selectedFileBase64) return;
+        if (!text && !selectedFile) return;
 
-        const userMessageContent = {
-            text: text,
-            image: selectedFileBase64
-        };
+        // 构建用户消息内容
+        const userMessageContent = { text: text };
+        if (selectedFile) {
+            if (selectedFile.type.startsWith('image/')) {
+                userMessageContent.image = selectedFileBase64;
+            } else {
+                userMessageContent.file = { name: selectedFile.name };
+            }
+        }
+
         chatHistory.push({ role: 'user', content: userMessageContent });
         renderMessages();
 
-        // 重置输入框和文件选择
+        // 准备发送到后端的数据
         const promptToSend = text;
-        const imageToSend = selectedFileBase64;
+        const fileBase64ToSend = selectedFileBase64;
+
+        // 重置输入框和文件选择
         promptInput.value = '';
         promptInput.style.height = 'auto';
         resetFileInput();
@@ -71,31 +96,21 @@ document.addEventListener('DOMContentLoaded', function() {
         chatHistory.push({ role: 'ai', content: '思考中...' });
         renderMessages();
 
-        // *** 修改点：调用我们自己的后端API，而不是DeepSeek ***
-        fetch('/api/chat', { // <--- 关键修改：指向自己的后端路由
+        fetch('/api/chat', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                // 不需要 'Authorization' 头，后端会处理
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 prompt: promptToSend,
-                image_base64: imageToSend // 发送prompt和base64编码的图片
+                image_base64: fileBase64ToSend // 后端可解析此base64字符串获取MIME类型和数据
             })
         })
         .then(r => {
-            if (!r.ok) { // 检查响应状态码
-                throw new Error(`服务器错误: ${r.statusText}`);
-            }
+            if (!r.ok) throw new Error(`服务器错误: ${r.statusText}`);
             return r.json();
         })
         .then(data => {
             chatHistory.pop(); // 移除 "思考中..."
-            if (data.answer) {
-                chatHistory.push({ role: 'ai', content: data.answer });
-            } else {
-                chatHistory.push({ role: 'ai', content: `错误: ${data.error || '未收到有效回复'}` });
-            }
+            chatHistory.push({ role: 'ai', content: data.answer || `错误: ${data.error || '未收到有效回复'}` });
             renderMessages();
         })
         .catch(e => {
@@ -108,7 +123,10 @@ document.addEventListener('DOMContentLoaded', function() {
     function resetFileInput() {
         fileInput.value = '';
         selectedFileBase64 = null;
-        imagePreviewContainer.style.display = 'none';
+        selectedFile = null;
+        filePreviewContainer.style.display = 'none';
+        imagePreview.style.display = 'none';
+        fileInfoPreview.style.display = 'none';
     }
 
     if (sendBtn) sendBtn.addEventListener('click', sendMsg);
@@ -129,22 +147,33 @@ document.addEventListener('DOMContentLoaded', function() {
     if (fileInput) {
         fileInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
-            if (file && file.type.startsWith('image/')) {
+            if (file) {
+                selectedFile = file;
                 const reader = new FileReader();
                 reader.onload = function(event) {
-                    selectedFileBase64 = event.target.result; // event.target.result 包含 "data:image/jpeg;base64,..."
-                    imagePreview.src = selectedFileBase64;
-                    imagePreviewContainer.style.display = 'block';
+                    selectedFileBase64 = event.target.result; // 包含 data:mime/type;base64,...
+
+                    if (file.type.startsWith('image/')) {
+                        imagePreview.src = selectedFileBase64;
+                        imagePreview.style.display = 'block';
+                        fileInfoPreview.style.display = 'none';
+                    } else {
+                        fileNameSpan.textContent = file.name;
+                        imagePreview.style.display = 'none';
+                        fileInfoPreview.style.display = 'flex';
+                    }
+                    filePreviewContainer.style.display = 'block';
                 };
                 reader.readAsDataURL(file);
             }
         });
     }
 
-    if (removeImageBtn) {
-        removeImageBtn.addEventListener('click', resetFileInput);
+    if (removeFileBtn) {
+        removeFileBtn.addEventListener('click', resetFileInput);
     }
 
+    // 初始渲染
     renderMessages();
 });
 // --- END OF REPLACEMENT for chat_widget.js ---
