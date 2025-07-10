@@ -20,7 +20,7 @@ from blueprints.settings import bp as settings_bp
 from blueprints.menu import bp as menu_bp
 from blueprints.api import bp as api_bp
 from config import *
-# 加载环境变量
+# 加载环境变量，用于
 load_dotenv()
 
 app = Flask(__name__)

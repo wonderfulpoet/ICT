@@ -99,6 +99,18 @@
     pointer-events: auto;
     z-index: 1;
 }
+.panel-image {
+    width: 600px; /* 或者你想要的其他固定宽度 */
+    height: auto; /* 保持图片比例 */
+    margin-top: 20px; /* 调整图片与上方文本的间距 */
+    border-radius: 8px; /* 轻微圆角，美观 */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1); /* 添加阴影效果 */
+}
+
+#panel3 .panel-image {
+    margin-top: 50px; /* 为第三张图片增加顶部外边距，使其下移 */
+}
+
 footer {
     background: #000000 !important;
     color: #fff !important;
@@ -120,31 +132,17 @@ footer {
     <div class="right-scroll">
         <div class="right-center-content">
             <section class="right-panel" id="panel1">
-                <h1>图像检测</h1>
                 <p>上传或输入一张图像，系统将自动检测该图像是否存在篡改内容，并给出详细的检测解释说明。适用于伪造图片、合成图片等真伪判别场景。</p>
-                <ul style="font-size:1.2rem;text-align:left;max-width:700px;">
-                    <li>支持常见图像格式的上传与检测</li>
-                    <li>自动分析图像篡改区域，输出检测结论</li>
-                    <li>提供检测过程的可解释性说明</li>
-                </ul>
+                <img src = "static\imgs\1.png" class="panel-image" alt="图像检测示例图">
             </section>
             <section class="right-panel" id="panel2">
-                <h1>掩码生成</h1>
                 <p>基于检测结果，自动在原图上生成掩码（mask）预测图片，直观标注出疑似被篡改的区域，辅助用户理解检测结果。</p>
-                <ul style="font-size:1.2rem;text-align:left;max-width:700px;">
-                    <li>输出与原图对齐的掩码图片</li>
-                    <li>高亮显示检测到的可疑区域</li>
-                    <li>支持掩码图片下载与对比</li>
-                </ul>
+                <img src = "static\imgs\2.png" class="panel-image" alt="掩码生成示例图">
             </section>
             <section class="right-panel" id="panel3">
-                <h1>智能对话</h1>
+                <br>
                 <p>在图像检测的语境下，支持与各类大模型（如GPT、文心一言等）进行智能对话，获取检测建议、原理解释、案例分析等多种智能问答服务。</p>
-                <ul style="font-size:1.2rem;text-align:left;max-width:700px;">
-                    <li>可针对检测结果进行追问与深入分析</li>
-                    <li>支持多轮对话，获取专业建议</li>
-                    <li>集成多种主流大模型，提升交互体验</li>
-                </ul>
+                <img src = "static\imgs\5.png"  alt="智能对话示例图" id = "panel3">
             </section>
         </div>
     </div>

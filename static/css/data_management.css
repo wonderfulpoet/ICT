@@ -1,260 +1,296 @@
+/* No need for :root and body styles here anymore, they are in templates/data_management.html */
+
 /* --- Data Management Page --- */
 #data-management-container {
-    padding: 20px;
-    height: 100%;
+    padding: 30px;
+    min-height: calc(100vh - 80px); /* Adjust based on global header/footer */
     display: flex;
     flex-direction: column;
+    background-color: var(--background-color-primary);
+    color: var(--text-color-primary);
 }
 
 .dm-header {
-    margin-bottom: 20px;
+    margin-bottom: 30px;
+    text-align: center;
+    padding: 15px 0;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .dm-header h2 {
-    font-size: 24px;
-    color: var(--text-color-primary);
+    font-size: 2.5rem;
+    color: var(--primary-color);
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
 }
 
 .dm-main {
     display: flex;
-    gap: 20px;
+    gap: 30px;
     flex-grow: 1;
-    min-height: 0; /* Important for flexbox scrolling */
+    min-height: 0;
 }
 
 /* --- Sidebar --- */
 .dm-sidebar {
-    width: 25%;
-    min-width: 220px;
+    width: 280px; /* Fixed width for sidebar */
+    flex-shrink: 0;
     background-color: var(--background-color-secondary);
-    padding: 20px;
-    border-radius: 8px;
+    padding: 30px;
+    border-radius: var(--border-radius-lg);
     overflow-y: auto;
+    box-shadow: 0 6px 20px var(--shadow-color);
+    border: 1px solid var(--border-color);
 }
 
 .dm-sidebar h4 {
     margin-top: 0;
-    margin-bottom: 15px;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 10px;
+    margin-bottom: 25px;
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 12px;
+    font-size: 1.3rem;
+    color: var(--text-color-primary);
 }
 
 .dm-filter-group {
-    margin-bottom: 20px;
+    margin-bottom: 30px;
 }
 
 .dm-filter-group label {
     display: block;
-    font-weight: bold;
-    margin-bottom: 10px;
-    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    font-size: 1.05rem;
+    color: var(--text-color-secondary);
 }
 
 .dm-date-options {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 12px;
 }
 
 .dm-date-btn {
-    padding: 8px;
+    padding: 10px 15px;
     border: 1px solid var(--border-color);
-    background-color: transparent;
+    background-color: var(--background-color-primary);
     color: var(--text-color-secondary);
-    border-radius: 4px;
+    border-radius: var(--border-radius-base);
     cursor: pointer;
-    transition: all 0.2s;
-    font-size: 13px;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+    font-weight: 500;
 }
 
 .dm-date-btn:hover {
     background-color: var(--hover-color);
     border-color: var(--primary-color);
+    color: var(--primary-color);
+    transform: translateY(-2px);
 }
 
 .dm-date-btn.active {
-    background-color: #3f51b5; /* 主色 */
+    background-color: var(--primary-color);
     color: white;
-    border-color: #3f51b5;
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    font-weight: 600;
 }
 
 .dm-checkbox-group label,
 .dm-radio-group label {
-    display: block;
-    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
     font-weight: normal;
     cursor: pointer;
+    font-size: 1rem;
+    color: var(--text-color-primary);
 }
 
-.dm-checkbox-group input,
-.dm-radio-group input {
-    margin-right: 8px;
+.dm-checkbox-group input[type="checkbox"],
+.dm-radio-group input[type="radio"] {
+    margin-right: 12px;
+    transform: scale(1.2); /* Slightly larger checkboxes/radios */
+    accent-color: var(--primary-color); /* Highlight color */
 }
 
 /* --- Content Area --- */
 .dm-content {
-    width: 75%;
+    flex-grow: 1;
     display: flex;
     flex-direction: column;
+    /* Add padding to dm-content to provide space around the toolbar and table */
+    padding-left: 20px;
+    padding-right: 20px;
 }
 
 .dm-toolbar {
-    margin-bottom: 15px;
+    margin-bottom: 25px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 20px;
 }
 
 .dm-search-box {
     position: relative;
-    max-width: 300px;
+    max-width: 400px;
+    width: 100%;
 }
 
 #dm-search-input {
     width: 100%;
-    padding: 10px 15px 10px 35px;
-    border-radius: 20px;
+    padding: 12px 20px 12px 50px; /* Increased left padding for icon */
+    border-radius: 30px;
     border: 1px solid var(--border-color);
     background-color: var(--background-color-secondary);
+    color: var(--text-color-primary);
+    font-size: 1rem;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
 }
 
-.dm-search-box .fa-search {
+#dm-search-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(77, 163, 255, 0.2);
+    background-color: var(--background-color-secondary-light);
+}
+
+#dm-search-input::placeholder {
+    color: var(--text-color-secondary);
+    opacity: 0.8;
+}
+
+.dm-search-box .fas.fa-search {
     position: absolute;
-    left: 15px;
+    left: 20px;
     top: 50%;
     transform: translateY(-50%);
     color: var(--text-color-secondary);
+    font-size: 1.1rem;
 }
 
+/* Updated dm-card-list for table containment */
 .dm-card-list {
     flex-grow: 1;
     overflow-y: auto;
-    padding-right: 10px;
+    /* Removed padding-right: 15px; */
+    /* Removed display: flex; flex-direction: column; and gap: 15px; as it contains a single table */
 }
 
 .dm-no-data {
     text-align: center;
     margin-top: 50px;
     color: var(--text-color-secondary);
+    font-size: 1.3rem;
 }
 
-/* --- Data Card --- */
-.dm-card {
-    display: flex;
-    align-items: center;
+/* --- Data Table 美化增强 --- */
+.dm-data-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 0;
     background-color: var(--background-color-secondary);
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 15px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1); /* 卡片阴影 */
-    transition: transform 0.2s, box-shadow 0.2s;
-    position: relative;
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+    box-shadow: 0 8px 32px var(--shadow-color);
+    border: 1.5px solid var(--primary-color);
+    table-layout: fixed;
 }
 
-.dm-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+.dm-data-table thead {
+    background: linear-gradient(90deg, var(--primary-color) 60%, var(--accent-color) 100%);
+    color: #fff;
+    font-size: 1.15rem;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(77,163,255,0.08);
 }
 
-.dm-card-select {
-    margin-right: 15px;
-}
-
-.dm-card-icon {
-    font-size: 28px;
-    color: var(--primary-color);
-    margin-right: 15px;
-    width: 40px;
+.dm-data-table th,
+.dm-data-table td {
+    padding: 20px 18px;
     text-align: center;
-}
-
-.dm-card-icon .fa-file-pdf { color: #e74c3c; }
-.dm-card-icon .fa-file-image { color: #3498db; }
-.dm-card-icon .fa-file-excel { color: #27ae60; }
-.dm-card-icon .fa-file-alt { color: #f1c40f; }
-
-
-.dm-card-main {
-    flex-grow: 1;
-}
-
-.dm-card-name {
-    font-weight: bold;
+    border-bottom: 1.5px solid var(--border-color);
     color: var(--text-color-primary);
-    margin-bottom: 5px;
+    word-break: break-word;
+    font-size: 1.05rem;
 }
 
-.dm-card-meta {
-    font-size: 12px;
-    color: var(--text-color-secondary);
-}
-
-.dm-card-meta span {
-    margin-right: 15px;
-}
-.dm-card-meta .fas {
-    margin-right: 5px;
-}
-
-.dm-card-status {
-    margin: 0 20px;
-}
-
-.dm-status-tag {
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: bold;
-    color: white;
-}
-
-.dm-status-tag.processed {
-    background-color: #28a745; /* 绿色 */
-}
-
-.dm-status-tag.pending {
-    background-color: #fd7e14; /* 橙色 */
-}
-
-.dm-card-actions {
-    display: flex;
-    gap: 10px;
-    opacity: 0;
-    transition: opacity 0.2s;
-}
-
-.dm-card:hover .dm-card-actions {
-    opacity: 1;
-}
-
-.dm-action-btn {
+.dm-data-table th {
+    font-weight: 700;
+    font-size: 1.15rem;
+    letter-spacing: 0.5px;
     background: none;
-    border: 1px solid var(--border-color);
-    color: var(--text-color-secondary);
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-.dm-action-btn:hover {
-    background-color: var(--hover-color);
-    color: var(--primary-color);
-}
-.dm-action-btn:disabled {
-    cursor: not-allowed;
-    opacity: 0.5;
-}
-.dm-delete-btn:hover {
-    color: #e74c3c;
+    border-bottom: 2.5px solid var(--primary-color);
+    box-shadow: 0 2px 8px rgba(77,163,255,0.08);
 }
 
-/* --- Footer & Pagination --- */
+.dm-data-table tbody tr {
+    transition: background 0.25s;
+}
+
+.dm-data-table tbody tr:nth-child(even) {
+    background-color: rgba(74, 85, 104, 0.7);
+}
+
+.dm-data-table tbody tr:nth-child(odd) {
+    background-color: rgba(45, 55, 72, 0.7);
+}
+
+.dm-data-table tbody tr:hover {
+    background: linear-gradient(90deg, rgba(77,163,255,0.12) 0%, rgba(167,109,249,0.10) 100%);
+}
+
+.dm-data-table td button {
+    padding: 8px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1rem;
+    margin-right: 8px;
+    border: none;
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s, transform 0.15s;
+    box-shadow: 0 2px 8px rgba(77,163,255,0.08);
+}
+
+.dm-view-btn {
+    background: linear-gradient(90deg, var(--primary-color) 60%, var(--accent-color) 100%);
+    color: #fff;
+}
+
+.dm-view-btn:hover {
+    background: var(--primary-color-dark);
+    color: #fff;
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 4px 16px rgba(77,163,255,0.18);
+}
+
+.dm-delete-btn {
+    background: transparent;
+    color: #ff6b6b;
+    border: 1.5px solid #ff6b6b;
+}
+
+.dm-delete-btn:hover {
+    background: #ff6b6b;
+    color: #fff;
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 4px 16px rgba(255,107,107,0.18);
+}
+
+
+/* --- Footer --- */
 .dm-footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-top: 15px;
+    margin-top: 30px;
+    padding-top: 20px;
     border-top: 1px solid var(--border-color);
+    color: var(--text-color-secondary);
+    font-size: 0.95rem;
 }
 
 .dm-bulk-actions {
@@ -262,33 +298,148 @@
     align-items: center;
     gap: 15px;
 }
+
+.dm-bulk-actions label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.dm-bulk-actions input[type="checkbox"] {
+    margin-right: 8px;
+    transform: scale(1.1);
+    accent-color: var(--primary-color);
+}
+
 #dm-bulk-delete-btn {
-    padding: 8px 15px;
-    background-color: #dc3545;
+    background-color: #ff4d4d;
     color: white;
     border: none;
-    border-radius: 5px;
+    padding: 10px 20px;
+    border-radius: var(--border-radius-base);
     cursor: pointer;
-}
-#dm-bulk-delete-btn:disabled {
-    background-color: #6c757d;
-    cursor: not-allowed;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
+#dm-bulk-delete-btn:hover:not(:disabled) {
+    background-color: #e60000;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+#dm-bulk-delete-btn:disabled {
+    background-color: var(--background-color-secondary-light);
+    color: var(--text-color-secondary);
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.dm-stats span {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+/* --- Pagination --- */
+.dm-pagination {
+    margin-top: 25px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
 
 .dm-pagination button {
-    margin: 0 2px;
-    padding: 5px 10px;
+    background-color: var(--background-color-secondary-light);
+    color: var(--text-color-primary);
     border: 1px solid var(--border-color);
-    background-color: transparent;
+    padding: 10px 15px;
+    border-radius: var(--border-radius-base);
     cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
 }
-.dm-pagination button.active {
-    background-color: #3f51b5; /* 主色 */
+
+.dm-pagination button:hover:not(:disabled) {
+    background-color: var(--primary-color-dark);
     color: white;
-    border-color: #3f51b5;
+    border-color: var(--primary-color);
 }
+
+.dm-pagination button.active {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+    font-weight: 600;
+}
+
 .dm-pagination button:disabled {
-    cursor: not-allowed;
     opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 1024px) {
+    .dm-main {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .dm-sidebar {
+        width: auto;
+        max-height: 300px; /* Limit sidebar height on smaller screens */
+    }
+
+    .dm-content {
+        padding-left: 0;
+        padding-right: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    #data-management-container {
+        padding: 20px;
+    }
+
+    .dm-header h2 {
+        font-size: 2rem;
+    }
+
+    .dm-toolbar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .dm-search-box {
+        max-width: 100%;
+    }
+
+    .dm-footer {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+    }
+
+    .dm-bulk-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .dm-data-table th,
+    .dm-data-table td {
+        padding: 12px 15px;
+        font-size: 0.9rem;
+    }
+
+    .dm-data-table td button {
+        padding: 6px 10px;
+        font-size: 0.8rem;
+    }
+
+    .dm-card-info p {
+        font-size: 0.9rem;
+    }
 }

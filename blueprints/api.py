@@ -83,7 +83,7 @@ def model_api():
 
         # 读取 JSON 文件
         try:
-            with open(f'{results_path}/{file_name}.json', 'r') as f:
+            with open(f'{results_path}/{file_name}.json', 'r', encoding='utf-8') as f:
                 json_data = json.load(f)  # 首先解析外层JSON
                 
                 # description字段本身是一个JSON字符串，需要再次解析
