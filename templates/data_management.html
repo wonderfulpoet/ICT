@@ -1,115 +1,199 @@
 {% extends 'base.html' %}
 
-{% block style %}
+{% block styles %}
 <style>
-:root {
-    --primary-color: #4da3ff;
-    --primary-color-dark: #378cdb;
-    --accent-color: #a76df9;
-    --background-color-primary: #1a202c;
-    --background-color-secondary: #2d3748;
-    --background-color-secondary-light: #4a5568;
-    --text-color-primary: #e2e8f0;
-    --text-color-secondary: #a0aec0;
-    --border-color: #4a5568;
-    --shadow-color: rgba(0, 0, 0, 0.25);
-    --hover-color: rgba(77, 163, 255, 0.1);
-    --border-radius-base: 8px;
-    --border-radius-lg: 12px;
-    --font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+/* 容器设置 */
+.data-management-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: transparent;
 }
-/* --- Data Management Page --- */
-#data-management-container {
-    padding: 30px;
-    min-height: calc(100vh - 80px);
+
+/* 核心内容大卡片 */
+.data-management-card {
+    width: 1300px;
+    max-width: 92vw;
+    height: 88vh;
+    background: rgba(26, 26, 46, 0.85);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border-radius: 28px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5),
+                0 0 60px rgba(var(--primary-color-rgb, 77, 163, 255), 0.15);
+    border: 2px solid rgba(255, 255, 255, 0.12);
+    position: relative;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
-    background-color: var(--background-color-primary);
-    color: var(--text-color-primary);
+}
+
+.data-management-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 250px;
+    background: radial-gradient(ellipse at top, 
+        rgba(var(--primary-color-rgb, 77, 163, 255), 0.25) 0%, 
+        transparent 70%);
+    pointer-events: none;
+}
+
+/* --- Data Management Page --- */
+#data-management-container {
+    padding: 40px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 .dm-header {
-    margin-bottom: 30px;
+    margin-bottom: 35px;
     text-align: center;
-    padding: 15px 0;
-    border-bottom: 1px solid var(--border-color);
+    padding: 0 0 25px 0;
+    position: relative;
+    z-index: 1;
+}
+
+.dm-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    height: 3px;
+    background: linear-gradient(90deg, 
+        transparent 0%,
+        rgba(var(--primary-color-rgb, 77, 163, 255), 0.8) 50%,
+        transparent 100%);
+    border-radius: 2px;
 }
 
 .dm-header h2 {
     font-size: 2.5rem;
-    color: var(--primary-color);
-    text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+    background: linear-gradient(135deg, 
+        rgb(var(--primary-color-rgb, 77, 163, 255)) 0%, 
+        rgba(var(--primary-color-rgb, 77, 163, 255), 0.7) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin: 0;
 }
 
 .dm-main {
     display: flex;
-    gap: 30px;
-    flex-grow: 1;
+    gap: 25px;
+    flex: 1;
     min-height: 0;
+    overflow: hidden;
 }
 
 .dm-sidebar {
     width: 280px;
     flex-shrink: 0;
-    background-color: var(--background-color-secondary);
-    padding: 30px;
-    border-radius: var(--border-radius-lg);
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(10px);
+    padding: 25px;
+    border-radius: 18px;
     overflow-y: auto;
-    box-shadow: 0 6px 20px var(--shadow-color);
-    border: 1px solid var(--border-color);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.dm-sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.dm-sidebar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+}
+
+.dm-sidebar::-webkit-scrollbar-thumb {
+    background: rgba(var(--primary-color-rgb, 77, 163, 255), 0.4);
+    border-radius: 3px;
+}
+
+.dm-sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(var(--primary-color-rgb, 77, 163, 255), 0.6);
 }
 
 .dm-sidebar h4 {
     margin-top: 0;
-    margin-bottom: 25px;
-    border-bottom: 2px solid var(--primary-color);
+    margin-bottom: 20px;
     padding-bottom: 12px;
     font-size: 1.3rem;
-    color: var(--text-color-primary);
+    color: rgba(255, 255, 255, 0.95);
+    position: relative;
+}
+
+.dm-sidebar h4::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 50px;
+    height: 2.5px;
+    background: linear-gradient(90deg, 
+        rgba(var(--primary-color-rgb, 77, 163, 255), 1) 0%,
+        transparent 100%);
+    border-radius: 2px;
 }
 
 .dm-filter-group {
-    margin-bottom: 30px;
+    margin-bottom: 25px;
 }
 
 .dm-filter-group label {
     display: block;
     font-weight: 600;
-    margin-bottom: 15px;
-    font-size: 1.05rem;
-    color: var(--text-color-secondary);
+    margin-bottom: 12px;
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.7);
 }
 
 .dm-date-options {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
 }
 
 .dm-date-btn {
-    padding: 10px 15px;
-    border: 1px solid var(--border-color);
-    background-color: var(--background-color-primary);
-    color: var(--text-color-secondary);
-    border-radius: var(--border-radius-base);
+    padding: 10px 14px;
+    border: 1.5px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.7);
+    border-radius: 10px;
     cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.9rem;
     font-weight: 500;
+    text-align: center;
 }
 
 .dm-date-btn:hover {
-    background-color: var(--hover-color);
-    border-color: var(--primary-color);
-    color: var(--primary-color);
+    background: rgba(var(--primary-color-rgb, 77, 163, 255), 0.15);
+    border-color: rgba(var(--primary-color-rgb, 77, 163, 255), 0.4);
+    color: rgb(var(--primary-color-rgb, 77, 163, 255));
     transform: translateY(-2px);
 }
 
 .dm-date-btn.active {
-    background-color: var(--primary-color);
+    background: linear-gradient(135deg, 
+        rgba(var(--primary-color-rgb, 77, 163, 255), 0.9) 0%,
+        rgba(var(--primary-color-rgb, 77, 163, 255), 0.7) 100%);
     color: white;
-    border-color: var(--primary-color);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    border-color: transparent;
+    box-shadow: 0 4px 12px rgba(var(--primary-color-rgb, 77, 163, 255), 0.4);
     font-weight: 600;
 }
 
@@ -117,26 +201,36 @@
 .dm-radio-group label {
     display: flex;
     align-items: center;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
     font-weight: normal;
     cursor: pointer;
-    font-size: 1rem;
-    color: var(--text-color-primary);
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.8);
+    padding: 7px 10px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.dm-checkbox-group label:hover,
+.dm-radio-group label:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.95);
 }
 
 .dm-checkbox-group input[type="checkbox"],
 .dm-radio-group input[type="radio"] {
-    margin-right: 12px;
+    margin-right: 10px;
     transform: scale(1.2);
-    accent-color: var(--primary-color);
+    accent-color: rgb(var(--primary-color-rgb, 77, 163, 255));
+    cursor: pointer;
 }
 
 .dm-content {
-    flex-grow: 1;
+    flex: 1;
     display: flex;
     flex-direction: column;
-    padding-left: 20px;
-    padding-right: 20px;
+    min-width: 0;
+    overflow: hidden;
 }
 
 .dm-toolbar {
@@ -144,7 +238,7 @@
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    gap: 20px;
+    gap: 15px;
 }
 
 .dm-search-box {
@@ -155,46 +249,66 @@
 
 #dm-search-input {
     width: 100%;
-    padding: 12px 20px 12px 50px;
-    border-radius: 30px;
-    border: 1px solid var(--border-color);
-    background-color: var(--background-color-secondary);
-    color: var(--text-color-primary);
-    font-size: 1rem;
-    box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
-    transition: all 0.3s ease;
+    padding: 12px 20px 12px 48px;
+    border-radius: 22px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.95rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 #dm-search-input:focus {
     outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(77, 163, 255, 0.2);
-    background-color: var(--background-color-secondary-light);
+    border-color: rgba(var(--primary-color-rgb, 77, 163, 255), 0.6);
+    box-shadow: 0 0 0 4px rgba(var(--primary-color-rgb, 77, 163, 255), 0.15);
+    background: rgba(255, 255, 255, 0.08);
 }
 
 #dm-search-input::placeholder {
-    color: var(--text-color-secondary);
-    opacity: 0.8;
+    color: rgba(255, 255, 255, 0.4);
 }
 
 .dm-search-box .fas.fa-search {
     position: absolute;
-    left: 20px;
+    left: 18px;
     top: 50%;
     transform: translateY(-50%);
-    color: var(--text-color-secondary);
-    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 1rem;
 }
 
 .dm-card-list {
-    flex-grow: 1;
+    flex: 1;
     overflow-y: auto;
+    overflow-x: auto;
+    min-height: 0;
+}
+
+.dm-card-list::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.dm-card-list::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+
+.dm-card-list::-webkit-scrollbar-thumb {
+    background: rgba(var(--primary-color-rgb, 77, 163, 255), 0.4);
+    border-radius: 4px;
+}
+
+.dm-card-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(var(--primary-color-rgb, 77, 163, 255), 0.6);
 }
 
 .dm-no-data {
     text-align: center;
-    margin-top: 50px;
-    color: var(--text-color-secondary);
+    margin-top: 80px;
+    color: rgba(255, 255, 255, 0.5);
     font-size: 1.3rem;
 }
 
@@ -203,104 +317,105 @@
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
-    margin-top: 0;
-    background-color: var(--background-color-secondary);
-    border-radius: var(--border-radius-lg);
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(10px);
+    border-radius: 14px;
     overflow: hidden;
-    box-shadow: 0 8px 32px var(--shadow-color);
-    border: 1.5px solid var(--primary-color);
-    table-layout: fixed;
+    border: 1.5px solid rgba(var(--primary-color-rgb, 77, 163, 255), 0.25);
 }
 
 .dm-data-table thead {
-    background: linear-gradient(90deg, var(--primary-color) 60%, var(--accent-color) 100%);
-    color: #fff;
-    font-size: 1.15rem;
-    font-weight: 700;
-    box-shadow: 0 2px 8px rgba(77,163,255,0.08);
-}
-
-.dm-data-table th,
-.dm-data-table td {
-    padding: 20px 18px;
-    text-align: center;
-    border-bottom: 1.5px solid var(--border-color);
-    color: var(--text-color-primary);
-    word-break: break-word;
-    font-size: 1.05rem;
+    background: linear-gradient(135deg, 
+        rgba(var(--primary-color-rgb, 77, 163, 255), 0.85) 0%, 
+        rgba(var(--primary-color-rgb, 77, 163, 255), 0.65) 100%);
 }
 
 .dm-data-table th {
-    font-weight: 700;
-    font-size: 1.15rem;
-    letter-spacing: 0.5px;
-    background: none;
-    border-bottom: 2.5px solid var(--primary-color);
-    box-shadow: 0 2px 8px rgba(77,163,255,0.08);
+    padding: 16px 18px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 1rem;
+    letter-spacing: 0.3px;
+    border-bottom: none;
+    color: #fff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.dm-data-table td {
+    padding: 16px 18px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.95rem;
 }
 
 .dm-data-table tbody tr {
-    transition: background 0.25s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .dm-data-table tbody tr:nth-child(even) {
-    background-color: rgba(74, 85, 104, 0.7);
-}
-
-.dm-data-table tbody tr:nth-child(odd) {
-    background-color: rgba(45, 55, 72, 0.7);
+    background: rgba(255, 255, 255, 0.02);
 }
 
 .dm-data-table tbody tr:hover {
-    background: linear-gradient(90deg, rgba(77,163,255,0.12) 0%, rgba(167,109,249,0.10) 100%);
+    background: linear-gradient(90deg, 
+        rgba(var(--primary-color-rgb, 77, 163, 255), 0.15) 0%, 
+        rgba(var(--primary-color-rgb, 77, 163, 255), 0.08) 100%);
+    transform: translateX(4px);
 }
 
 .dm-data-table td button {
-    padding: 8px 20px;
-    border-radius: 20px;
+    padding: 7px 18px;
+    border-radius: 18px;
     cursor: pointer;
     font-weight: 600;
-    font-size: 1rem;
-    margin-right: 8px;
+    font-size: 0.85rem;
+    margin: 0 4px;
     border: none;
-    transition: background 0.2s, color 0.2s, box-shadow 0.2s, transform 0.15s;
-    box-shadow: 0 2px 8px rgba(77,163,255,0.08);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .dm-view-btn {
-    background: linear-gradient(90deg, var(--primary-color) 60%, var(--accent-color) 100%);
+    background: linear-gradient(135deg, 
+        rgba(var(--primary-color-rgb, 77, 163, 255), 0.9) 0%, 
+        rgba(var(--primary-color-rgb, 77, 163, 255), 0.7) 100%);
     color: #fff;
+    box-shadow: 0 2px 8px rgba(var(--primary-color-rgb, 77, 163, 255), 0.3);
 }
 
 .dm-view-btn:hover {
-    background: var(--primary-color-dark);
-    color: #fff;
-    transform: translateY(-2px) scale(1.05);
-    box-shadow: 0 4px 16px rgba(77,163,255,0.18);
+    background: linear-gradient(135deg, 
+        rgba(var(--primary-color-rgb, 77, 163, 255), 1) 0%, 
+        rgba(var(--primary-color-rgb, 77, 163, 255), 0.85) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(var(--primary-color-rgb, 77, 163, 255), 0.5);
 }
 
 .dm-delete-btn {
     background: transparent;
     color: #ff6b6b;
-    border: 1.5px solid #ff6b6b;
+    border: 2px solid #ff6b6b;
 }
 
 .dm-delete-btn:hover {
     background: #ff6b6b;
     color: #fff;
-    transform: translateY(-2px) scale(1.05);
-    box-shadow: 0 4px 16px rgba(255,107,107,0.18);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(255, 107, 107, 0.4);
 }
 
 .dm-footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 30px;
-    padding-top: 20px;
-    border-top: 1px solid var(--border-color);
-    color: var(--text-color-secondary);
-    font-size: 0.95rem;
+    margin-top: 25px;
+    padding: 20px 25px;
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(10px);
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
 }
 
 .dm-bulk-actions {
@@ -313,108 +428,128 @@
     display: flex;
     align-items: center;
     cursor: pointer;
+    font-weight: 500;
 }
 
 .dm-bulk-actions input[type="checkbox"] {
     margin-right: 8px;
-    transform: scale(1.1);
-    accent-color: var(--primary-color);
+    transform: scale(1.15);
+    accent-color: rgb(var(--primary-color-rgb, 77, 163, 255));
+    cursor: pointer;
 }
 
 #dm-bulk-delete-btn {
-    background-color: #ff4d4d;
+    background: linear-gradient(135deg, #ff4d4d 0%, #e60000 100%);
     color: white;
     border: none;
-    padding: 10px 20px;
-    border-radius: var(--border-radius-base);
+    padding: 9px 20px;
+    border-radius: 18px;
     cursor: pointer;
-    font-size: 1rem;
+    font-size: 0.9rem;
+    font-weight: 600;
     display: flex;
     align-items: center;
     gap: 8px;
-    transition: background-color 0.3s ease, transform 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(255, 77, 77, 0.3);
 }
 
 #dm-bulk-delete-btn:hover:not(:disabled) {
-    background-color: #e60000;
+    background: linear-gradient(135deg, #e60000 0%, #cc0000 100%);
     transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    box-shadow: 0 6px 18px rgba(255, 77, 77, 0.5);
 }
 
 #dm-bulk-delete-btn:disabled {
-    background-color: var(--background-color-secondary-light);
-    color: var(--text-color-secondary);
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.3);
     cursor: not-allowed;
-    opacity: 0.7;
+    opacity: 0.5;
+    box-shadow: none;
+}
+
+.dm-stats {
+    font-weight: 500;
 }
 
 .dm-stats span {
-    font-weight: 600;
-    color: var(--primary-color);
-}
-
-.dm-pagination {
-    margin-top: 25px;
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-}
-
-.dm-pagination button {
-    background-color: var(--background-color-secondary-light);
-    color: var(--text-color-primary);
-    border: 1px solid var(--border-color);
-    padding: 10px 15px;
-    border-radius: var(--border-radius-base);
-    cursor: pointer;
-    transition: all 0.3s ease;
+    font-weight: 700;
+    color: rgb(var(--primary-color-rgb, 77, 163, 255));
     font-size: 1rem;
 }
 
+.dm-pagination {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+}
+
+.dm-pagination button {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    color: rgba(255, 255, 255, 0.8);
+    border: 1.5px solid rgba(255, 255, 255, 0.1);
+    padding: 9px 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
 .dm-pagination button:hover:not(:disabled) {
-    background-color: var(--primary-color-dark);
+    background: rgba(var(--primary-color-rgb, 77, 163, 255), 0.3);
     color: white;
-    border-color: var(--primary-color);
+    border-color: rgba(var(--primary-color-rgb, 77, 163, 255), 0.5);
+    transform: translateY(-2px);
 }
 
 .dm-pagination button.active {
-    background-color: var(--primary-color);
+    background: linear-gradient(135deg, 
+        rgba(var(--primary-color-rgb, 77, 163, 255), 0.9) 0%,
+        rgba(var(--primary-color-rgb, 77, 163, 255), 0.7) 100%);
     color: white;
-    border-color: var(--primary-color);
+    border-color: transparent;
     font-weight: 600;
+    box-shadow: 0 4px 12px rgba(var(--primary-color-rgb, 77, 163, 255), 0.4);
 }
 
 .dm-pagination button:disabled {
-    opacity: 0.5;
+    opacity: 0.3;
     cursor: not-allowed;
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1200px) {
+    .data-management-card {
+        width: 95vw;
+        height: 90vh;
+    }
     .dm-main {
         flex-direction: column;
         gap: 20px;
     }
     .dm-sidebar {
         width: auto;
-        max-height: 300px;
-    }
-    .dm-content {
-        padding-left: 0;
-        padding-right: 0;
+        max-height: 250px;
     }
 }
 
 @media (max-width: 768px) {
+    .data-management-card {
+        width: 98vw;
+        height: 95vh;
+        border-radius: 20px;
+    }
     #data-management-container {
-        padding: 20px;
+        padding: 25px;
     }
     .dm-header h2 {
         font-size: 2rem;
     }
     .dm-toolbar {
         flex-direction: column;
-        align-items: flex-start;
-        gap: 15px;
+        align-items: stretch;
     }
     .dm-search-box {
         max-width: 100%;
@@ -422,117 +557,114 @@
     .dm-footer {
         flex-direction: column;
         gap: 15px;
-        align-items: flex-start;
+        align-items: stretch;
     }
-    .dm-bulk-actions {
-        width: 100%;
-        justify-content: space-between;
+    .dm-data-table {
+        font-size: 0.85rem;
     }
     .dm-data-table th,
     .dm-data-table td {
-        padding: 12px 15px;
-        font-size: 0.9rem;
-    }
-    .dm-data-table td button {
-        padding: 6px 10px;
-        font-size: 0.8rem;
-    }
-    .dm-card-info p {
-        font-size: 0.9rem;
+        padding: 12px 10px;
     }
 }
+
 </style>
 {% endblock %}
 
 {% block body %}
-<div id="data-management-container">
-    <div class="dm-header">
-        <h2>数据管理</h2>
-    </div>
-    <div class="dm-main">
-        <!-- 左侧筛选区 -->
-        <div class="dm-sidebar">
-            <h4>筛选</h4>
-            <div class="dm-filter-group">
-                <label>日期范围</label>
-                <div class="dm-date-options">
-                    <button class="dm-date-btn active" data-range="all">全部</button>
-                    <button class="dm-date-btn" data-range="today">今日</button>
-                    <button class="dm-date-btn" data-range="week">本周</button>
-                    <button class="dm-date-btn" data-range="month">本月</button>
+<div class="data-management-wrapper">
+    <div class="data-management-card">
+        <div id="data-management-container">
+            <div class="dm-header">
+                <h2>数据管理</h2>
+            </div>
+            <div class="dm-main">
+                <!-- 左侧筛选区 -->
+                <div class="dm-sidebar">
+                    <h4>筛选</h4>
+                    <div class="dm-filter-group">
+                        <label>日期范围</label>
+                        <div class="dm-date-options">
+                            <button class="dm-date-btn active" data-range="all">全部</button>
+                            <button class="dm-date-btn" data-range="today">今日</button>
+                            <button class="dm-date-btn" data-range="week">本周</button>
+                            <button class="dm-date-btn" data-range="month">本月</button>
+                        </div>
+                    </div>
+                    <div class="dm-filter-group">
+                        <label>文件类型</label>
+                        <div class="dm-checkbox-group">
+                            <label><input type="checkbox" name="file-type" value="text"> 文本</label>
+                            <label><input type="checkbox" name="file-type" value="image"> 图片</label>
+                            <label><input type="checkbox" name="file-type" value="spreadsheet"> 表格</label>
+                            <label><input type="checkbox" name="file-type" value="pdf"> PDF</label>
+                        </div>
+                    </div>
+                    <div class="dm-filter-group">
+                        <label>状态</label>
+                        <div class="dm-radio-group">
+                            <label><input type="radio" name="status" value="all" checked> 全部</label>
+                            <label><input type="radio" name="status" value="processed"> 已处理</label>
+                            <label><input type="radio" name="status" value="pending"> 待处理</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 右侧数据展示区 -->
+                <div class="dm-content">
+                    <div class="dm-toolbar">
+                        <div class="dm-search-box">
+                            <input type="text" id="dm-search-input" placeholder="按文件名称搜索...">
+                            <i class="fas fa-search"></i>
+                        </div>
+                    </div>
+
+                    <div id="dm-card-list" class="dm-card-list">
+                        <!-- 数据卡片将通过JS动态插入 -->
+                        <table class="dm-data-table">
+                            <thead>
+                                <tr>
+                                    <th>上传时间</th>
+                                    <th>名称</th>
+                                    <th>伪造类型</th>
+                                    <th>检测结果</th>
+                                    <th>置信度</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>2025-07-10 15:55:37</td>
+                                    <td>1.jpg</td>
+                                    <td>Photoshop修改</td>
+                                    <td>是伪造</td>
+                                    <td>97%</td>
+                                    <td>
+                                        <button class="dm-view-btn">查看</button>
+                                        <button class="dm-delete-btn">删除</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="dm-pagination" id="dm-pagination">
+                        <!-- 分页控件将通过JS动态生成 -->
+                    </div>
+                </div>
                 </div>
             </div>
-            <div class="dm-filter-group">
-                <label>文件类型</label>
-                <div class="dm-checkbox-group">
-                    <label><input type="checkbox" name="file-type" value="text"> 文本</label>
-                    <label><input type="checkbox" name="file-type" value="image"> 图片</label>
-                    <label><input type="checkbox" name="file-type" value="spreadsheet"> 表格</label>
-                    <label><input type="checkbox" name="file-type" value="pdf"> PDF</label>
+
+            <!-- 底部操作栏 -->
+            <div class="dm-footer">
+                <div class="dm-bulk-actions">
+                    <label><input type="checkbox" id="dm-select-all"> 全选</label>
+                    <button id="dm-bulk-delete-btn" disabled><i class="fas fa-trash-alt"></i> 批量删除</button>
+                </div>
+                <div class="dm-stats" id="dm-stats">
+                    共 1 条记录
                 </div>
             </div>
-            <div class="dm-filter-group">
-                <label>状态</label>
-                <div class="dm-radio-group">
-                    <label><input type="radio" name="status" value="all" checked> 全部</label>
-                    <label><input type="radio" name="status" value="processed"> 已处理</label>
-                    <label><input type="radio" name="status" value="pending"> 待处理</label>
-                </div>
-            </div>
-        </div>
-
-        <!-- 右侧数据展示区 -->
-        <div class="dm-content">
-            <div class="dm-toolbar">
-                <div class="dm-search-box">
-                    <input type="text" id="dm-search-input" placeholder="按文件名称搜索...">
-                    <i class="fas fa-search"></i>
-                </div>
-            </div>
-
-            <div id="dm-card-list" class="dm-card-list">
-                <!-- 数据卡片将通过JS动态插入 -->
-                <table class="dm-data-table">
-                    <thead>
-                        <tr>
-                            <th>上传时间</th>
-                            <th>名称</th>
-                            <th>伪造类型</th>
-                            <th>检测结果</th>
-                            <th>置信度</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>2025-07-10 15:55:37</td>
-                            <td>1.jpg</td>
-                            <td>Photoshop修改</td>
-                            <td>是伪造</td>
-                            <td>97%</td>
-                            <td>
-                                <button class="dm-view-btn">查看</button>
-                                <button class="dm-delete-btn">删除</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="dm-pagination" id="dm-pagination">
-                <!-- 分页控件将通过JS动态生成 -->
-            </div>
-        </div>
-    </div>
-
-    <!-- 底部操作栏 -->
-    <div class="dm-footer">
-        <div class="dm-bulk-actions">
-            <label><input type="checkbox" id="dm-select-all"> 全选</label>
-            <button id="dm-bulk-delete-btn" disabled><i class="fas fa-trash-alt"></i> 批量删除</button>
-        </div>
-        <div class="dm-stats" id="dm-stats">
-            共 1 条记录
         </div>
     </div>
 </div>

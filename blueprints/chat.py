@@ -29,7 +29,7 @@ except ImportError:
 bp = Blueprint('chat', __name__, url_prefix="/")
 
 # API配置
-API_KEY = os.environ.get("API_KEY", "sk-0d8f31e1cf5d4774bcf82f2f7624c02d")
+API_KEY = os.environ.get("API_KEY", "sk-e39673b760f6463da1e60a02230a7ea5")
 API_URL = os.environ.get("API_URL", "https://api.deepseek.com/v1")
 
 # --- 模型定义保持不变 ---

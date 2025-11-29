@@ -3,148 +3,221 @@
 {% block styles %}
 {{ super() }}
 <style>
+/* 容器设置 */
 .right-fullpage-container {
-    position: absolute;
-    left: 0; top: 0;
-    width: 100%;
-    height: 100%;
-    /* background: #232a36; */
-    z-index: 2;
-    overflow: hidden;
-}
-.right-nav {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 64px;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    gap: 24px;
-    background: transparent;
-    z-index: 100;
-    box-shadow: 0 2px 16px rgba(0,0,0,0.18);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-}
-.right-nav input[type="radio"] {
-    display: none;
-}
-.right-nav a {
-    background: #232a36;
-    color: #fff;
-    padding: 10px 24px;
-    border-radius: 8px;
-    text-decoration: none;
-    background-color: transparent;
-    font-size: 1.1rem;
-    transition: background 0.2s, color 0.2s;
-    text-align: center;
-    margin-bottom: 0;
-}
-.right-nav a.active, .right-nav a:hover {
-    background: var(--accent-color);
-    color: #fff;
-    font-weight: bold;
-}
-.right-scroll {
-    width: 100%;
-    min-height: calc(92vh - 64px); /* 92vh减去导航栏高度 */
-    margin-top: 64px;              /* 导航栏高度 */
     position: relative;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
     display: flex;
     justify-content: center;
     align-items: center;
-    /* 不加背景色 */
+    background: transparent; /* 背景透明，透出base的粒子背景 */
 }
+
+/* 核心内容大卡片 */
 .right-center-content {
-    width: 1200px;
-    max-width: 96vw;
-    height: 90vh;
-    background: #232a36;
-    border-radius: 18px;
-    box-shadow: 0 8px 32px 0 rgba(0,0,0,0.25);
+    /* 调整宽度，避免在大屏下过于宽大，视觉更聚焦 */
+    width: 1100px; 
+    max-width: 90vw;
+    height: 80vh; /* 调整高度 */
+    background: rgba(35, 42, 54, 0.9); /* 稍微增加透明度，更具科技感 */
+    border-radius: 24px;
+    box-shadow: 0 12px 48px rgba(0,0,0,0.4);
     position: relative;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
     align-items: center;
+    border: 1px solid rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
 }
-@media (max-width: 1300px) {
-    .right-center-content {
-        width: 96vw;
-    }
-}
-.right-panel {
+
+/* 顶部导航 (放入卡片内部) */
+.right-nav {
+    position: absolute;
+    top: 30px; /* 距离卡片顶部距离 */
     width: 100%;
-    height: 100%;
-    flex: 1 0 auto;
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
-    font-size: 2rem;
+    gap: 15px;
+    z-index: 10;
+}
+
+.right-nav a {
+    background: rgba(255,255,255,0.05);
+    color: #aaa;
+    padding: 10px 30px;
+    border-radius: 30px; /* 胶囊状圆角 */
+    text-decoration: none;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.right-nav a.active, .right-nav a:hover {
+    background: linear-gradient(135deg, 
+        rgba(var(--primary-color-rgb, 77, 163, 255), 0.3) 0%,
+        rgba(var(--primary-color-rgb, 77, 163, 255), 0.2) 100%);
+    color: rgb(var(--primary-color-rgb, 77, 163, 255));
+    border-color: rgb(var(--primary-color-rgb, 77, 163, 255));
+    font-weight: bold;
+    box-shadow: 0 0 20px rgba(var(--primary-color-rgb, 77, 163, 255), 0.4);
+}
+
+/* 内容面板区域 */
+.right-panel {
     position: absolute;
-    left: 0;
     top: 0;
-    transition: opacity 0.5s;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 100px 60px 60px 60px; /* 留出顶部导航的空间 */
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* 内容垂直居中 */
+    align-items: center;
     opacity: 0;
     pointer-events: none;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    transform: scale(0.95);
 }
+
 .right-panel.active {
     opacity: 1;
     pointer-events: auto;
     z-index: 1;
-}
-.panel-image {
-    width: 600px; /* 或者你想要的其他固定宽度 */
-    height: auto; /* 保持图片比例 */
-    margin-top: 20px; /* 调整图片与上方文本的间距 */
-    border-radius: 8px; /* 轻微圆角，美观 */
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1); /* 添加阴影效果 */
+    transform: scale(1);
 }
 
-#panel3 .panel-image {
-    margin-top: 50px; /* 为第三张图片增加顶部外边距，使其下移 */
+.right-panel p {
+    font-size: 1.2rem;
+    color: #e0e0e0;
+    text-align: center;
+    max-width: 800px;
+    margin-bottom: 30px;
+    line-height: 1.6;
+}
+
+.panel-image {
+    max-width: 80%;
+    max-height: 50vh;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    object-fit: contain;
+}
+
+/* ---------- 新增：左右切换箭头 ---------- */
+.nav-btn {
+    position: absolute;
+    top: 55%; /* 向下移动，大约在垂直居中偏下的位置 */
+    transform: translateY(-50%);
+    width: 50px;
+    height: 50px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    font-size: 1.2rem;
+    cursor: pointer;
+    z-index: 20;
+    transition: all 0.3s;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.nav-btn:hover {
+    background: linear-gradient(135deg, 
+        rgba(var(--primary-color-rgb, 77, 163, 255), 0.9) 0%,
+        rgba(var(--primary-color-rgb, 77, 163, 255), 0.7) 100%);
+    box-shadow: 0 0 20px rgba(var(--primary-color-rgb, 77, 163, 255), 0.6);
+    transform: translateY(-50%) scale(1.1);
+}
+
+.nav-prev { left: 30px; }
+.nav-next { right: 30px; }
+
+/* ---------- 新增：底部圆点指示器 ---------- */
+.dots-container {
+    position: absolute;
+    top: 700px; /* 放置在导航栏下方，正文上方 */
+    /* bottom: auto; */
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    z-index: 20;
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.dot.active {
+    background: linear-gradient(90deg, 
+        rgba(var(--primary-color-rgb, 77, 163, 255), 1) 0%,
+        rgba(var(--primary-color-rgb, 77, 163, 255), 0.8) 100%);
+    width: 30px; /* 选中时变宽 */
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(var(--primary-color-rgb, 77, 163, 255), 0.6);
 }
 
 footer {
-    background: #000000 !important;
-    color: #fff !important;
-    opacity: 1 !important;
+    display: none !important; /* 隐藏iframe内部的footer，避免重复 */
 }
 </style>
 {% endblock %}
 
 {% block body %}
 <div class="right-fullpage-container">
-    <div class="right-nav">
-        <input type="radio" name="radio-set" checked id="nav1">
-        <a href="#panel1">图像检测</a>
-        <input type="radio" name="radio-set" id="nav2">
-        <a href="#panel2">掩码生成</a>
-        <input type="radio" name="radio-set" id="nav3">
-        <a href="#panel3">智能对话</a>
-    </div>
-    <div class="right-scroll">
-        <div class="right-center-content">
-            <section class="right-panel" id="panel1">
-                <p>上传或输入一张图像，系统将自动检测该图像是否存在篡改内容，并给出详细的检测解释说明。适用于伪造图片、合成图片等真伪判别场景。</p>
-                <img src = "static\imgs\1.png" class="panel-image" alt="图像检测示例图">
-            </section>
-            <section class="right-panel" id="panel2">
-                <p>基于检测结果，自动在原图上生成掩码（mask）预测图片，直观标注出疑似被篡改的区域，辅助用户理解检测结果。</p>
-                <img src = "static\imgs\2.png" class="panel-image" alt="掩码生成示例图">
-            </section>
-            <section class="right-panel" id="panel3">
-                <br>
-                <p>在图像检测的语境下，支持与各类大模型（如GPT、文心一言等）进行智能对话，获取检测建议、原理解释、案例分析等多种智能问答服务。</p>
-                <img src = "static\imgs\5.png"  alt="智能对话示例图" id = "panel3">
-            </section>
+    
+    <!-- 核心卡片 -->
+    <div class="right-center-content">
+        
+        <!-- 顶部导航 (Tabs) -->
+        <div class="right-nav">
+            <a href="#panel1">图像检测</a>
+            <a href="#panel2">掩码生成</a>
+            <a href="#panel3">智能对话</a>
         </div>
+
+        <!-- 装饰性圆点 (配合截图效果) -->
+        <div class="dots-container">
+            <div class="dot active" data-index="0"></div>
+            <div class="dot" data-index="1"></div>
+            <div class="dot" data-index="2"></div>
+        </div>
+
+        <!-- 内容区域 -->
+        <section class="right-panel active" id="panel1">
+            <p>上传或输入一张图像，系统将自动检测该图像是否存在篡改内容，并给出详细的检测解释说明。适用于伪造图片、合成图片等真伪判别场景。</p>
+            <img src="{{ url_for('static', filename='imgs/1.png') }}" class="panel-image" alt="图像检测示例图">
+        </section>
+        
+        <section class="right-panel" id="panel2">
+            <p>基于检测结果，自动在原图上生成掩码（mask）预测图片，直观标注出疑似被篡改的区域，辅助用户理解检测结果。</p>
+            <img src="{{ url_for('static', filename='imgs/2.png') }}" class="panel-image" alt="掩码生成示例图">
+        </section>
+        
+        <section class="right-panel" id="panel3">
+            <br>
+            <p>在图像检测的语境下，支持与各类大模型（如GPT、文心一言等）进行智能对话，获取检测建议、原理解释、案例分析等多种智能问答服务。</p>
+            <!-- 注意：这里建议把id="panel3"从img移除，避免id重复冲突 -->
+            <img src="{{ url_for('static', filename='imgs/5.png') }}" class="panel-image" alt="智能对话示例图">
+        </section>
+
+        <!-- 左右切换箭头 -->
+        <div class="nav-btn nav-prev"><i class="fas fa-chevron-left"></i></div>
+        <div class="nav-btn nav-next"><i class="fas fa-chevron-right"></i></div>
+
     </div>
 </div>
 {% endblock %}
@@ -154,35 +227,67 @@ footer {
 document.addEventListener('DOMContentLoaded', function() {
     const panels = document.querySelectorAll('.right-panel');
     const navLinks = document.querySelectorAll('.right-nav a');
+    const dots = document.querySelectorAll('.dot');
+    const prevBtn = document.querySelector('.nav-prev');
+    const nextBtn = document.querySelector('.nav-next');
+    
     let current = 0;
     const total = panels.length;
+    let autoPlayTimer = null;
+    const AUTO_PLAY_INTERVAL = 5000; // 5秒自动切换
 
+    // 核心切换函数
     function showPanel(idx) {
-        panels.forEach((p, i) => {
-            p.classList.toggle('active', i === idx);
-        });
-        navLinks.forEach((n, i) => {
-            n.classList.toggle('active', i === idx);
-        });
+        // 循环逻辑处理
+        if (idx < 0) idx = total - 1;
+        if (idx >= total) idx = 0;
+
         current = idx;
-        location.hash = panels[idx].id;
+
+        // 更新面板 - 添加淡入淡出动画
+        panels.forEach((p, i) => {
+            p.classList.toggle('active', i === current);
+        });
+
+        // 更新顶部导航状态
+        navLinks.forEach((n, i) => {
+            n.classList.toggle('active', i === current);
+        });
+
+        // 更新圆点状态
+        dots.forEach((d, i) => {
+            d.classList.toggle('active', i === current);
+        });
+
+        // 重置自动播放计时器
+        resetAutoPlay();
     }
-    showPanel(0);
 
-    // 鼠标滚轮切换
-    let wheelLock = false;
-    window.addEventListener('wheel', function(e) {
-        if (wheelLock) return;
-        wheelLock = true;
-        setTimeout(() => wheelLock = false, 800);
-        if (e.deltaY > 0 && current < total - 1) {
+    // 自动播放功能
+    function startAutoPlay() {
+        stopAutoPlay();
+        autoPlayTimer = setInterval(() => {
             showPanel(current + 1);
-        } else if (e.deltaY < 0 && current > 0) {
-            showPanel(current - 1);
-        }
-    });
+        }, AUTO_PLAY_INTERVAL);
+    }
 
-    // 导航点击切换
+    function stopAutoPlay() {
+        if (autoPlayTimer) {
+            clearInterval(autoPlayTimer);
+            autoPlayTimer = null;
+        }
+    }
+
+    function resetAutoPlay() {
+        stopAutoPlay();
+        startAutoPlay();
+    }
+
+    // 初始化
+    showPanel(0);
+    startAutoPlay(); // 启动自动播放
+
+    // 事件监听：顶部导航点击
     navLinks.forEach((link, idx) => {
         link.addEventListener('click', function(e) {
             e.preventDefault();
@@ -190,19 +295,79 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // 支持锚点跳转
-    window.addEventListener('hashchange', function() {
-        const hash = location.hash.replace('#', '');
-        const idx = Array.from(panels).findIndex(p => p.id === hash);
-        if (idx !== -1) showPanel(idx);
+    // 事件监听：底部圆点点击
+    dots.forEach((dot, idx) => {
+        dot.addEventListener('click', function() {
+            showPanel(idx);
+        });
     });
 
-    // 页面加载时根据锚点显示
-    if (location.hash) {
-        const hash = location.hash.replace('#', '');
-        const idx = Array.from(panels).findIndex(p => p.id === hash);
-        if (idx !== -1) showPanel(idx);
+    // 事件监听：左右箭头
+    prevBtn.addEventListener('click', () => showPanel(current - 1));
+    nextBtn.addEventListener('click', () => showPanel(current + 1));
+
+    // 事件监听：鼠标滚轮
+    let wheelLock = false;
+    window.addEventListener('wheel', function(e) {
+        if (wheelLock) return;
+        wheelLock = true;
+        setTimeout(() => wheelLock = false, 800);
+        if (e.deltaY > 0) {
+            showPanel(current + 1);
+        } else if (e.deltaY < 0) {
+            showPanel(current - 1);
+        }
+    });
+
+    // 键盘控制
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowLeft') {
+            showPanel(current - 1);
+        } else if (e.key === 'ArrowRight') {
+            showPanel(current + 1);
+        }
+    });
+
+    // 鼠标悬停暂停自动播放
+    const container = document.querySelector('.right-center-content');
+    container.addEventListener('mouseenter', stopAutoPlay);
+    container.addEventListener('mouseleave', startAutoPlay);
+
+    // 触摸滑动支持（移动端）
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    container.addEventListener('touchstart', function(e) {
+        touchStartX = e.changedTouches[0].screenX;
+        stopAutoPlay();
+    }, { passive: true });
+
+    container.addEventListener('touchend', function(e) {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+        startAutoPlay();
+    }, { passive: true });
+
+    function handleSwipe() {
+        const swipeThreshold = 50;
+        if (touchEndX < touchStartX - swipeThreshold) {
+            // 向左滑动 - 下一张
+            showPanel(current + 1);
+        }
+        if (touchEndX > touchStartX + swipeThreshold) {
+            // 向右滑动 - 上一张
+            showPanel(current - 1);
+        }
     }
+
+    // 页面可见性变化时控制自动播放
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            stopAutoPlay();
+        } else {
+            startAutoPlay();
+        }
+    });
 });
 </script>
 {% endblock %}

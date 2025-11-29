@@ -4,36 +4,25 @@ html, body {
     padding: 0;
     height: 100%;
     width: 100%;
-    overflow: hidden; /* Prevents the main page from scrolling */
-    background-color: #2d333b; /* A dark background to match the theme */
+    overflow: hidden;
+    background-color: #0f0f1e;
     font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
-    color: #333;
+    color: #fff;
 }
+
 #app, .main {
     height: 100%;
     width: 100%;
 }
+
 a {
-    color: #1E9FFF;
+    color: rgb(var(--primary-color-rgb, 77, 163, 255));
     text-decoration: none;
-    transition: opacity 0.2s;
-}
-a:hover {
-    opacity: 0.8;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* layui Optimizations */
-.layui-form-select {
-    z-index: 1000;
-}
-.layui-form-item .layui-input-inline,
-.layui-input-block {
-    width: 500px;
-}
-.layui-form-onswitch,
-.layui-form-checked[lay-skin="primary"] i {
-    border-color: #009688;
-    background-color: #009688;
+a:hover {
+    opacity: 0.85;
 }
 
 /* Utility classes */
@@ -42,9 +31,22 @@ a:hover {
 .l { float: left }
 .r { float: right }
 
-/* Scrollbar (hidden by default) */
+/* Scrollbar */
 ::-webkit-scrollbar {
-    width: 0px;
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(var(--primary-color-rgb, 77, 163, 255), 0.4);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(var(--primary-color-rgb, 77, 163, 255), 0.6);
 }
 
 /* --- Left Sidebar --- */
@@ -52,54 +54,143 @@ a:hover {
     position: fixed;
     left: 0;
     top: 0;
-    width: 150px;
+    width: 280px;
     height: 100%;
-    background: #3c444d;
+    background: linear-gradient(180deg, 
+        rgba(var(--primary-color-rgb, 77, 163, 255), 0.15) 0%, 
+        rgba(15, 15, 30, 0.95) 100%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     overflow-y: auto;
     overflow-x: hidden;
     z-index: 100;
-    box-shadow: 2px 0 8px rgba(0,0,0,0.15); /* Adds depth */
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.3);
+    border-right: 2px solid rgba(var(--primary-color-rgb, 77, 163, 255), 0.2);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+.left::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 200px;
+    background: radial-gradient(ellipse at top, 
+        rgba(var(--primary-color-rgb, 77, 163, 255), 0.3) 0%, 
+        transparent 70%);
+    pointer-events: none;
+}
+
+.left:hover {
+    border-right-color: rgba(var(--primary-color-rgb, 77, 163, 255), 0.4);
+}
+
 .left ul {
     margin: 0;
-    padding: 10px 0;
+    padding: 30px 15px;
     list-style: none;
 }
+
 .left ul li {
     width: 100%;
     box-sizing: border-box;
+    margin-bottom: 6px;
 }
 
 /* --- Menu Item Links --- */
 .left ul li a {
-    color: #aeb2b7; /* Softer text color */
-    padding: 14px 20px;
+    color: rgba(255, 255, 255, 0.7);
+    padding: 18px 20px;
     display: flex;
     align-items: center;
-    font-size: 14px;
-    font-weight: 500; /* Bolder text for readability */
+    gap: 16px;
+    font-size: 1.05rem;
+    font-weight: 500;
     position: relative;
-    border-left: 3px solid transparent; /* Placeholder for active indicator */
-    transition: color 0.2s, background-color 0.2s;
+    border-radius: 14px;
+    overflow: hidden;
+    background: transparent;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.left ul li a::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, 
+        rgba(var(--primary-color-rgb, 77, 163, 255), 0.4), 
+        transparent);
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 0;
+}
+
+.left ul li a:hover::before {
+    width: 100%;
 }
 
 .left ul li a:hover {
-    color: #ffffff;
-    background-color: #4a5461;
+    color: rgba(255, 255, 255, 0.95);
+    background: rgba(var(--primary-color-rgb, 77, 163, 255), 0.12);
+    transform: translateX(6px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .left ul li a.active {
-    color: #ffffff;
-    background-color: #2d333b; /* Darker background to make border pop */
-    border-left-color: var(--accent-color); /* Bright accent color for active item */
+    background: linear-gradient(135deg, 
+        rgba(var(--primary-color-rgb, 77, 163, 255), 0.9) 0%, 
+        rgba(var(--primary-color-rgb, 77, 163, 255), 0.7) 100%) !important;
+    color: #fff !important;
+    font-weight: 600;
+    box-shadow: 0 6px 20px rgba(var(--primary-color-rgb, 77, 163, 255), 0.4),
+                0 0 40px rgba(var(--primary-color-rgb, 77, 163, 255), 0.2);
+    transform: translateX(6px) scale(1.02);
+    border-left: 4px solid rgba(255, 255, 255, 0.8);
+}
+
+.left ul li a.active::before {
+    width: 100%;
+    background: linear-gradient(90deg, 
+        rgba(255, 255, 255, 0.2), 
+        transparent);
 }
 
 /* Menu Icons */
-.left ul li a .layui-icon:first-child {
-    font-size: 16px;
-    margin-right: 10px;
-    width: 20px;
-    text-align: center;
+.left ul li a .icon {
+    font-size: 1.4em;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    z-index: 1;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    color: rgba(var(--primary-color-rgb, 77, 163, 255), 0.8);
+    flex-shrink: 0;
+}
+
+.left ul li a .menu-text {
+    position: relative;
+    z-index: 1;
+}
+
+.left ul li a:hover .icon {
+    transform: scale(1.15) rotate(-5deg);
+    background: rgba(var(--primary-color-rgb, 77, 163, 255), 0.2);
+    color: rgb(var(--primary-color-rgb, 77, 163, 255));
+    box-shadow: 0 0 20px rgba(var(--primary-color-rgb, 77, 163, 255), 0.4);
+}
+
+.left ul li a.active .icon {
+    transform: scale(1.2);
+    background: rgba(255, 255, 255, 0.25);
+    color: #fff;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
 }
 
 /* Arrow for expandable menus */
@@ -111,39 +202,80 @@ a:hover {
     font-size: 12px;
     transition: transform 0.3s ease-in-out;
 }
+
 .left ul li.hidden a .arrow {
-    transform: translateY(-50%) rotate(-180deg); /* Points up when menu is closed */
+    transform: translateY(-50%) rotate(-180deg);
 }
 
 /* --- Submenu --- */
 .left ul li > div {
-    background-color: #28313c; /* Darker for hierarchy */
-    padding-top: 5px;
-    padding-bottom: 5px;
+    background-color: rgba(0, 0, 0, 0.2);
+    padding: 5px 0;
+    border-radius: 10px;
+    margin-top: 4px;
 }
+
 .left ul li > div a {
-    padding-left: 47px; /* Indent sub-items */
-    font-size: 13px;
-    font-weight: 400; /* Lighter weight for sub-items */
-    border-left: 3px solid transparent !important; /* No border indicator for submenu items */
+    padding-left: 60px;
+    font-size: 0.95rem;
+    font-weight: 400;
+    border-left: none !important;
 }
+
 .left ul li > div a.active {
+    background: rgba(var(--primary-color-rgb, 77, 163, 255), 0.8) !important;
     color: #ffffff;
-    background-color: #009688; /* Use LayUI green for active sub-item */
 }
 
 /* --- Right Content Area & Iframe --- */
 .right {
     position: absolute;
     top: 0;
-    left: 150px;
+    left: 280px;
     right: 0;
     bottom: 0;
     box-sizing: border-box;
     overflow: hidden;
 }
+
 .right iframe {
     width: 100%;
     height: 100%;
     border: none;
+}
+
+/* 移动端适配 */
+@media (max-width: 900px) {
+    .left {
+        width: 85px;
+        padding: 30px 8px;
+    }
+    
+    .left ul li a {
+        padding: 16px 12px;
+        font-size: 1rem;
+        flex-direction: column;
+        justify-content: center;
+        gap: 6px;
+    }
+    
+    .left ul li a .menu-text {
+        display: none;
+    }
+    
+    .left ul li a .icon {
+        margin: 0;
+        width: 36px;
+        height: 36px;
+        font-size: 1.3em;
+    }
+    
+    .left ul li a:hover,
+    .left ul li a.active {
+        transform: translateX(0) scale(1.05);
+    }
+    
+    .right {
+        left: 85px;
+    }
 }

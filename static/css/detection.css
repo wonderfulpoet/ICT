@@ -1,59 +1,110 @@
 /* Main Container */
 .detection-container {
     width: 100%;
-    padding: 2rem;
-    background-color: var(--background-color);
-    border-radius: var(--border-radius);
+    padding: 2.5rem;
+    background: transparent;
+    border-radius: var(--border-radius-lg);
     text-align: center;
+    animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .detection-container h2 {
     color: var(--text-color);
-    margin-bottom: 2.5rem;
+    margin-bottom: 3rem;
     font-weight: 700;
-    font-size: 2.2rem;
+    font-size: 2.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 0.02em;
 }
 
 /* Content Area Layout */
 .content-area {
     display: flex;
-    gap: 2rem;
-    margin-bottom: 2.5rem;
+    gap: 2.5rem;
+    margin-bottom: 3rem;
+    animation: fadeIn 0.8s ease-out 0.2s both;
 }
 
 .panel {
     flex: 1;
     display: flex;
     flex-direction: column;
-    background-color: var(--container-bg);
-    padding: 1.5rem;
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow);
+    background: rgba(26, 26, 46, 0.6);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    padding: 2rem;
+    border-radius: var(--border-radius-lg);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.08), transparent);
+    transition: left 0.8s;
+}
+
+.panel:hover::before {
+    left: 100%;
+}
+
+.panel:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4), 0 0 40px rgba(102, 126, 234, 0.2);
+    border-color: rgba(102, 126, 234, 0.3);
 }
 
 .panel h3 {
     color: var(--subheading-color);
-    font-size: 1.25rem;
-    margin-bottom: 1rem;
-    font-weight: 600;
+    font-size: 1.4rem;
+    margin-bottom: 1.5rem;
+    font-weight: 700;
     text-align: left;
+    position: relative;
+    z-index: 1;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 /* Image Box Styles */
 .image-box {
-    border: 2px dashed var(--border-color);
+    border: 2px dashed rgba(102, 126, 234, 0.3);
     border-radius: var(--border-radius);
-    min-height: 400px;
+    min-height: 420px;
     flex-grow: 1;
     display: flex;
     justify-content: center;
     align-items: center;
     position: relative;
     overflow: hidden;
-    background-color: var(--secondary-color);
-    transition: all 0.3s ease;
+    background: rgba(15, 15, 30, 0.5);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     color: var(--placeholder-color);
-    font-size: 1.1rem;
+    font-size: 1.05rem;
 }
 
 #upload-box {
@@ -61,8 +112,15 @@
 }
 
 #upload-box:hover {
-    border-color: var(--accent-color);
-    background-color: var(--secondary-hover-color);
+    border-color: #667eea;
+    background: rgba(102, 126, 234, 0.08);
+    border-style: solid;
+    box-shadow: 0 0 30px rgba(102, 126, 234, 0.2), inset 0 0 30px rgba(102, 126, 234, 0.05);
+}
+
+#upload-box:hover span {
+    color: #667eea;
+    transform: scale(1.05);
 }
 
 .preview-image {
@@ -124,36 +182,70 @@
 
 /* Button Styles */
 .panel-actions {
-    margin-top: 1rem;
+    margin-top: 1.5rem;
     display: flex;
     justify-content: center;
-    gap: 1rem;
+    gap: 1.2rem;
 }
 
 .btn {
-    padding: 0.6rem 1.2rem;
+    padding: 12px 28px;
     border: none;
-    border-radius: 6px;
-    background-color: var(--accent-color);
+    border-radius: var(--border-radius-sm);
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     color: white;
-    font-size: 0.95rem;
+    font-size: 1rem;
+    font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.15);
+    transform: translate(-50%, -50%);
+    transition: width 0.5s, height 0.5s;
+}
+
+.btn:hover::before {
+    width: 300px;
+    height: 300px;
 }
 
 .btn:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
 .btn-primary {
-    background-color: var(--primary-color);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: transparent;
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+}
+
+.btn-primary:hover {
+    box-shadow: 0 8px 28px rgba(102, 126, 234, 0.5);
+    transform: translateY(-3px) scale(1.02);
 }
 
 .btn-detect {
-    padding: 1rem 3rem;
-    font-size: 1.2rem;
-    font-weight: 600;
+    padding: 18px 60px;
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    margin: 20px 0;
 }
 
 /* Results Info */
@@ -183,40 +275,64 @@
 /* Chat Widget Styles */
 .chat-widget {
     position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 400px;
+    bottom: 30px;
+    right: 30px;
+    width: 420px;
     max-width: 90vw;
     z-index: 1001;
-    background-color: #1f232a;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    background: rgba(26, 26, 46, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(102, 126, 234, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    transition: all 0.3s ease-in-out;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .chat-widget.is-collapsed {
-    height: 60px;
-    width: 250px;
+    height: 70px;
+    width: 280px;
 }
 
 .chat-widget-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 20px;
-    height: 60px;
-    background-color: #232a36;
+    padding: 0 25px;
+    height: 70px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: #fff;
     cursor: pointer;
     flex-shrink: 0;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.chat-widget-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.6s;
+}
+
+.chat-widget-header:hover::before {
+    left: 100%;
 }
 
 .chat-widget-header h3 {
     margin: 0;
-    font-size: 1.1rem;
+    font-size: 1.15rem;
+    font-weight: 700;
+    position: relative;
+    z-index: 1;
 }
 
 #chat-toggle-icon {
@@ -253,27 +369,49 @@
 
 .ds-bubble {
     max-width: 85%;
-    padding: 10px 15px;
+    padding: 12px 18px;
     border-radius: 18px;
     font-size: 0.95rem;
     line-height: 1.6;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     word-break: break-word;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: all 0.3s ease;
+    animation: bubbleSlideIn 0.3s ease-out;
+}
+
+@keyframes bubbleSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.ds-bubble:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.25);
 }
 
 .ds-bubble.user {
     align-self: flex-end;
-    background: var(--accent-color);
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.9) 0%, rgba(118, 75, 162, 0.9) 100%);
     color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .ds-bubble.ai {
     align-self: flex-start;
-    background: #2c313a;
+    background: rgba(44, 49, 58, 0.9);
     color: #e3e3e3;
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .ds-bubble-image {
@@ -370,21 +508,25 @@
 
 #dsPromptInput {
     flex: 1;
-    padding: 10px 15px;
-    border-radius: 20px;
-    background-color: #2c313a;
+    padding: 12px 18px;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     color: #fff;
-    border: 1px solid #3e4654;
+    border: 2px solid rgba(255, 255, 255, 0.08);
     resize: none;
-    font-size: 0.9rem;
-    max-height: 100px;
-    line-height: 1.4;
-    transition: border-color 0.2s;
+    font-size: 0.95rem;
+    max-height: 120px;
+    line-height: 1.5;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 #dsPromptInput:focus {
     outline: none;
-    border-color: var(--accent-color);
+    border-color: #667eea;
+    background: rgba(102, 126, 234, 0.08);
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
 }
 
 .ds-tool-btn {
@@ -409,23 +551,29 @@
 }
 
 #dsSendBtn {
-    background: var(--accent-color);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: #fff;
     border: none;
     border-radius: 50%;
-    width: 42px;
-    height: 42px;
-    font-size: 1rem;
+    width: 48px;
+    height: 48px;
+    font-size: 1.1rem;
     cursor: pointer;
     flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background-color 0.2s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
 #dsSendBtn:hover {
-    background: var(--primary-dark);
+    transform: scale(1.1) rotate(15deg);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+#dsSendBtn:active {
+    transform: scale(0.95) rotate(15deg);
 }
 
 /* Text Output Area Styles */

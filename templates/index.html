@@ -26,16 +26,16 @@
                        target="main"
                        :class="{active: vo.active}"
                        @click="setActive(index)">
-                        <i class="layui-icon" v-html="vo.icon"></i>
-                        <span v-text="vo.name"></span>
+                        <span class="icon" v-text="vo.icon"></span>
+                        <span class="menu-text" v-text="vo.name"></span>
                     </a>
                     <a v-else
                        href="javascript:;"
                        :class="{active: vo.active}"
                        @click="toggleMenu(index)">
-                        <i class="layui-icon" v-html="vo.icon"></i>
-                        <span v-text="vo.name"></span>
-                        <i class="layui-icon arrow" v-if="vo.list.length > 0"></i>
+                        <span class="icon" v-text="vo.icon"></span>
+                        <span class="menu-text" v-text="vo.name"></span>
+                        <i class="layui-icon arrow" v-if="vo.list.length > 0"></i>
                     </a>
                     <!--子级分类-->
                     <div v-show="vo.active && vo.list.length > 0">
@@ -61,24 +61,28 @@
 <script type="text/javascript">
     let menu = [{
         "name": "首页",
+        "icon": "🏠",
         "url": "home_page",
         "hidden": false,
         "active": true,
         "list": []
     }, {
         "name": "综合检测",
+        "icon": "🔍",
         "url": "/detection",
         "hidden": false,
         "active": false,
         "list": []
     }, {
         "name": "数据管理",
+        "icon": "📊",
         "url": "data",
         "hidden": false,
         "active": false,
         "list": []
     }, {
         "name": "模型中心",
+        "icon": "🧠",
         "url": "models",
         "hidden": false,
         "active": false,
@@ -86,12 +90,14 @@
     },
     {
         "name": "系统设置",
+        "icon": "⚙️",
         "url": "settings",
         "hidden": false,
         "active": false,
         "list": []
     }, {
         "name": "退出登录",
+        "icon": "🚪",
         "url": "logout",
         "external": true,
         "hidden": false,
