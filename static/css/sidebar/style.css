@@ -91,7 +91,7 @@ a:hover {
 .left ul li a.active {
     color: #ffffff;
     background-color: #2d333b; /* Darker background to make border pop */
-    border-left-color: #1E9FFF; /* Bright accent color for active item */
+    border-left-color: var(--accent-color); /* Bright accent color for active item */
 }
 
 /* Menu Icons */

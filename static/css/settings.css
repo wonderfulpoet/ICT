@@ -1,7 +1,7 @@
 /* --- Settings Page General Layout --- */
 #settings-container {
     display: flex;
-    height: calc(100vh - 110px); /* Full height minus header/footer padding */
+    height: calc(100vh - 110px);
     background-color: var(--background-color);
     border-radius: var(--border-radius);
     overflow: hidden;
@@ -60,7 +60,7 @@
     flex-grow: 1;
     display: flex;
     flex-direction: column;
-    min-width: 0; /* Fix flexbox overflow issue */
+    min-width: 0;
 }
 
 .settings-content {
@@ -118,7 +118,7 @@
     align-items: center;
     padding: 15px 0;
 }
-/* For items that should stack on smaller screens if needed */
+
 .setting-item.vertical-layout {
     grid-template-columns: 1fr;
     gap: 15px;
@@ -148,132 +148,43 @@
     justify-content: flex-end;
     gap: 15px;
 }
-.item-control.full-width {
-    justify-content: flex-start;
-    width: 100%;
+
+/* --- Password Form --- */
+#change-password-form { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 15px; 
+    max-width: 450px; 
 }
 
-
-/* --- Specific Controls --- */
-/* iOS-style Switch */
-.ios-switch {
-    position: relative;
-    display: inline-block;
-    width: 50px;
-    height: 28px;
-}
-.ios-switch input { display: none; }
-.ios-switch .slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background-color: var(--secondary-hover-color);
-    border-radius: 28px;
-    transition: .3s;
-}
-.ios-switch .slider:before {
-    position: absolute;
-    content: "";
-    height: 22px; width: 22px;
-    left: 3px; bottom: 3px;
-    background-color: white;
-    border-radius: 50%;
-    transition: .3s;
-}
-.ios-switch input:checked + .slider { background-color: var(--accent-color); }
-.ios-switch input:checked + .slider:before { transform: translateX(22px); }
-.ios-switch input:disabled + .slider { background-color: #3e4654; cursor: not-allowed; }
-
-/* Color Picker */
-.color-picker { display: flex; gap: 12px; }
-.color-option {
-    width: 32px; height: 32px;
-    border-radius: 50%;
-    cursor: pointer;
-    border: 3px solid transparent;
-    transition: all 0.2s ease;
-}
-.color-option:hover { transform: scale(1.1); }
-.color-option.active {
-    border-color: #fff;
-    box-shadow: 0 0 0 2px var(--accent-color);
-    transform: scale(1.1);
-}
-
-/* Font Size Slider */
-.slider-container { display: flex; align-items: center; gap: 15px; width: 250px; }
-.slider-container input[type="range"] { flex-grow: 1; }
-.slider-container span { font-size: 0.8rem; color: var(--placeholder-color); }
-#font-size-value { font-weight: bold; font-size: 1rem; width: 40px; text-align: right; }
-
-/* Password Form */
-#change-password-form { display: flex; flex-direction: column; gap: 15px; max-width: 350px; }
-#change-password-form input[type='password'] { width: 100%; padding: 10px 12px; font-size: 1rem; }
-#change-password-form button { align-self: flex-start; }
-
-/* Device List */
-.device-list { display: flex; flex-direction: column; gap: 15px; }
-.device-item {
-    display: flex; align-items: center; gap: 15px;
-    padding: 12px;
-    background: var(--secondary-color);
-    border-radius: 8px;
-}
-.device-item .fas { font-size: 1.5rem; width: 30px; text-align: center; color: var(--placeholder-color); }
-.device-info { flex-grow: 1; }
-.device-info strong { display: block; }
-.device-info small { color: var(--placeholder-color); font-size: 0.8rem; }
-.current-device {
-    background-color: #28a745; color: white;
-    font-size: 0.7rem; font-weight: 600;
-    padding: 3px 8px; border-radius: 12px;
-    margin-left: 8px; vertical-align: middle;
-}
-
-/* Checkbox Group */
-.checkbox-group { display: flex; flex-direction: column; gap: 15px; }
-.checkbox-group label { display: flex; align-items: center; gap: 10px; cursor: pointer; }
-
-/* About Section */
-.about-card {
-    text-align: center; padding: 30px;
-    background-color: var(--container-bg);
+#change-password-form input[type='password'] { 
+    width: 100%; 
+    padding: 12px 15px; 
+    font-size: 1rem;
+    border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
-    margin-bottom: 40px;
-}
-.about-card .fas.fa-rocket { font-size: 3rem; color: var(--accent-color); margin-bottom: 15px; }
-.about-card h2 { font-size: 1.8rem; margin: 0 0 5px 0; }
-.about-card p { margin-bottom: 20px; color: var(--placeholder-color); }
-
-/* Progress Bar */
-.progress-bar {
-    background-color: var(--secondary-color);
-    border-radius: 5px; height: 20px; overflow: hidden;
-}
-.progress-bar div {
-    background-color: var(--accent-color);
-    height: 100%; color: white;
-    font-size: 0.75rem; line-height: 20px; text-align: center;
-    transition: width 0.5s ease;
-}
-
-/* --- Footer --- */
-.settings-footer {
-    flex-shrink: 0;
-    padding: 20px 40px;
     background-color: var(--container-bg);
-    border-top: 1px solid var(--border-color);
-    display: flex;
-    justify-content: flex-end;
-    gap: 15px;
+    color: var(--text-color);
+    transition: border-color 0.3s;
 }
 
-.btn-danger-outline {
-    background-color: transparent;
-    border: 1px solid var(--danger-color);
-    color: var(--danger-color);
+#change-password-form input[type='password']:focus {
+    border-color: var(--accent-color);
+    outline: none;
 }
-.btn-danger-outline:hover {
-    background-color: var(--danger-color);
+
+#change-password-form button { 
+    align-self: flex-start;
+    padding: 10px 25px;
+    background-color: var(--accent-color);
     color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+#change-password-form button:hover {
+    background-color: var(--primary-dark);
 }

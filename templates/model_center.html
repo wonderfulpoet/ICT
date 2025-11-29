@@ -73,9 +73,9 @@
     box-shadow: 0 0 8px #222;
 }
 .mc-tab-btn {
-    background: #232a36;
-    color: #e6e6e6;
-    border: 1.5px solid #4da3ff;
+    background: var(--container-bg);
+    color: var(--text-color);
+    border: 1.5px solid var(--accent-color);
     border-radius: 8px;
     padding: 14px 38px;
     font-size: 20px;
@@ -85,13 +85,13 @@
     outline: none;
 }
 .mc-tab-btn.active, .mc-tab-btn:focus {
-    background: #4da3ff;
+    background: var(--accent-color);
     color: #fff;
     border-color: #fff;
     font-weight: bold;
 }
 .mc-tab-btn:hover {
-    background: #3a8cd4;
+    background: var(--primary-dark);
     color: #fff;
 }
 .mc-model-list {
@@ -116,9 +116,9 @@
     margin: 0 18px;
 }
 .mc-model-list li:hover {
-    background: #4da3ff;
+    background: var(--accent-color);
     color: #fff;
-    box-shadow: 0 2px 16px #4da3ff44;
+    box-shadow: 0 2px 16px rgba(77,163,255,0.27);
     font-weight: bold;
 }
 .mc-divider {
@@ -130,7 +130,7 @@
 
 .mc-category-desc {
   text-align: center;
-  color: #4da3ff;
+  color: var(--accent-color);
   font-size: 1.08rem;
   margin: 18px 0 0 0;
   letter-spacing: 1px;
@@ -150,7 +150,7 @@ function showCategory(cat) {
 </script>
 
 <!-- Toast提示 -->
-<div id="model-toast" style="display:none;position:fixed;right:40px;bottom:40px;z-index:9999;background:#4da3ff;color:#fff;padding:16px 32px;border-radius:12px;font-size:1.2rem;box-shadow:0 2px 16px #4da3ff44;transition:opacity 0.3s;opacity:0;pointer-events:none;">已选择该模型！</div>
+<div id="model-toast" style="display:none;position:fixed;right:40px;bottom:40px;z-index:9999;background:var(--accent-color);color:#fff;padding:16px 32px;border-radius:12px;font-size:1.2rem;box-shadow:0 2px 16px rgba(77,163,255,0.27);transition:opacity 0.3s;opacity:0;pointer-events:none;">已选择该模型！</div>
 <script>
 function showModelToast(msg) {
   var toast = document.getElementById('model-toast');

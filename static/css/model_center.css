@@ -94,7 +94,7 @@
 }
 .mc-card-logo {
     font-size: 24px;
-    color: var(--primary-color);
+    color: var(--accent-color);
     margin-right: 15px;
 }
 .mc-card-name {
@@ -152,7 +152,7 @@
     overflow: hidden;
 }
 .mc-progress-bar div {
-    background-color: #3f51b5;
+    background-color: var(--accent-color);
     height: 100%;
     color: white;
     font-size: 12px;
@@ -178,11 +178,11 @@
     transition: all 0.2s;
 }
 .mc-btn-primary {
-    background-color: #3f51b5; /* 填充色 */
+    background-color: var(--accent-color); /* 填充色 */
     color: white;
 }
 .mc-btn-primary:hover {
-    background-color: var(--primary-color-dark);
+    background-color: var(--primary-dark);
 }
 .mc-btn-secondary {
     background-color: transparent;
@@ -191,7 +191,7 @@
 }
 .mc-btn-secondary:hover {
     background-color: var(--hover-color);
-    border-color: #3f51b5;
+    border-color: var(--accent-color);
 }
 .mc-details-toggle i {
     margin-left: 5px;
@@ -241,7 +241,7 @@
 
 .mc-category-desc {
     text-align: center;
-    color: #4da3ff;
+    color: var(--accent-color);
     font-size: 1.08rem;
     margin: 18px 0 0 0;
     letter-spacing: 1px;

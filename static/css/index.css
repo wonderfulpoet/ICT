@@ -57,10 +57,10 @@ html, body {
     letter-spacing: 1px;
 }
 .nav-link.active, .nav-link:hover {
-    background: #4da3ff;
+    background: var(--accent-color);
     color: #fff;
     font-weight: bold;
-    box-shadow: 0 4px 16px #4da3ff44;
+    box-shadow: 0 4px 16px rgba(77, 163, 255, 0.27);
     transform: scale(1.08);
 }
 
@@ -90,7 +90,7 @@ html, body {
     background: #232a36;
     color: #fff;
 }
-.section1 { background: #232a36; }
-.section2 { background: #4da3ff; }
+.section1 { background: var(--container-bg); }
+.section2 { background: var(--accent-color); }
 .section3 { background: #7efc9a; color: #232a36; }
 /* 可自定义每一屏的背景色和样式 */

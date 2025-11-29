@@ -78,7 +78,7 @@
     font-family: 'Microsoft YaHei', '微软雅黑', sans-serif;
     font-weight: 500;
     color: #ffffff;
-    background: linear-gradient(45deg, #4da3ff, #7bb6f9, #4da3ff);
+    background: linear-gradient(45deg, var(--accent-color), var(--subheading-color), var(--accent-color));
     background-size: 200% 200%;
     border: none;
     border-radius: 50px;

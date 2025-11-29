@@ -266,7 +266,7 @@
 
 .ds-bubble.user {
     align-self: flex-end;
-    background: #007bff;
+    background: var(--accent-color);
     color: #fff;
 }
 
@@ -384,7 +384,7 @@
 
 #dsPromptInput:focus {
     outline: none;
-    border-color: #007bff;
+    border-color: var(--accent-color);
 }
 
 .ds-tool-btn {
@@ -409,7 +409,7 @@
 }
 
 #dsSendBtn {
-    background: #007bff;
+    background: var(--accent-color);
     color: #fff;
     border: none;
     border-radius: 50%;
@@ -425,7 +425,7 @@
 }
 
 #dsSendBtn:hover {
-    background: #0056b3;
+    background: var(--primary-dark);
 }
 
 /* Text Output Area Styles */

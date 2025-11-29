@@ -41,6 +41,102 @@
             width: calc(100vw - 60px);
         }
     }
+    
+    /* 主题颜色选择器样式 */
+    .theme-color-selector {
+        position: relative;
+        margin-left: 15px;
+    }
+    
+    .theme-toggle-btn {
+        background: var(--accent-color);
+        color: #fff;
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    
+    .theme-toggle-btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    
+    .theme-color-panel {
+        position: absolute;
+        top: 50px;
+        right: 0;
+        background: var(--container-bg);
+        border-radius: 12px;
+        padding: 15px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        min-width: 200px;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        transition: all 0.3s ease;
+        z-index: 1000;
+    }
+    
+    .theme-color-panel.active {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+    
+    .theme-panel-header {
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 12px;
+        color: var(--text-color);
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .theme-colors-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+    }
+    
+    .theme-color-option {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        border: 3px solid transparent;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        position: relative;
+    }
+    
+    .theme-color-option:hover {
+        transform: scale(1.1);
+        border-color: rgba(255,255,255,0.3);
+    }
+    
+    .theme-color-option.active {
+        border-color: #fff;
+        box-shadow: 0 0 0 2px var(--accent-color);
+    }
+    
+    .theme-color-option.active::after {
+        content: '✓';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #fff;
+        font-weight: bold;
+        font-size: 1.2rem;
+        text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    }
     </style>
     
 </head>
@@ -65,6 +161,26 @@
                         <a href="/register" class="register-btn"><i class="fas fa-user-plus"></i> 注册</a>
                     </div>
                     {% endif %}
+                    
+                    <!-- 主题颜色选择器 -->
+                    <div class="theme-color-selector">
+                        <button class="theme-toggle-btn" id="themeToggleBtn" title="切换主题颜色">
+                            <i class="fas fa-palette"></i>
+                        </button>
+                        <div class="theme-color-panel" id="themeColorPanel">
+                            <div class="theme-panel-header">选择主题颜色</div>
+                            <div class="theme-colors-grid">
+                                <button class="theme-color-option" data-color="#4da3ff" data-name="科技蓝" style="background: #4da3ff;" title="科技蓝"></button>
+                                <button class="theme-color-option" data-color="#4CAF50" data-name="活力绿" style="background: #4CAF50;" title="活力绿"></button>
+                                <button class="theme-color-option" data-color="#e91e63" data-name="优雅粉" style="background: #e91e63;" title="优雅粉"></button>
+                                <button class="theme-color-option" data-color="#ff9800" data-name="温暖橙" style="background: #ff9800;" title="温暖橙"></button>
+                                <button class="theme-color-option" data-color="#673ab7" data-name="神秘紫" style="background: #673ab7;" title="神秘紫"></button>
+                                <button class="theme-color-option" data-color="#00bcd4" data-name="清新青" style="background: #00bcd4;" title="清新青"></button>
+                                <button class="theme-color-option" data-color="#f44336" data-name="热情红" style="background: #f44336;" title="热情红"></button>
+                                <button class="theme-color-option" data-color="#9c27b0" data-name="典雅紫" style="background: #9c27b0;" title="典雅紫"></button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </header>
 
@@ -80,6 +196,7 @@
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script src="{{ url_for('static', filename='js/preview.js') }}"></script>
     <script src="{{ url_for('static', filename='js/effects.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
 
     {% block script %}
     {% endblock %}
