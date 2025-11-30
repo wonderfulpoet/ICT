@@ -3,436 +3,517 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>智鉴惟真</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/welcome.css') }}">
-    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" rel="stylesheet">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <title>智鉴惟真 | AI Deepfake Detection System</title>
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
-    <style> 
-    .container {
-        display: flex;
-        gap: 24px;
-        justify-content: center;
-        flex-wrap: wrap;
-        max-width: 1200px;
-        margin: 40px auto;
+
+    <style>
+        /* =========================================
+           1. 全局变量与重置 (Design Tokens)
+           ========================================= */
+        :root {
+            --bg-body: #050508;
+            --bg-card: rgba(255, 255, 255, 0.03);
+            --bg-card-hover: rgba(255, 255, 255, 0.06);
+            --primary-gradient: linear-gradient(135deg, #00f2ff 0%, #7000ff 100%);
+            --text-main: #ffffff;
+            --text-secondary: #a1a1aa;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --blur-val: 20px;
+            --container-width: 1200px;
         }
 
-        .card {
-        background-color: #111;
-        border-radius: 16px;
-        padding: 24px;
-        width: 100%;
-        max-width: 360px;
-        box-sizing: border-box;
-        transition: all 0.3s ease;
-        border: 1px solid transparent;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
         }
 
-        .card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 0 16px rgba(0, 123, 255, 0.2);
+        /* 隐藏滚动条但保留功能 */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-body); }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+
+        a { text-decoration: none; color: inherit; transition: 0.3s; }
+        ul { list-style: none; }
+
+        /* =========================================
+           2. 动态背景 (保留原有的粒子逻辑容器)
+           ========================================= */
+        #particles {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -1;
+            pointer-events: none;
+            background: radial-gradient(circle at 50% 0%, #1a1a2e 0%, #050508 60%);
+        }
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: floatUp linear infinite;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            50% { opacity: 0.5; }
+            100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+        }
+
+        /* =========================================
+           3. 通用布局组件
+           ========================================= */
+        .container {
+            max-width: var(--container-width);
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        .section-title h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+        .section-title p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        /* 渐变文字效果 */
+        .gradient-text {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* =========================================
+           4. 顶部导航 (模拟)
+           ========================================= */
+        nav.top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px 0;
+            margin-bottom: 40px;
+        }
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .user-actions {
+            display: flex;
+            gap: 16px;
+        }
+        .btn {
+            padding: 10px 24px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+            background: rgba(255,255,255,0.05);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn:hover { background: rgba(255,255,255,0.1); }
+        .btn-primary {
+            background: var(--text-main);
+            color: #000;
+            border: none;
+        }
+        .btn-primary:hover {
+            background: #e0e0e0;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255,255,255,0.2);
+        }
+
+        /* =========================================
+           5. Hero 区域 (首屏)
+           ========================================= */
+        .hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 80px 0 100px;
             position: relative;
         }
-
-        .card:hover img {
-            transform: scale(1.02);
-            transition: transform 0.3s ease;
-            background: linear-gradient(135deg, #007bff 0%, #00ffff 100%);
-            opacity: 0.9;
+        .hero h1 {
+            font-size: 4rem; /* 大标题 */
+            line-height: 1.1;
+            margin-bottom: 24px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
         }
-
-        .card img {
+        .hero p.subtitle {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin-bottom: 48px;
+        }
+        .hero-btn {
+            padding: 16px 48px;
+            font-size: 1.1rem;
+            background: var(--primary-gradient);
+            border: none;
+            color: white;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
             transition: all 0.3s ease;
         }
-
-
-        .card h3 {
-        font-size: 20px;
-        font-weight: bold;
-        margin: 0 0 12px 0;
+        .hero-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 40px rgba(112, 0, 255, 0.5);
         }
 
-        .card p {
-        font-size: 14px;
-        color: #ccc;
-        margin: 0 0 20px 0;
-        line-height: 1.6;
+        /* =========================================
+           6. 功能卡片区 (Features Grid)
+           ========================================= */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+            margin-bottom: 120px;
+        }
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 32px;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+        .feature-card:hover {
+            transform: translateY(-10px);
+            background: var(--bg-card-hover);
+            border-color: rgba(255,255,255,0.2);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+        .card-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #00f2ff;
+            margin-bottom: 24px;
+        }
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 12px;
+        }
+        .feature-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 24px;
+            flex-grow: 1;
+        }
+        .card-visual {
+            width: 100%;
+            height: 180px;
+            border-radius: 12px;
+            background: #000;
+            overflow: hidden;
+            position: relative;
+        }
+        .card-visual img, .card-visual video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.8;
+            transition: 0.5s;
+        }
+        .feature-card:hover .card-visual img {
+            transform: scale(1.1);
+            opacity: 1;
+            height: auto;
+            width: 100%;
         }
 
-        .card img {
-        width: 100%;
-        border-radius: 12px;
-        object-fit: contain;
+        /* =========================================
+           7. 详情网格区 (Detailed Grid)
+           ========================================= */
+        .details-section {
+            padding: 80px 0;
+            border-top: 1px solid var(--border-color);
+        }
+        .specs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 24px;
+        }
+        .spec-item {
+            background: rgba(255,255,255,0.02);
+            padding: 24px;
+            border-radius: 16px;
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+            border: 1px solid transparent;
+            transition: 0.3s;
+        }
+        .spec-item:hover {
+            border-color: rgba(112, 0, 255, 0.3);
+            background: rgba(255,255,255,0.04);
+        }
+        .spec-icon {
+            flex-shrink: 0;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(0,242,255,0.1), rgba(112,0,255,0.1));
+            color: #00f2ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .spec-content h4 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+        .spec-content p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
         }
 
+        /* =========================================
+           8. 页脚
+           ========================================= */
+        footer {
+            margin-top: 100px;
+            padding: 40px 0;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* =========================================
+           9. 响应式适配
+           ========================================= */
         @media (max-width: 768px) {
-        .card {
-            max-width: 100%;
+            .hero h1 { font-size: 2.5rem; }
+            .hero p.subtitle { font-size: 1rem; }
+            .feature-card { padding: 24px; }
+            .container { padding: 0 20px; }
+            .top-nav { flex-direction: column; gap: 20px; }
         }
+        
+        /* 动画类 */
+        .fade-up {
+            opacity: 0;
+            transform: translateY(30px);
         }
-
-    .suggestion-list {
-        width: 200%;
-        max-width: 1200px; /* Increased max-width */
-        list-style: none;
-        display: flex;
-        gap: 2rem; /* Increased gap between cards */
-        margin: 9.5vh auto;
-        overflow: hidden;
-        overflow-x: auto;
-        scroll-snap-type: x mandatory;
-        scrollbar-width: none;
-        justify-content: center;
-    }
-
-    .suggestion-list::-webkit-scrollbar {
-        display: none;
-    }
-
-    .suggestion-list .suggestion {
-        cursor: pointer;
-        padding: 1.75rem; /* Increased padding */
-        width: 300px; /* Increased width */
-        flex-shrink: 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        border-radius: 1rem; /* Slightly larger border radius */
-        justify-content: space-between;
-        background: var(--secondary-color);
-        transition: 0.2s ease;
-        scroll-snap-align: start;
-    }
-
-    .suggestion-list .suggestion:hover {
-        background: var(--secondary-hover-color);
-        transform: translateY(-5px);
-    }
-
-    .suggestion-list .suggestion :where(.text, .icon) {
-        font-weight: 700;
-        color: white;
-    }
-
-    .suggestion-list .suggestion .text {
-        font-size: 1.3rem; /* Increased font size */
-        line-height: 1.5;
-        text-align: center;
-    }
-
-    .suggestion-list .suggestion .icon {
-        width: 50px; /* Increased icon size */
-        height: 50px; /* Increased icon size */
-        display: flex;
-        font-size: 1.5rem; /* Increased icon font size */
-        margin-top: 3rem; /* Increased top margin */
-        align-self: center;
-        align-items: center;
-        border-radius: 50%;
-        justify-content: center;
-        color: white;
-        background: var(--primary-color);
-    }
-    h1 {
-  font-size: 36px;
-  text-align: center;
-  margin-bottom: 10px;
-  animation: fadeIn 1s ease forwards;
-}
-
-h2 {
-  text-align: center;
-  font-weight: normal;
-  font-size: 18px;
-  color: #aaa;
-  margin-bottom: 40px;
-  animation: fadeIn 1.5s ease forwards;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 24px;
-  max-width: 1200px;
-  margin: 0 auto 60px auto;
-}
-
-.grid .card {
-  background: #111;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.5);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  transform: translateY(20px);
-  opacity: 0;
-  animation: fadeInUp 0.8s ease forwards;
-}
-
-.grid .card:hover {
-    transform: scale(1.03);
-    box-shadow: 0 4px 20px rgba(0, 123, 255, 0.3);
-    background: linear-gradient(135deg, #111 0%, #007bff 100%);
-    transition: all 0.3s ease;
-    border-radius: 12px;
-}
-
-.grid .card p {
-  font-size: 15px;
-  line-height: 1.6;
-  color: #ddd;
-}
-
-.user {
-  display: flex;
-  align-items: center;
-  margin-top: 20px;
-}
-
-.avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: var(--secondary-hover-color);
-  margin-right: 12px;
-}
-
-.userinfo {
-  font-size: 14px;
-}
-
-.userinfo .name {
-  font-weight: bold;
-  color: white;
-}
-
-.userinfo .company {
-  color: var(--placeholder-color);
-}
-
-/* 动画 */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* 每个卡片动画延迟 */
-.grid .card:nth-child(1) { animation-delay: 0.2s; }
-.grid .card:nth-child(2) { animation-delay: 0.4s; }
-.grid .card:nth-child(3) { animation-delay: 0.6s; }
-.grid .card:nth-child(4) { animation-delay: 0.8s; }
-.grid .card:nth-child(5) { animation-delay: 1.0s; }
-.grid .card:nth-child(6) { animation-delay: 1.2s; }
-
     </style>
-
 </head>
-
 <body>
-    <!-- 动态背景 -->
-    <div class="dynamic-background"></div>
-    <div class="particles" id="particles"></div>
-    <!-- 欢迎界面内容 -->
-    <div class="home-container" id="homeContainer">
-        <div class="user-info">
-            {% if logged_in %}
-            <span class="user-greeting">您好，{{ username }}</span>
-            <a href="/logout" class="logout-btn"><i class="fas fa-sign-out-alt"></i> 退出登录</a>
-            {% else %}
-            <div class="login-prompt">
-                <span>登录可开启更多功能</span>
-                <a href="/login" class="login-btn"><i class="fas fa-sign-in-alt"></i> 登录</a>
-                <a href="/register" class="register-btn"><i class="fas fa-user-plus"></i> 注册</a>
+
+    <div id="particles"></div>
+
+    <div class="container">
+        <nav class="top-nav fade-up">
+            <div class="logo">
+                <i class="fa-solid fa-shield-halved gradient-text"></i>
+                <span style="margin-left: 10px;">智鉴惟真</span>
             </div>
-            {% endif %}
-        </div>
+            
+            <div class="user-actions">
+                {% if logged_in %}
+                    <span class="btn"><i class="fas fa-user-circle"></i> {{ username }}</span>
+                    <a href="/logout" class="btn"><i class="fas fa-sign-out-alt"></i> 退出</a>
+                {% else %}
+                    <a href="/login" class="btn"><i class="fas fa-sign-in-alt"></i> 登录</a>
+                    <a href="/register" class="btn btn-primary"><i class="fas fa-rocket"></i> 立即注册</a>
+                {% endif %}
+            </div>
+        </nav>
 
-        <div style="--top-margin: 80px; margin-top: var(--top-margin);"></div>
-            <h1 class="home-title" style="font-size: 48px; margin-bottom: 20px;">智鉴惟真</h1>
-            <p class="home-subtitle" style="font-size: 24px; margin-bottom: 40px;">守护学术诚信，护航社会发展</p>
-            <button class="start-button" id="startButton" style="margin-bottom: 60px;">
-            <i class="fas fa-rocket"></i> 开始体验
+        <header class="hero fade-up">
+            <h1>守护真相，<br>在 <span class="gradient-text">AI 生成</span> 的时代</h1>
+            <p class="subtitle">
+                基于多模态融合的学术不端与 Deepfake 深度伪造检测系统。<br>
+                精准定位、语义对齐、可解释性分析。
+            </p>
+            <button id="startButton" class="hero-btn">
+                <i class="fas fa-play" style="margin-right: 8px; font-size: 0.8em;"></i> 开始体验检测
             </button>
+        </header>
+
+        <div class="section-title fade-up">
+            <h2>核心能力</h2>
+            <p>三大引擎驱动，全方位识别数字伪造</p>
         </div>
 
+        <section class="features-grid">
+            <div class="feature-card fade-up">
+                <div class="card-icon"><i class="fas fa-image"></i></div>
+                <h3>图像篡改检测</h3>
+                <p>上传或输入图像，系统利用先进的 CNN 与 Transformer 混合架构，自动检测像素级篡改痕迹。</p>
+                <div class="card-visual">
+                    <img src="{{ url_for('static', filename='imgs/1.png') }}" alt="Detection">
+                </div>
+            </div>
 
+            <div class="feature-card fade-up">
+                <div class="card-icon"><i class="fas fa-mask"></i></div>
+                <h3>智能掩码生成</h3>
+                <p>不仅仅是判断真伪。基于 SAM (Segment Anything) 技术，自动生成高精度掩码，标记可疑区域。</p>
+                <div class="card-visual">
+                    <img src="{{ url_for('static', filename='imgs/2.png') }}" alt="Mask Generation">
+                </div>
+            </div>
 
-        <ul class="suggestion-list">
-            <li class="suggestion">
-            <h4 class="text">多模态联合检测</h4>
-            <span class="icon material-symbols-rounded" style="font-size: 40px;">visibility</span>
-            </li>
-            <li class="suggestion">
-            <h4 class="text">篡改区域精确定位</h4>
-            <span class="icon material-symbols-rounded" style="font-size: 40px;">health_and_safety</span>
-            </li>
-            <li class="suggestion">
-            <h4 class="text">多种形式篡改检测</h4>
-            <span class="icon material-symbols-rounded" style="font-size: 40px;">compare</span>
-            </li>
-          </ul>
-        
-        <div class="container">
-  <div class="card">
-    <h3 style="color: white;">图像检测</h3>
-    <p>上传或输入一张图像，系统将自动检测该图像是否存在篡改内容，并给出详细的检测解释说明。</p>
-    <img src="https://t4.ftcdn.net/jpg/06/02/56/37/240_F_602563744_EEVH1igoEMgoi0WOWijBflLBhG1GhoLv.jpg" alt="前沿智能图" />
-  </div>
-  
-  <div class="card">
-    <h3 style="color: white;">掩码生成</h3>
-    <p>基于检测结果，自动在原图上生成掩码（mask）预测图片，直观标注出疑似被篡改的区域。</p>
-    <video src="https://segment-anything.com/assets/section-1.1b.mp4" autoplay loop muted style="width: 100%; border-radius: 12px;"></video>
-  </div>
-  
-  <div class="card">
-    <h3 style="color: white;">智能对话</h3>
-    <p>在图像检测的语境下，支持与各类大模型（如GPT、文心一言等）进行智能对话。</p>
-    <img src="https://t4.ftcdn.net/jpg/03/23/82/99/240_F_323829966_H32wLhoouiPinJ66KyggCvqQ2dFPuuQ1.jpg" alt="隐私选项图" />
-  </div>
-</div>
+            <div class="feature-card fade-up">
+                <div class="card-icon"><i class="fas fa-robot"></i></div>
+                <h3>多模态对话分析</h3>
+                <p>内置大语言模型，支持针对检测结果进行自然语言问答，让技术细节变得通俗易懂。</p>
+                <div class="card-visual">
+                    <img src="{{ url_for('static', filename='imgs/4.png') }}" alt="AI Chat">
+                </div>
+            </div>
+        </section>
 
+        <section class="details-section">
+            <div class="section-title fade-up">
+                <h2>全场景学术护航</h2>
+                <p>从数据图表到文本语义，构建完整的诚信防火墙</p>
+            </div>
+            
+            <div class="specs-grid">
+                <div class="spec-item fade-up">
+                    <div class="spec-icon"><i class="fas fa-layer-group"></i></div>
+                    <div class="spec-content">
+                        <h4>图文联合检测</h4>
+                        <p>判断论文插图与上下文描述是否一致，识别虚假数据图表。</p>
+                    </div>
+                </div>
+
+                <div class="spec-item fade-up">
+                    <div class="spec-icon"><i class="fas fa-align-center"></i></div>
+                    <div class="spec-content">
+                        <h4>语义对齐分析</h4>
+                        <p>利用跨模态 Transformer 技术，对图像与文本的语义嵌入进行对齐检测。</p>
+                    </div>
+                </div>
+
+                <div class="spec-item fade-up">
+                    <div class="spec-icon"><i class="fas fa-copy"></i></div>
+                    <div class="spec-content">
+                        <h4>伪原创识别</h4>
+                        <p>集成文本比对与异常分析，识别"论文工厂"的模板化生成产物。</p>
+                    </div>
+                </div>
+
+                <div class="spec-item fade-up">
+                    <div class="spec-icon"><i class="fas fa-search-location"></i></div>
+                    <div class="spec-content">
+                        <h4>可解释性溯源</h4>
+                        <p>结果可精确定位到具体图像片段或文本段落，拒绝"黑盒"判定。</p>
+                    </div>
+                </div>
+
+                <div class="spec-item fade-up">
+                    <div class="spec-icon"><i class="fas fa-globe"></i></div>
+                    <div class="spec-content">
+                        <h4>多学科适配</h4>
+                        <p>专门优化的模型权重，支持理工、医药、人文等多种学科类型。</p>
+                    </div>
+                </div>
+
+                <div class="spec-item fade-up">
+                    <div class="spec-icon"><i class="fas fa-lock"></i></div>
+                    <div class="spec-content">
+                        <h4>隐私合规</h4>
+                        <p>内置数据脱敏与审计机制，确保科研数据的合规使用。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p>&copy; 2025 HDU智鉴惟真团队</p>
+        </footer>
     </div>
-<h1 style="color: white;">基于多模态融合的学术不端检测系统</h1>
-<h2 style="color: white;">为学术界提供较好适应当下的学术不端一站式检测方案</h2>
 
-<div class="grid">
-  <div class="card">
-    <p>（1）图文伪造联合检测：基于图像识别和自然语言处理技术，判断图文内容是否一致，识别虚假图片或与描述不符的伪造数据图表。</p>
-  </div>
-
-  <div class="card">
-    <p>（2）多模态语义对齐与异常识别：利用对比学习、跨模态Transformer等技术，实现文本与图像语义嵌入对齐，对不一致内容标记风险。</p>
-  </div>
-
-  <div class="card">
-    <p>（3）学术成果伪原创检测：集成文本抄袭比对、图像篡改检测、数据异常分析，识别模板化生成、批量拼凑的"论文工厂"产物。</p>
-  </div>
-
-  <div class="card">
-    <p>（4）可追溯可解释的结果输出：支持将检测结果定位到具体图像片段、文本段落、数据字段，增强检测的可信度和可解释性。</p>
-  </div>
-
-  <div class="card">
-    <p>（5）多学科场景适配能力：系统支持理工科、医药、生物、人文社科等多种学科类型的内容识别，提升跨领域适用性。</p>
-  </div>
-
-  <div class="card">
-    <p>（6）合规性与隐私保护机制：在数据处理、模型训练和结果存储等环节嵌入脱敏与审计机制，确保科研数据的合规使用和隐私安全。</p>
-  </div>
-</div>
-
-</body></li>
-
-<script>    
-    // 🌟 粒子效果生成
-    function createParticles() {
-        const particlesContainer = document.getElementById('particles');
-        if (!particlesContainer) return;
-        
-        const particleCount = 80;
-        
-        for (let i = 0; i < particleCount; i++) {
-            const particle = document.createElement('div');
-            particle.className = 'particle';
-            
-            // 随机位置
-            particle.style.left = Math.random() * 100 + '%';
-            particle.style.top = Math.random() * 100 + '%';
-            
-            // 随机大小
-            const size = Math.random() * 3 + 2;
-            particle.style.width = size + 'px';
-            particle.style.height = size + 'px';
-            
-            // 随机动画延迟和时长
-            particle.style.animationDelay = Math.random() * 20 + 's';
-            particle.style.animationDuration = (Math.random() * 20 + 15) + 's';
-            
-            particlesContainer.appendChild(particle);
+    <script>
+        // 1. 粒子背景生成逻辑 (简化版)
+        function createParticles() {
+            const container = document.getElementById('particles');
+            const count = 40; 
+            for (let i = 0; i < count; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                const size = Math.random() * 3 + 1;
+                p.style.width = size + 'px';
+                p.style.height = size + 'px';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                p.style.animationDelay = (Math.random() * 5) + 's';
+                container.appendChild(p);
+            }
         }
-    }
-    
-    // 页面加载完成后创建粒子
-    document.addEventListener('DOMContentLoaded', createParticles);
-    
-    // 开始按钮动画
-function initStartButton() {
-    const startButton = document.getElementById('startButton');
-    if (!startButton) return; // 安全检查
+        createParticles();
 
-    // 鼠标悬停时的流光效果
-    startButton.addEventListener('mouseenter', function() {
-        anime({
-            targets: this,
-            scale: 1.05,
-            duration: 300,
-            easing: 'easeOutQuad'
-        });
-    });
-
-    startButton.addEventListener('mouseleave', function() {
-        anime({
-            targets: this,
-            scale: 1,
-            duration: 300,
-            easing: 'easeOutQuad'
-        });
-    });
-
-    // 点击事件
-    startButton.addEventListener('click', function() {
-        // 按钮点击动画
-        anime({
-            targets: this,
-            scale: 0.95,
-            duration: 100,
-            easing: 'easeInQuad'
-        }).finished.then(() => {
+        // 2. 元素入场动画 (使用 Anime.js)
+        document.addEventListener('DOMContentLoaded', () => {
             anime({
-                targets: this,
-                scale: 1,
-                duration: 100,
-                easing: 'easeOutQuad'
+                targets: '.fade-up',
+                translateY: [30, 0],
+                opacity: [0, 1],
+                duration: 800,
+                easing: 'easeOutExpo',
+                delay: anime.stagger(100) // 每个元素延迟 100ms
             });
         });
 
-        // 页面切换动画
+        // 在 welcome.html 的 script 区域修改
+    const btn = document.getElementById('startButton');
+    btn.addEventListener('click', () => {
+        // 1. 按钮点击动画
         anime({
-            targets: '#homeContainer',
-            opacity: 0,
-            translateY: -50,
-            duration: 800,
+            targets: btn,
+            scale: [1, 0.95, 1],
+            duration: 300,
             easing: 'easeInOutQuad'
-        }).finished.then(() => {
-            document.getElementById('homeContainer').style.display = 'none';
-                // 根据登录状态决定跳转
-            {% if logged_in %}
-                window.location.href = "/index";
-            {% else %}
-                window.location.href = "/login";
-            {% endif %}
+        });
+
+        // 2. 页面离场动画（可选，让页面淡出）
+        anime({
+            targets: 'body',
+            opacity: 0,
+            duration: 800,
+            easing: 'easeInOutQuad',
+            complete: function() {
+                window.location.href = 'index'; 
+            }
         });
     });
-}
-
-// 确保DOM加载完成后初始化
-document.addEventListener('DOMContentLoaded', initStartButton);
-</script>>
+    </script>
+</body>
+</html>
