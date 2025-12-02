@@ -1,93 +1,491 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>基于多模态融合的学术不端检测系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.2/marked.min.js"></script>
 
-{% block styles %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/detection.css') }}">
-{% endblock %}
+    <style>
+        :root {
+            /* --- 核心主题色：保持不变，与模型中心一致 --- */
+            --primary-bg: #05080f; /* 深蓝黑背景 */
+            --secondary-bg: #0d1930;
+            --container-bg: rgba(13, 25, 48, 0.85); /* 深蓝灰半透明 */
+            
+            --accent-color: #00c6ff; /* 亮青色 */
+            --gradient-start: #00c6ff; /* 渐变起点：青蓝 */
+            --gradient-end: #0072ff;   /* 渐变终点：深蓝 */
+            
+            --text-color: #e0e6ed;
+            --subheading-color: #a0b3d9; /* 蓝调灰 */
+            --border-color: rgba(66, 135, 245, 0.25);
+            --placeholder-color: #6c757d;
+            
+            --border-radius: 12px;
+            --border-radius-lg: 20px;
+            --border-radius-sm: 8px;
+            
+            /* 蓝色系光晕 */
+            --glow-shadow: 0 0 20px rgba(0, 114, 255, 0.3); 
+        }
 
-{% block body %}
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--primary-bg);
+            /* 背景径向渐变 */
+            background-image: radial-gradient(circle at 10% 20%, rgba(0, 114, 255, 0.1) 0%, transparent 20%),
+                              radial-gradient(circle at 90% 80%, rgba(0, 198, 255, 0.08) 0%, transparent 20%);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 2rem;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* 粒子画布样式 */
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* --- Main Container --- */
+        .detection-container {
+            width: 90%;
+            max-width: 1400px;
+            padding: 2.5rem;
+            background: transparent;
+            border-radius: var(--border-radius-lg);
+            text-align: center;
+            animation: fadeIn 0.6s ease-out;
+            margin-bottom: 100px;
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .detection-container h2 {
+            color: var(--text-color);
+            margin-bottom: 3rem;
+            font-weight: 700;
+            font-size: 2.5rem;
+            /* !!! 关键修改 !!! 
+               使用 90deg (水平) 渐变 
+               起始加入 #ffffff (白色) 模拟模型中心的高光质感
+            */
+            background: linear-gradient(90deg, #ffffff 0%, var(--gradient-start) 40%, var(--gradient-end) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 0.02em;
+            /* 增强文字阴影，制造发光感 */
+            text-shadow: 0 0 30px rgba(0, 114, 255, 0.3);
+        }
+
+        /* Content Area Layout */
+        .content-area {
+            display: flex;
+            gap: 2.5rem;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+            animation: fadeIn 0.8s ease-out 0.2s both;
+        }
+
+        .panel {
+            flex: 1;
+            min-width: 400px;
+            display: flex;
+            flex-direction: column;
+            background: var(--container-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding: 2rem;
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border-color);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .panel:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5), 0 0 40px rgba(0, 114, 255, 0.15);
+            border-color: rgba(0, 198, 255, 0.3);
+        }
+
+        .panel h3 {
+            color: var(--subheading-color);
+            font-size: 1.4rem;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+            text-align: left;
+            /* 小标题也改为 90deg 水平渐变，保持一致性 */
+            background: linear-gradient(90deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Image Box Styles */
+        .image-box {
+            border: 2px dashed rgba(0, 198, 255, 0.3);
+            border-radius: var(--border-radius);
+            min-height: 350px;
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            background: rgba(5, 12, 25, 0.5);
+            transition: all 0.4s ease;
+            color: var(--placeholder-color);
+            font-size: 1.05rem;
+        }
+
+        #upload-box { cursor: pointer; }
+        #upload-box:hover {
+            border-color: var(--accent-color);
+            background: rgba(0, 198, 255, 0.05);
+            border-style: solid;
+            box-shadow: inset 0 0 20px rgba(0, 114, 255, 0.1);
+        }
+
+        .preview-image {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: contain; padding: 1rem;
+        }
+
+        /* Text Areas */
+        .text-input-container, .text-output-container {
+            margin-top: 1.5rem;
+            position: relative;
+            text-align: left;
+        }
+
+        .text-input-container label, .text-output-container label {
+            display: block; margin-bottom: 0.5rem;
+            color: var(--subheading-color); font-size: 0.95rem; font-weight: 500;
+        }
+
+        textarea, .text-output {
+            width: 100%; padding: 12px 15px;
+            border-radius: 8px; border: 1px solid var(--border-color);
+            background-color: rgba(0, 0, 0, 0.2);
+            color: var(--text-color); font-size: 0.95rem;
+            font-family: inherit; resize: vertical;
+            transition: all 0.3s ease;
+        }
+        
+        .text-output {
+            min-height: 100px; max-height: 200px;
+            overflow-y: auto; line-height: 1.6;
+        }
+
+        textarea:focus {
+            outline: none; border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(0, 198, 255, 0.2);
+            background-color: rgba(0, 0, 0, 0.3);
+        }
+
+        .char-counter {
+            text-align: right; font-size: 0.8rem;
+            color: var(--placeholder-color); margin-top: 0.3rem;
+        }
+
+        /* Buttons */
+        .panel-actions {
+            margin-top: 1.5rem; display: flex;
+            justify-content: center; gap: 1.2rem;
+        }
+
+        .btn {
+            padding: 12px 28px; border: none;
+            border-radius: var(--border-radius-sm);
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(8px); color: white;
+            font-size: 1rem; font-weight: 600; cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex; align-items: center; gap: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--accent-color);
+        }
+
+        .btn:disabled {
+            opacity: 0.6; cursor: not-allowed; transform: none; border-color: transparent;
+        }
+
+        .btn-primary {
+            /* 按钮也改为 90deg 水平渐变，更加流畅 */
+            background: linear-gradient(90deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+            border-color: transparent;
+            box-shadow: 0 4px 16px rgba(0, 114, 255, 0.4);
+        }
+
+        .btn-detect {
+            padding: 16px 50px; font-size: 1.2rem;
+            margin: 2rem auto; display: flex; justify-content: center;
+        }
+
+        /* Result Info */
+        .result-info {
+            margin-top: 2rem; padding: 1.5rem;
+            border-radius: var(--border-radius);
+            text-align: left;
+            background-color: rgba(13, 25, 48, 0.9);
+            border: 1px solid var(--accent-color);
+            display: none;
+            max-width: 800px; margin-left: auto; margin-right: auto;
+            box-shadow: 0 0 20px rgba(0, 114, 255, 0.2);
+        }
+        .result-info p { margin: 0.8rem 0; color: var(--text-color); font-size: 1.1rem; }
+        .result-info p strong { color: var(--accent-color); display: inline-block; width: 140px; }
+
+        /* --- Chat Widget Styles --- */
+        .chat-widget {
+            position: fixed; bottom: 30px; right: 30px;
+            width: 400px; height: 600px;
+            min-width: 300px; min-height: 200px;
+            max-width: 90vw; max-height: 90vh;
+            z-index: 1001;
+            background: rgba(13, 25, 48, 0.95); /* 深蓝背景 */
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(0, 114, 255, 0.2);
+            border: 1px solid var(--border-color);
+            display: flex; flex-direction: column; overflow: hidden;
+            transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                        width 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s;
+        }
+
+        .chat-widget.is-resizing { transition: none !important; }
+
+        .chat-widget.is-collapsed {
+            height: 70px !important; width: 280px !important; resize: none;
+        }
+
+        /* Resize Handle */
+        .resize-handle {
+            position: absolute; top: 0; left: 0; width: 20px; height: 20px;
+            cursor: nwse-resize; z-index: 1002; background: transparent;
+        }
+        .resize-handle::after {
+            content: ''; position: absolute; top: 6px; left: 6px; width: 6px; height: 6px;
+            border-top: 2px solid rgba(255,255,255,0.4);
+            border-left: 2px solid rgba(255,255,255,0.4);
+            border-top-left-radius: 4px;
+        }
+        .is-collapsed .resize-handle { display: none; }
+
+        .chat-widget-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 25px; height: 70px;
+            /* 修改头部渐变 90deg */
+            background: linear-gradient(90deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+            color: #fff; cursor: pointer; flex-shrink: 0; user-select: none;
+        }
+        .is-collapsed #chat-toggle-icon { transform: rotate(180deg); }
+
+        .chat-widget-body {
+            flex: 1; display: flex; flex-direction: column;
+            opacity: 1; overflow: hidden; transition: opacity 0.3s ease-in-out;
+        }
+        .is-collapsed .chat-widget-body { opacity: 0; pointer-events: none; display: none; }
+
+        .ds-messages {
+            flex: 1; overflow-y: auto; padding: 15px;
+            display: flex; flex-direction: column; gap: 12px;
+        }
+
+        /* Chat Bubbles */
+        .ds-bubble {
+            max-width: 85%; padding: 12px 18px; border-radius: 18px;
+            font-size: 0.95rem; line-height: 1.6; word-break: break-word;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            animation: bubbleSlideIn 0.3s ease-out;
+        }
+        @keyframes bubbleSlideIn {
+            from { opacity: 0; transform: translateY(10px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .ds-bubble.user {
+            align-self: flex-end;
+            /* 90deg 水平渐变 */
+            background: linear-gradient(90deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+            color: #fff; border-bottom-right-radius: 4px;
+        }
+        .ds-bubble.ai {
+            align-self: flex-start; background: rgba(30, 40, 60, 0.8);
+            color: #e3e3e3; border-bottom-left-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Markdown in Chat */
+        .ds-bubble .markdown-body p { margin-bottom: 0.5em; }
+        .ds-bubble .markdown-body p:last-child { margin-bottom: 0; }
+        .ds-bubble .markdown-body strong { color: #fff; font-weight: 700; }
+        .ds-bubble .markdown-body code { 
+            background: rgba(0,0,0,0.3); padding: 2px 4px; border-radius: 4px; font-family: monospace; 
+        }
+        .ds-bubble .markdown-body pre { 
+            background: #0f1520; padding: 10px; border-radius: 8px; overflow-x: auto; 
+        }
+
+        /* File Preview Container */
+        .ds-input-container {
+            padding: 10px 15px; background: #0f1520;
+            border-top: 1px solid rgba(255,255,255,0.08);
+        }
+        .ds-file-preview-container {
+            display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px;
+            max-height: 120px; overflow-y: auto; display: none;
+        }
+        .ds-file-item {
+            display: flex; align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px; padding: 4px 10px;
+        }
+        .ds-file-thumb {
+            width: 24px; height: 24px; object-fit: cover;
+            border-radius: 4px; margin-right: 8px;
+        }
+        .ds-file-name { font-size: 0.85rem; color: #e0e0e0; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .ds-remove-file-btn { background: none; border: none; color: #ff6b6b; cursor: pointer; margin-left: 8px; }
+
+        /* Input Bar */
+        .ds-input-bar { display: flex; align-items: flex-end; gap: 10px; }
+        #dsPromptInput {
+            flex: 1; padding: 12px 18px; border-radius: 22px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(8px); color: #fff;
+            border: 2px solid rgba(255, 255, 255, 0.08);
+            resize: none; font-size: 0.95rem; max-height: 120px; min-height: 48px; line-height: 1.4;
+        }
+        #dsPromptInput:focus { outline: none; border-color: var(--accent-color); background: rgba(0, 198, 255, 0.08); }
+        .ds-tool-btn {
+            background: transparent; color: #a0a0a0; border: none;
+            border-radius: 50%; width: 42px; height: 42px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .ds-tool-btn:hover { color: #fff; background-color: rgba(255,255,255,0.1); }
+        #dsSendBtn {
+            /* 修改发送按钮渐变 90deg */
+            background: linear-gradient(90deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+            color: #fff; border: none; border-radius: 50%;
+            width: 48px; height: 48px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 114, 255, 0.4);
+        }
+        #dsSendBtn:hover { transform: scale(1.1); }
+        
+        .error-text { color: #ff6b6b; }
+    </style>
+</head>
+<body>
+
+<canvas id="particle-canvas"></canvas>
+
 <div class="detection-container">
     <h2>基于多模态融合的学术不端检测系统</h2>
     <div class="content-area">
-        <!-- Upload Panel with Text Input -->
         <div class="panel">
-            <h3>原始图片与描述</h3>
+            <h3><i class="fas fa-file-image"></i> 原始图片与描述</h3>
             <div class="image-box" id="upload-box">
-                <span id="upload-placeholder"><i class="fas fa-cloud-upload-alt"></i> 点击或拖拽图片到此处</span>
+                <span id="upload-placeholder"><i class="fas fa-cloud-upload-alt fa-2x"></i><br><br>点击或拖拽图片到此处</span>
                 <input type="file" id="image-input" accept="image/*" style="display:none;">
                 <img id="input-preview" class="preview-image" style="display:none;" alt="Input Preview">
             </div>
             
-            <!-- Text Input Area -->
             <div class="text-input-container">
-                <label for="image-description"><i class="fas fa-comment-alt"></i> 图片描述 (可选)</label>
+                <label for="image-description"><i class="fas fa-pen-fancy"></i> 图片描述 (可选)</label>
                 <textarea id="image-description" placeholder="请输入图片的相关描述或问题..."></textarea>
                 <div class="char-counter"><span id="char-count">0</span>/200</div>
             </div>
             
             <div class="panel-actions">
-                <button class="btn" id="upload-btn"><i class="fas fa-upload"></i> 上传图片</button>
-                <button class="btn" id="clear-btn" style="background-color: #555;"><i class="fas fa-trash"></i> 清除</button>
+                <button class="btn" id="upload-btn"><i class="fas fa-folder-open"></i> 选择图片</button>
+                <button class="btn" id="clear-btn" style="background-color: rgba(255,255,255,0.1);"><i class="fas fa-trash-alt"></i> 清除</button>
             </div>
         </div>
         
-        <!-- Results Panel -->
         <div class="panel">
-            <h3>检测结果</h3>
+            <h3><i class="fas fa-chart-pie"></i> 检测结果</h3>
             <div class="image-box" id="result-box">
                 <span id="result-placeholder">检测结果将在此显示</span>
                 <img id="result-image-preview" class="preview-image" style="display:none;" alt="Result Preview">
             </div>
             
-            <!-- Text Output Area -->
             <div class="text-output-container">
-                <label><i class="fas fa-align-left"></i> 分析结果</label>
-                <div class="text-output" id="result-text-output">
-                    <p>检测结果文本将在此显示...</p>
+                <label><i class="fas fa-file-alt"></i> 分析报告</label>
+                <div class="text-output markdown-body" id="result-text-output">
+                    <p>等待检测...</p>
                 </div>
             </div>
             
             <div class="panel-actions">
-                <button class="btn btn-primary" id="download-btn"><i class="fas fa-download"></i> 下载结果</button>
-                <button class="btn" id="copy-text-btn" style="background-color: #555;"><i class="fas fa-copy"></i> 复制文本</button>
+                <button class="btn btn-primary" id="download-btn" disabled><i class="fas fa-download"></i> 下载报告</button>
+                <button class="btn" id="copy-text-btn" disabled style="background-color: rgba(255,255,255,0.1);"><i class="fas fa-copy"></i> 复制</button>
             </div>
         </div>
     </div>
 
-    <!-- Detect Button -->
     <button class="btn btn-primary btn-detect" id="detect-btn">
-        <i class="fas fa-search"></i> 开始检测
+        <i class="fas fa-search"></i> 开始智能检测
     </button>
 
-    <!-- Results Details -->
     <div class="result-info" id="result-info-details">
-        <p><strong>伪造判断:</strong> <span id="result-is-fake"></span></p>
-        <p><strong>主要伪造类型:</strong> <span id="result-fake-type"></span></p>
-        <p><strong>置信度评分:</strong> <span id="result-confidence-score"></span></p>
-        <!-- <p><strong>分析说明:</strong> <span id="result-analysis"></span></p> -->
+        <p><strong>伪造判断:</strong> <span id="result-is-fake">--</span></p>
+        <p><strong>主要伪造类型:</strong> <span id="result-fake-type">--</span></p>
+        <p><strong>置信度评分:</strong> <span id="result-confidence-score">--</span></p>
+        <p style="display:none;"><strong>分析说明:</strong> <span id="result-analysis"></span></p>
     </div>
 </div>
 
-<!-- 悬浮聊天窗口 -->
 <div id="chat-widget" class="chat-widget is-collapsed">
+    <div class="resize-handle" id="resize-handle" title="拖动调整大小"></div>
+
     <div class="chat-widget-header" id="chat-widget-toggle">
         <h3><i class="fas fa-robot"></i> 智能助手</h3>
         <i class="fas fa-chevron-up" id="chat-toggle-icon"></i>
     </div>
 
     <div class="chat-widget-body">
-        <div class="ds-messages" id="dsMessages"></div>
-        <div class="ds-input-container">
-            <div id="dsFilePreviewContainer" class="ds-file-preview-container">
-                <img id="dsImagePreview" src="" alt="Image Preview"/>
-                <div id="dsFilePreviewInfo" class="ds-file-preview-info">
-                    <i class="fas fa-file-alt"></i>
-                    <span id="dsFileName"></span>
-                </div>
-                <button id="dsRemoveFileBtn" class="ds-remove-image-btn" title="移除文件">×</button>
+        <div class="ds-messages" id="dsMessages">
+            <div class="ds-bubble ai">
+                <div class="markdown-body">您好！我是您的学术诚信助手。您可以上传文档或询问关于学术规范的问题。</div>
             </div>
+        </div>
+        
+        <div class="ds-input-container">
+            <div id="dsFilePreviewContainer" class="ds-file-preview-container"></div>
+            
             <div class="ds-input-bar">
-                <input type="file" id="dsFileInput" accept="image/*,application/pdf,.doc,.docx" style="display: none;"/>
-                <label for="dsFileInput" id="dsUploadBtn" class="ds-tool-btn" title="上传文件">
+                <input type="file" id="dsFileInput" accept="image/*,application/pdf,.doc,.docx" multiple style="display: none;"/>
+                <label for="dsFileInput" id="dsUploadBtn" class="ds-tool-btn" title="上传文件 (支持多选)">
                     <i class="fas fa-paperclip"></i>
                 </label>
                 <textarea id="dsPromptInput" placeholder="请输入您的问题..." rows="1"></textarea>
@@ -98,9 +496,554 @@
         </div>
     </div>
 </div>
-{% endblock %}
 
-{% block script %}
-    <script src="{{ url_for('static', filename='js/detection.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/chat_widget.js') }}"></script>
-{% endblock %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    // --- 粒子背景特效代码开始 ---
+    const initParticles = () => {
+        const canvas = document.getElementById('particle-canvas');
+        if (!canvas) return;
+        
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let particles = [];
+        
+        // 配置参数
+        const particleCount = 80; // 粒子数量
+        const connectionDistance = 150; // 连线距离
+        const mouseDistance = 200; // 鼠标互动距离
+        
+        // 调整大小
+        const resize = () => {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+        };
+        
+        // 粒子类
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 0.5; // X轴速度
+                this.vy = (Math.random() - 0.5) * 0.5; // Y轴速度
+                this.size = Math.random() * 2 + 1;
+                // 修改粒子颜色为青蓝色
+                this.color = 'rgba(0, 198, 255, 0.5)'; 
+            }
+            
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                
+                // 边界反弹
+                if (this.x < 0 || this.x > width) this.vx *= -1;
+                if (this.y < 0 || this.y > height) this.vy *= -1;
+            }
+            
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+        }
+        
+        // 初始化
+        resize();
+        window.addEventListener('resize', resize);
+        for(let i=0; i<particleCount; i++) particles.push(new Particle());
+        
+        // 鼠标位置追踪
+        let mouse = { x: null, y: null };
+        window.addEventListener('mousemove', e => {
+            mouse.x = e.x;
+            mouse.y = e.y;
+        });
+        window.addEventListener('mouseout', () => {
+            mouse.x = null;
+            mouse.y = null;
+        });
+        
+        // 动画循环
+        const animate = () => {
+            ctx.clearRect(0, 0, width, height);
+            
+            particles.forEach((p, index) => {
+                p.update();
+                p.draw();
+                
+                // 绘制粒子间的连线
+                for (let j = index + 1; j < particles.length; j++) {
+                    const p2 = particles[j];
+                    const dx = p.x - p2.x;
+                    const dy = p.y - p2.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (dist < connectionDistance) {
+                        ctx.beginPath();
+                        // 修改连线颜色为青蓝
+                        ctx.strokeStyle = `rgba(0, 198, 255, ${1 - dist/connectionDistance})`;
+                        ctx.lineWidth = 1;
+                        ctx.moveTo(p.x, p.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.stroke();
+                    }
+                }
+                
+                // 绘制鼠标连线
+                if (mouse.x != null) {
+                    const dx = p.x - mouse.x;
+                    const dy = p.y - mouse.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < mouseDistance) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = `rgba(255, 255, 255, ${1 - dist/mouseDistance})`;
+                        ctx.moveTo(p.x, p.y);
+                        ctx.lineTo(mouse.x, mouse.y);
+                        ctx.stroke();
+                    }
+                }
+            });
+            
+            requestAnimationFrame(animate);
+        };
+        
+        animate();
+    };
+    
+    // 启动粒子效果
+    initParticles();
+    // --- 粒子背景特效代码结束 ---
+
+    /* =========================================
+       1. Helper Functions
+       ========================================= */
+    const toBase64 = file => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
+
+    /* =========================================
+       2. Main Detection Panel Logic
+       ========================================= */
+    const imageInput = document.getElementById('image-input');
+    const uploadBtn = document.getElementById('upload-btn');
+    const uploadBox = document.getElementById('upload-box');
+    const inputPreview = document.getElementById('input-preview');
+    const uploadPlaceholder = document.getElementById('upload-placeholder');
+    const clearBtn = document.getElementById('clear-btn');
+    const descInput = document.getElementById('image-description');
+    const charCount = document.getElementById('char-count');
+    const detectBtn = document.getElementById('detect-btn');
+    
+    // Result Elements
+    const resultPlaceholder = document.getElementById('result-placeholder');
+    const resultImagePreview = document.getElementById('result-image-preview');
+    const resultTextOutput = document.getElementById('result-text-output');
+    const resultInfoDetails = document.getElementById('result-info-details');
+    const resultIsFake = document.getElementById('result-is-fake');
+    const resultFakeType = document.getElementById('result-fake-type');
+    const resultConfidenceScore = document.getElementById('result-confidence-score');
+    const resultAnalysis = document.getElementById('result-analysis');
+    const downloadBtn = document.getElementById('download-btn');
+    const copyTextBtn = document.getElementById('copy-text-btn');
+
+    // -- Event Listeners for Upload --
+    uploadBtn.addEventListener('click', () => imageInput.click());
+    uploadBox.addEventListener('click', () => imageInput.click());
+    
+    // Drag and Drop
+    uploadBox.addEventListener('dragover', e => { e.preventDefault(); uploadBox.style.borderColor = '#00c6ff'; });
+    uploadBox.addEventListener('dragleave', e => { e.preventDefault(); uploadBox.style.borderColor = 'rgba(0, 198, 255, 0.3)'; });
+    uploadBox.addEventListener('drop', e => {
+        e.preventDefault();
+        uploadBox.style.borderColor = 'rgba(0, 198, 255, 0.3)';
+        if (e.dataTransfer.files.length) {
+            imageInput.files = e.dataTransfer.files;
+            handleFileSelect(imageInput.files[0]);
+        }
+    });
+
+    imageInput.addEventListener('change', function() {
+        if (this.files && this.files[0]) handleFileSelect(this.files[0]);
+    });
+
+    function handleFileSelect(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            inputPreview.src = e.target.result;
+            inputPreview.style.display = 'block';
+            uploadPlaceholder.style.display = 'none';
+            resetResultArea();
+        }
+        reader.readAsDataURL(file);
+    }
+
+    // -- Clear Logic --
+    clearBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        imageInput.value = '';
+        inputPreview.src = '';
+        inputPreview.style.display = 'none';
+        uploadPlaceholder.style.display = 'block';
+        descInput.value = '';
+        charCount.textContent = '0';
+        resetResultArea();
+    });
+
+    function resetResultArea() {
+        resultImagePreview.src = '';
+        resultImagePreview.style.display = 'none';
+        resultPlaceholder.style.display = 'block';
+        resultInfoDetails.style.display = 'none';
+        resultTextOutput.innerHTML = '<p>等待检测...</p>';
+        resultIsFake.textContent = '--';
+        resultFakeType.textContent = '--';
+        resultConfidenceScore.textContent = '--';
+        downloadBtn.disabled = true;
+        copyTextBtn.disabled = true;
+    }
+
+    // -- API Detection Logic --
+    detectBtn.addEventListener('click', async () => {
+        if (!imageInput.files || !imageInput.files.length) {
+            alert("请先上传一张图片！");
+            return;
+        }
+
+        // UI Loading State
+        detectBtn.disabled = true;
+        detectBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 检测中...';
+        resultTextOutput.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> 正在生成分析结果...</p>';
+        resultPlaceholder.style.display = 'none';
+        
+        try {
+            const file = imageInput.files[0];
+            const description = descInput.value || '';
+            const fileName = file.name;
+            const imageBase64 = await toBase64(file);
+
+            const response = await fetch('/call_api', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    image_data: imageBase64.split(',')[1], // Remove "data:image/..." header
+                    description: description,
+                    file_name: fileName
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || `检测失败: ${response.status}`);
+            }
+
+            await new Promise(resolve => setTimeout(resolve, 5000));
+
+            const result = await response.json();
+            displayDetectionResult(result);
+
+        } catch (error) {
+            console.error('检测错误:', error);
+            resultTextOutput.innerHTML = `<p class="error-text">检测失败: ${error.message}</p>`;
+            resultPlaceholder.textContent = '检测失败';
+            resultPlaceholder.style.display = 'block';
+        } finally {
+            detectBtn.disabled = false;
+            detectBtn.innerHTML = '<i class="fas fa-search"></i> 开始智能检测';
+        }
+    });
+
+    function displayDetectionResult(result) {
+        if (result.status !== "success") throw new Error(result.error || "未知错误");
+        const data = result.result;
+
+        // Image
+        if (data.processed_image) {
+            resultImagePreview.src = data.processed_image;
+            resultImagePreview.style.display = 'block';
+        }
+
+        // Text (Markdown support)
+        if (data.description) {
+            resultTextOutput.innerHTML = marked.parse(data.description);
+        }
+
+        // Details
+        resultIsFake.textContent = data.is_fake ? '是' : '否';
+        resultFakeType.textContent = data.fake_type || '未知';
+        resultConfidenceScore.textContent = data.confidence_scores || '--';
+        if (data.analysis) resultAnalysis.textContent = data.analysis;
+
+        resultInfoDetails.style.display = 'block';
+        downloadBtn.disabled = false;
+        copyTextBtn.disabled = false;
+    }
+
+    // -- Download & Copy --
+    downloadBtn.addEventListener('click', () => {
+        if (resultImagePreview.src) {
+            const link = document.createElement('a');
+            link.href = resultImagePreview.src;
+            link.download = '检测结果.png';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    });
+
+    copyTextBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(resultTextOutput.innerText).then(() => {
+            const originalHTML = copyTextBtn.innerHTML;
+            copyTextBtn.innerHTML = '<i class="fas fa-check"></i>';
+            setTimeout(() => copyTextBtn.innerHTML = originalHTML, 2000);
+        });
+    });
+
+    /* =========================================
+       3. Chat Widget Logic (with API)
+       ========================================= */
+    const chatWidget = document.getElementById('chat-widget');
+    const toggleHeader = document.getElementById('chat-widget-toggle');
+    const dsMessages = document.getElementById('dsMessages');
+    const dsPromptInput = document.getElementById('dsPromptInput');
+    const dsSendBtn = document.getElementById('dsSendBtn');
+    const dsFileInput = document.getElementById('dsFileInput');
+    const dsFilePreviewContainer = document.getElementById('dsFilePreviewContainer');
+    
+    // UI State
+    let chatFiles = []; 
+    let chatHistory = [{ role: 'ai', content: '你好！有什么可以帮你的吗？' }];
+
+    // Toggle Collapse
+    toggleHeader.addEventListener('click', (e) => {
+        if (e.target.closest('.resize-handle')) return;
+        chatWidget.classList.toggle('is-collapsed');
+    });
+
+    // Auto-resize textarea
+    dsPromptInput.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+        if(this.value === '') this.style.height = '';
+    });
+
+    // File selection logic
+    dsFileInput.addEventListener('change', function() {
+        if (this.files && this.files.length > 0) {
+            Array.from(this.files).forEach(file => chatFiles.push(file));
+            renderFilePreviews();
+            this.value = ''; 
+        }
+    });
+
+    function renderFilePreviews() {
+        dsFilePreviewContainer.innerHTML = '';
+        if (chatFiles.length === 0) {
+            dsFilePreviewContainer.style.display = 'none';
+            return;
+        }
+        dsFilePreviewContainer.style.display = 'flex';
+
+        chatFiles.forEach((file, index) => {
+            const fileItem = document.createElement('div');
+            fileItem.className = 'ds-file-item';
+            
+            let iconClass = 'fa-file';
+            if (file.type.startsWith('image/')) iconClass = 'fa-file-image';
+            else if (file.type.includes('pdf')) iconClass = 'fa-file-pdf';
+            
+            // Check if image for thumb
+            let thumbHTML = `<i class="fas ${iconClass} ds-file-icon" style="margin-right:5px; color:#aaa;"></i>`;
+            
+            // Render
+            fileItem.innerHTML = `
+                ${thumbHTML}
+                <span class="ds-file-name" title="${file.name}">${file.name}</span>
+                <button class="ds-remove-file-btn" data-index="${index}">
+                    <i class="fas fa-times-circle"></i>
+                </button>
+            `;
+            
+            // If image, load thumb
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.className = 'ds-file-thumb';
+                    fileItem.insertBefore(img, fileItem.querySelector('.ds-file-name'));
+                    fileItem.querySelector('.ds-file-icon').style.display = 'none';
+                }
+                reader.readAsDataURL(file);
+            }
+
+            dsFilePreviewContainer.appendChild(fileItem);
+        });
+
+        document.querySelectorAll('.ds-remove-file-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const idx = parseInt(e.currentTarget.getAttribute('data-index'));
+                chatFiles.splice(idx, 1);
+                renderFilePreviews();
+            });
+        });
+    }
+
+    // Append Message to UI
+    function appendMessage(content, role, attachedFiles = []) {
+        const bubble = document.createElement('div');
+        bubble.className = `ds-bubble ${role}`;
+        
+        // 1. Render Files
+        if (attachedFiles.length > 0) {
+            attachedFiles.forEach(file => {
+                if (file.type && file.type.startsWith('image/')) {
+                    // Image thumbnail in chat
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.style.maxWidth = '100%';
+                        img.style.borderRadius = '8px';
+                        img.style.marginTop = '5px';
+                        bubble.appendChild(img);
+                    }
+                    reader.readAsDataURL(file);
+                } else {
+                    const fileDiv = document.createElement('div');
+                    fileDiv.style.cssText = "display:flex; align-items:center; gap:8px; margin-bottom:5px; padding:6px; background:rgba(0,0,0,0.2); border-radius:6px;";
+                    fileDiv.innerHTML = `<i class="fas fa-file"></i> <span style="font-size:0.9em;">${file.name}</span>`;
+                    bubble.appendChild(fileDiv);
+                }
+            });
+        }
+
+        // 2. Render Text (Markdown)
+        if (content) {
+            const textDiv = document.createElement('div');
+            textDiv.className = 'markdown-body';
+            textDiv.innerHTML = marked.parse(content);
+            bubble.appendChild(textDiv);
+        }
+
+        dsMessages.appendChild(bubble);
+        dsMessages.scrollTop = dsMessages.scrollHeight;
+    }
+
+    // Send Logic
+    dsSendBtn.addEventListener('click', handleChatSend);
+    dsPromptInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleChatSend();
+        }
+    });
+
+    async function handleChatSend() {
+        const text = dsPromptInput.value.trim();
+        if (!text && chatFiles.length === 0) return;
+
+        // 1. Display User Message
+        const currentFiles = [...chatFiles];
+        appendMessage(text, 'user', currentFiles);
+
+        // 2. Clear Input
+        dsPromptInput.value = '';
+        dsPromptInput.style.height = '';
+        chatFiles = [];
+        renderFilePreviews();
+
+        // 3. Prepare Data for API
+        // NOTE: The provided API signature expects 'image_base64' (singular).
+        // Logic: If files exist, grab the first one to send to API.
+        let imageBase64ToSend = null;
+        if (currentFiles.length > 0) {
+            try {
+                // Assuming we want to send the first file if it's an image
+                // Adjust this logic if backend supports arrays
+                imageBase64ToSend = await toBase64(currentFiles[0]);
+            } catch (e) {
+                console.error("File conversion error", e);
+            }
+        }
+
+        // 4. Show Loading
+        const loadingDiv = document.createElement('div');
+        loadingDiv.className = 'ds-bubble ai';
+        loadingDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 思考中...';
+        dsMessages.appendChild(loadingDiv);
+        dsMessages.scrollTop = dsMessages.scrollHeight;
+
+        // 5. Call API
+        try {
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    prompt: text,
+                    image_base64: imageBase64ToSend 
+                })
+            });
+
+            // Remove loading spinner
+            dsMessages.removeChild(loadingDiv);
+
+            if (!response.ok) throw new Error(`Server Error: ${response.statusText}`);
+            
+            const data = await response.json();
+            const aiText = data.answer || "API未返回有效内容";
+            
+            appendMessage(aiText, 'ai');
+
+        } catch (error) {
+            dsMessages.removeChild(loadingDiv);
+            appendMessage(`请求出错: ${error.message}`, 'ai');
+        }
+    }
+
+    /* =========================================
+       4. Resize Logic (Chat Widget)
+       ========================================= */
+    const resizeHandle = document.getElementById('resize-handle');
+    let isResizing = false;
+    let startX, startY, startWidth, startHeight;
+
+    resizeHandle.addEventListener('mousedown', (e) => {
+        if (chatWidget.classList.contains('is-collapsed')) return;
+        isResizing = true;
+        chatWidget.classList.add('is-resizing');
+        startX = e.clientX; startY = e.clientY;
+        const rect = chatWidget.getBoundingClientRect();
+        startWidth = rect.width; startHeight = rect.height;
+        document.documentElement.addEventListener('mousemove', doResize);
+        document.documentElement.addEventListener('mouseup', stopResize);
+        e.preventDefault();
+    });
+
+    function doResize(e) {
+        if (!isResizing) return;
+        const dx = startX - e.clientX; 
+        const dy = startY - e.clientY;
+        const newWidth = startWidth + dx;
+        const newHeight = startHeight + dy;
+        if (newWidth > 300 && newWidth < window.innerWidth * 0.9) chatWidget.style.width = newWidth + 'px';
+        if (newHeight > 200 && newHeight < window.innerHeight * 0.9) chatWidget.style.height = newHeight + 'px';
+    }
+
+    function stopResize() {
+        isResizing = false;
+        chatWidget.classList.remove('is-resizing');
+        document.documentElement.removeEventListener('mousemove', doResize);
+        document.documentElement.removeEventListener('mouseup', stopResize);
+    }
+});
+</script>
+
+</body>
+</html>

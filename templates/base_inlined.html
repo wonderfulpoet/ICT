@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ICT系统{% endblock %}</title>
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    
+    <style>
+/* Reset & Global Styles */
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    background-color: #0f0f1e;
+    font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+    color: #fff;
+}
+
+#app, .main {
+    height: 100%;
+    width: 100%;
+}
+
+a {
+    color: rgb(var(--primary-color-rgb, 77, 163, 255));
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+a:hover {
+    opacity: 0.85;
+}
+
+/* Utility classes */
+.cl { zoom: 1 }
+.cl:after { content: '\20'; display: block; height: 0; clear: both; visibility: hidden }
+.l { float: left }
+.r { float: right }
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(var(--primary-color-rgb, 77, 163, 255), 0.4);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(var(--primary-color-rgb, 77, 163, 255), 0.6);
+}
+
+/* --- Left Sidebar --- */
+.left {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 280px;
+    height: 100%;
+    background: linear-gradient(180deg, 
+        rgba(var(--primary-color-rgb, 77, 163, 255), 0.15) 0%, 
+        rgba(15, 15, 30, 0.95) 100%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    z-index: 100;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.3);
+    border-right: 2px solid rgba(var(--primary-color-rgb, 77, 163, 255), 0.2);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.left::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 200px;
+    background: radial-gradient(ellipse at top, 
+        rgba(var(--primary-color-rgb, 77, 163, 255), 0.3) 0%, 
+        transparent 70%);
+    pointer-events: none;
+}
+
+.left:hover {
+    border-right-color: rgba(var(--primary-color-rgb, 77, 163, 255), 0.4);
+}
+
+.left ul {
+    margin: 0;
+    padding: 30px 15px;
+    list-style: none;
+}
+
+.left ul li {
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 6px;
+}
+
+/* --- Menu Item Links --- */
+.left ul li a {
+    color: rgba(255, 255, 255, 0.7);
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 1.05rem;
+    font-weight: 500;
+    position: relative;
+    border-radius: 14px;
+    overflow: hidden;
+    background: transparent;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.left ul li a::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, 
+        rgba(var(--primary-color-rgb, 77, 163, 255), 0.4), 
+        transparent);
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 0;
+}
+
+.left ul li a:hover::before {
+    width: 100%;
+}
+
+.left ul li a:hover {
+    color: rgba(255, 255, 255, 0.95);
+    background: rgba(var(--primary-color-rgb, 77, 163, 255), 0.12);
+    transform: translateX(6px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.left ul li a.active {
+    background: linear-gradient(135deg, 
+        rgba(var(--primary-color-rgb, 77, 163, 255), 0.9) 0%, 
+        rgba(var(--primary-color-rgb, 77, 163, 255), 0.7) 100%) !important;
+    color: #fff !important;
+    font-weight: 600;
+    box-shadow: 0 6px 20px rgba(var(--primary-color-rgb, 77, 163, 255), 0.4),
+                0 0 40px rgba(var(--primary-color-rgb, 77, 163, 255), 0.2);
+    transform: translateX(6px) scale(1.02);
+    border-left: 4px solid rgba(255, 255, 255, 0.8);
+}
+
+.left ul li a.active::before {
+    width: 100%;
+    background: linear-gradient(90deg, 
+        rgba(255, 255, 255, 0.2), 
+        transparent);
+}
+
+/* Menu Icons */
+.left ul li a .icon {
+    font-size: 1.4em;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    z-index: 1;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    color: rgba(var(--primary-color-rgb, 77, 163, 255), 0.8);
+    flex-shrink: 0;
+}
+
+.left ul li a .menu-text {
+    position: relative;
+    z-index: 1;
+}
+
+.left ul li a:hover .icon {
+    transform: scale(1.15) rotate(-5deg);
+    background: rgba(var(--primary-color-rgb, 77, 163, 255), 0.2);
+    color: rgb(var(--primary-color-rgb, 77, 163, 255));
+    box-shadow: 0 0 20px rgba(var(--primary-color-rgb, 77, 163, 255), 0.4);
+}
+
+.left ul li a.active .icon {
+    transform: scale(1.2);
+    background: rgba(255, 255, 255, 0.25);
+    color: #fff;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+}
+
+/* Arrow for expandable menus */
+.left ul li a .arrow {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 12px;
+    transition: transform 0.3s ease-in-out;
+}
+
+.left ul li.hidden a .arrow {
+    transform: translateY(-50%) rotate(-180deg);
+}
+
+/* --- Submenu --- */
+.left ul li > div {
+    background-color: rgba(0, 0, 0, 0.2);
+    padding: 5px 0;
+    border-radius: 10px;
+    margin-top: 4px;
+}
+
+.left ul li > div a {
+    padding-left: 60px;
+    font-size: 0.95rem;
+    font-weight: 400;
+    border-left: none !important;
+}
+
+.left ul li > div a.active {
+    background: rgba(var(--primary-color-rgb, 77, 163, 255), 0.8) !important;
+    color: #ffffff;
+}
+
+/* --- Right Content Area & Iframe --- */
+.right {
+    position: absolute;
+    top: 0;
+    left: 280px;
+    right: 0;
+    bottom: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.right iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/* 移动端适配 */
+@media (max-width: 900px) {
+    .left {
+        width: 85px;
+        padding: 30px 8px;
+    }
+    
+    .left ul li a {
+        padding: 16px 12px;
+        font-size: 1rem;
+        flex-direction: column;
+        justify-content: center;
+        gap: 6px;
+    }
+    
+    .left ul li a .menu-text {
+        display: none;
+    }
+    
+    .left ul li a .icon {
+        margin: 0;
+        width: 36px;
+        height: 36px;
+        font-size: 1.3em;
+    }
+    
+    .left ul li a:hover,
+    .left ul li a.active {
+        transform: translateX(0) scale(1.05);
+    }
+    
+    .right {
+        left: 85px;
+    }
+}
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% block content %}{% endblock %}
+    
+    <script>
+/**
+ * 全局主题颜色管理器
+ * 实现主题颜色的动态切换和持久化存储
+ */
+
+(function() {
+    'use strict';
+    
+    // 默认主题颜色
+    const DEFAULT_THEME_COLOR = '#4da3ff';
+    
+    // 主题颜色管理类
+    class ThemeManager {
+        constructor() {
+            this.currentColor = this.loadThemeColor();
+            this.init();
+        }
+        
+        /**
+         * 初始化主题管理器
+         */
+        init() {
+            // 应用保存的主题颜色
+            this.applyThemeColor(this.currentColor);
+            
+            // 等待DOM加载完成后绑定事件
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => this.bindEvents());
+            } else {
+                this.bindEvents();
+            }
+        }
+        
+        /**
+         * 绑定事件监听器
+         */
+        bindEvents() {
+            const toggleBtn = document.getElementById('themeToggleBtn');
+            const panel = document.getElementById('themeColorPanel');
+            const colorOptions = document.querySelectorAll('.theme-color-option');
+            
+            if (!toggleBtn || !panel) return;
+            
+            // 切换面板显示/隐藏
+            toggleBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                panel.classList.toggle('active');
+            });
+            
+            // 点击文档其他地方关闭面板
+            document.addEventListener('click', (e) => {
+                if (!panel.contains(e.target) && e.target !== toggleBtn) {
+                    panel.classList.remove('active');
+                }
+            });
+            
+            // 颜色选项点击事件
+            colorOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    const color = option.dataset.color;
+                    const name = option.dataset.name;
+                    this.setThemeColor(color);
+                    this.updateActiveOption(option);
+                    
+                    // 显示提示
+                    this.showToast(`已切换至${name}主题`);
+                    
+                    // 关闭面板
+                    setTimeout(() => {
+                        panel.classList.remove('active');
+                    }, 300);
+                });
+            });
+            
+            // 设置当前激活的颜色选项
+            this.updateActiveOption();
+        }
+        
+        /**
+         * 设置主题颜色
+         * @param {string} color - 十六进制颜色值
+         */
+        setThemeColor(color) {
+            this.currentColor = color;
+            this.applyThemeColor(color);
+            this.saveThemeColor(color);
+        }
+        
+    /**
+     * 应用主题颜色到页面
+     * @param {string} color - 十六进制颜色值
+     */
+    applyThemeColor(color) {
+        // 更新CSS变量
+        document.documentElement.style.setProperty('--accent-color', color);
+        document.documentElement.style.setProperty('--primary-color', color);
+        
+        // 计算浅色和深色变体
+        const lightColor = this.adjustBrightness(color, 20);
+        const darkColor = this.adjustBrightness(color, -20);
+        
+        document.documentElement.style.setProperty('--accent-color-light', lightColor);
+        document.documentElement.style.setProperty('--accent-color-dark', darkColor);
+        document.documentElement.style.setProperty('--primary-dark', darkColor);
+        
+        // 更新次要颜色（用于悬停等状态）
+        const hoverColor = this.adjustBrightness(color, -10);
+        document.documentElement.style.setProperty('--secondary-hover-color', hoverColor);
+        
+        // 更新RGB变量（用于透明度）
+        const rgb = this.hexToRgb(color);
+        document.documentElement.style.setProperty('--primary-color-rgb', `${rgb.r}, ${rgb.g}, ${rgb.b}`);
+        
+        // 更新按钮背景色
+        const toggleBtn = document.getElementById('themeToggleBtn');
+        if (toggleBtn) {
+            toggleBtn.style.backgroundColor = color;
+        }
+        }
+        
+        /**
+         * 调整颜色亮度
+         * @param {string} color - 十六进制颜色值
+         * @param {number} amount - 调整量 (-100 到 100)
+         * @returns {string} 调整后的颜色
+         */
+        adjustBrightness(color, amount) {
+            // 移除 # 号
+            color = color.replace('#', '');
+            
+            // 转换为 RGB
+            let r = parseInt(color.substring(0, 2), 16);
+            let g = parseInt(color.substring(2, 4), 16);
+            let b = parseInt(color.substring(4, 6), 16);
+            
+            // 调整亮度
+            r = Math.max(0, Math.min(255, r + amount));
+            g = Math.max(0, Math.min(255, g + amount));
+            b = Math.max(0, Math.min(255, b + amount));
+            
+            // 转换回十六进制
+            const rr = r.toString(16).padStart(2, '0');
+            const gg = g.toString(16).padStart(2, '0');
+            const bb = b.toString(16).padStart(2, '0');
+            
+            return `#${rr}${gg}${bb}`;
+        }
+        
+        /**
+         * 将十六进制颜色转换为RGB对象
+         * @param {string} hex - 十六进制颜色值
+         * @returns {object} RGB对象 {r, g, b}
+         */
+        hexToRgb(hex) {
+            // 移除 # 号
+            hex = hex.replace('#', '');
+            
+            // 转换为 RGB
+            const r = parseInt(hex.substring(0, 2), 16);
+            const g = parseInt(hex.substring(2, 4), 16);
+            const b = parseInt(hex.substring(4, 6), 16);
+            
+            return { r, g, b };
+        }        /**
+         * 更新激活的颜色选项
+         * @param {HTMLElement} activeOption - 当前激活的选项元素
+         */
+        updateActiveOption(activeOption = null) {
+            const colorOptions = document.querySelectorAll('.theme-color-option');
+            
+            colorOptions.forEach(option => {
+                if (activeOption) {
+                    option.classList.toggle('active', option === activeOption);
+                } else {
+                    // 根据当前颜色设置激活状态
+                    option.classList.toggle('active', option.dataset.color === this.currentColor);
+                }
+            });
+        }
+        
+        /**
+         * 保存主题颜色到本地存储
+         * @param {string} color - 十六进制颜色值
+         */
+        saveThemeColor(color) {
+            try {
+                localStorage.setItem('themeColor', color);
+            } catch (e) {
+                console.warn('无法保存主题颜色到本地存储:', e);
+            }
+        }
+        
+        /**
+         * 从本地存储加载主题颜色
+         * @returns {string} 主题颜色
+         */
+        loadThemeColor() {
+            try {
+                const savedColor = localStorage.getItem('themeColor');
+                return savedColor || DEFAULT_THEME_COLOR;
+            } catch (e) {
+                console.warn('无法从本地存储加载主题颜色:', e);
+                return DEFAULT_THEME_COLOR;
+            }
+        }
+        
+        /**
+         * 显示提示消息
+         * @param {string} message - 提示内容
+         */
+        showToast(message) {
+            // 移除已存在的提示
+            const existingToast = document.querySelector('.theme-toast');
+            if (existingToast) {
+                existingToast.remove();
+            }
+            
+            // 创建新提示
+            const toast = document.createElement('div');
+            toast.className = 'theme-toast';
+            toast.textContent = message;
+            toast.style.cssText = `
+                position: fixed;
+                top: 80px;
+                right: 20px;
+                background: var(--accent-color);
+                color: #fff;
+                padding: 12px 24px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                z-index: 10000;
+                font-size: 0.9rem;
+                animation: slideInRight 0.3s ease;
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // 3秒后自动移除
+            setTimeout(() => {
+                toast.style.animation = 'slideOutRight 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+    }
+    
+    // 添加动画样式
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // 创建全局主题管理器实例
+    window.themeManager = new ThemeManager();
+    
+})();
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -2,6 +2,30 @@
 
 {% block styles %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/settings.css') }}">
+<style>
+    #change-password-form .btn-primary {
+        background: linear-gradient(90deg, #00c6ff 0%, #0072ff 100%);
+        border: none;
+        color: #fff;
+        padding: 12px 30px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(0, 198, 255, 0.3);
+    }
+    
+    #change-password-form .btn-primary:hover {
+        background: linear-gradient(90deg, #00d4ff 0%, #0080ff 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 198, 255, 0.4);
+    }
+    
+    #change-password-form .btn-primary:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 8px rgba(0, 198, 255, 0.3);
+    }
+</style>
 {% endblock %}
 
 {% block body %}
