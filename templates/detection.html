@@ -743,7 +743,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(errorData.error || `检测失败: ${response.status}`);
             }
 
-            await new Promise(resolve => setTimeout(resolve, 5000));
+            await new Promise(resolve => setTimeout(resolve, 10000));
 
             const result = await response.json();
             displayDetectionResult(result);

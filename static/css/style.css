@@ -10,12 +10,17 @@
     --accent-gradient: linear-gradient(135deg, #4da3ff 0%, #667eea 100%);
     --danger-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
     --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --primary-gradient: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%); /* 青蓝 -> 深蓝 */
     
     /* 🎯 主色调 */
-    --primary-color: #667eea;
+    /* --primary-color: #667eea;
     --primary-light: #8899f0;
     --primary-dark: #5568d3;
-    --primary-color-rgb: 102, 126, 234;
+    --primary-color-rgb: 102, 126, 234; */
+    --primary-color: #0072ff;       
+    --primary-light: #4dabff;       
+    --primary-dark: #0052cc;        
+    --primary-color-rgb: 0, 114, 255; 
     
     --accent-color: #4da3ff;
     --accent-light: #6bb5ff;
